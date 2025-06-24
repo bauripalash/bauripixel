@@ -6,6 +6,8 @@
 #define RAYGUI_GRID_ALPHA 0.7f
 #define RAYGUI_IMPLEMENTATION
 #include "external/raygui.h"
+#define STB_DS_IMPLEMENTATION
+#include "external/stb/stb_ds.h"
 
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 700
@@ -29,10 +31,16 @@ int RunApp() {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     SetTargetFPS(60);
-    int fontSize = 10;
 
     cb = NewColorBar();
-    SetWidgetBounds(&cb.prop, (Rectangle){10, 10, 50, -1});
+    for (int i = 0; i < 8; i++) {
+        AddToColorBar(&cb, RED);
+        AddToColorBar(&cb, GREEN);
+        AddToColorBar(&cb, BLUE);
+        AddToColorBar(&cb, PINK);
+        AddToColorBar(&cb, MAGENTA);
+    }
+    SetColorBarAnchor(&cb, (Vector2){0, 50}, (Vector2){-1, 50});
     cb.prop.active = true;
 
     for (int row = 0; row < GridRow; row++) {
@@ -56,6 +64,7 @@ int RunApp() {
         EndDrawing();
     }
 
+    ClearColorBar(&cb);
     CloseWindow();
 
     return 0;

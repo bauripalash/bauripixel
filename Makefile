@@ -39,8 +39,7 @@ infer: cmake_clean
 
 .PHONY: cmake_clean
 cmake_clean:
-	cd build
-	ninja clean
+	cd build && ninja clean
 
 .PHONY: clean
 clean: cmake_clean
