@@ -2,6 +2,7 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../external/stb/stb_ds.h"
+#include "../include/colors.h"
 #include <stdbool.h>
 
 ColorBarState NewColorBar() {
@@ -81,9 +82,6 @@ bool ColorBar(ColorBarState *state) {
         int minSize = minScrollSize + MARGIN_LEFT * 2;
         state->prop.bounds.x = state->anchor.x + MARGIN_LEFT;
         state->prop.bounds.y = state->anchor.y + MARGIN_TOPBOTTOM;
-        // state->prop.bounds.height =
-        //     GetScreenHeight() - state->anchor.y - state->bottomStop.y -
-        //     MARGIN_TOPBOTTOM * 2; // how to handle according to anchor.y
 
         Rectangle bounds = state->prop.bounds;
 
@@ -108,6 +106,7 @@ bool ColorBar(ColorBarState *state) {
             }
         } else {
             hHandleHover = false;
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
 
         if (CheckCollisionPointRec(mpos, vResizeHandle)) {
@@ -117,6 +116,7 @@ bool ColorBar(ColorBarState *state) {
             }
         } else {
             vHandleHover = false;
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
@@ -145,17 +145,35 @@ bool ColorBar(ColorBarState *state) {
         bounds.width = state->prop.bounds.width;
         bounds.height = state->prop.bounds.height;
 
-        DrawRectangleRec(bounds, LIGHTGRAY);
-        DrawRectangleLinesEx(bounds, 2, BLACK);
+        DrawRectangleRounded(bounds, 0.05, 0, ColorGrayLighter);
+        DrawRectangleRoundedLinesEx(
+            bounds, 0.05, 0, 5, Fade(ColorGrayLighter, 0.5)
+        );
+        if (hHandleHover || state->widthDragging) {
 
-        if (hHandleHover) {
-            Color clr = state->widthDragging ? BLUE : MAGENTA;
-            DrawRectangleRec(hResizeHandle, clr);
+            SetMouseCursor(MOUSE_CURSOR_RESIZE_EW);
+            int handleHeight = bounds.height * 0.5;
+            DrawRectangleRounded(
+                (Rectangle){hResizeHandle.x,
+                            hResizeHandle.y + (handleHeight * 0.5),
+                            hResizeHandle.width, handleHeight},
+                1, 0, Fade(ColorWhite, 0.3)
+            );
         }
 
-        if (vHandleHover) {
-            Color clr = state->heightDragging ? BLUE : MAGENTA;
-            DrawRectangleRec(vResizeHandle, clr);
+        if (vHandleHover || state->heightDragging) {
+
+            SetMouseCursor(MOUSE_CURSOR_RESIZE_NS);
+            int handleWidth = bounds.width * 0.5;
+            DrawRectangleRounded(
+                (Rectangle){
+                    vResizeHandle.x + (handleWidth * 0.5),
+                    vResizeHandle.y,
+                    handleWidth,
+                    vResizeHandle.height,
+                },
+                1, 0, Fade(ColorWhite, 0.3)
+            );
         }
 
         Rectangle scrollBound = {
@@ -188,9 +206,16 @@ bool ColorBar(ColorBarState *state) {
         state->content.height =
             PANEL_PADDING + cBoxRows * (boxSize + boxSpacing);
 
+        int ogDefBG = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
+        int ogBorderWidth = GuiGetStyle(LISTVIEW, BORDER_WIDTH);
+        GuiSetStyle(DEFAULT, BACKGROUND_COLOR, HexColorTransparent);
+        GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
         GuiScrollPanel(
             scrollBound, NULL, state->content, &state->scroll, &state->view
         );
+
+        GuiSetStyle(LISTVIEW, BORDER_WIDTH, ogBorderWidth);
+        GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ogDefBG);
 
         BeginScissorMode(
             scrollBound.x, scrollBound.y, scrollBound.width, scrollBound.height
@@ -206,7 +231,7 @@ bool ColorBar(ColorBarState *state) {
                       row * (boxSize + boxSpacing) + state->scroll.y;
             Rectangle rect = {x, y, boxSize, boxSize};
             DrawRectangleRec(rect, state->colors[i]);
-            DrawRectangleLinesEx(rect, 2, BLACK);
+            DrawRectangleLinesEx(rect, 2, ColorBlack);
 
             if (state->currentIndex == i) {
                 DrawRectangleLinesEx(rect, 3, BLACK);

@@ -1,4 +1,7 @@
 #include "external/raylib.h"
+#include "include/colors.h"
+#include "include/themes/theme.h"
+#include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
 #include "include/widgets/widget.h"
 #include <stdbool.h>
@@ -20,6 +23,7 @@ int CellSize = 40;
 
 Color colorCanvas[GridRow][GridCol];
 ColorBarState cb;
+CanvasState canvas;
 
 void Layout();
 void ApplyStyle();
@@ -31,6 +35,7 @@ int RunApp() {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     SetTargetFPS(60);
+    LoadAppLightTheme();
 
     cb = NewColorBar();
     for (int i = 0; i < 8; i++) {
@@ -42,6 +47,12 @@ int RunApp() {
     }
     SetColorBarAnchor(&cb, (Vector2){0, 50}, (Vector2){-1, 50});
     cb.prop.active = true;
+
+    canvas = NewCanvas();
+    canvas.prop.active = true;
+    SetCanvasAnchor(
+        &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){30, 50}
+    );
 
     for (int row = 0; row < GridRow; row++) {
         for (int col = 0; col < GridCol; col++) {
@@ -58,7 +69,7 @@ int RunApp() {
 
         BeginDrawing();
         {
-            ClearBackground(RAYWHITE);
+            ClearBackground(ColorGrayDarkest);
             Layout();
         }
         EndDrawing();
@@ -84,6 +95,11 @@ void Layout() {
             prevColor = cb.currentColor;
         }
     }
+
+    SetCanvasAnchor(
+        &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){-1, 50}
+    );
+    Canvas(&canvas);
 
     /*
     if (IsKeyPressed(KEY_G)) {
