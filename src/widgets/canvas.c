@@ -1,5 +1,7 @@
 #include "../include/widgets/canvas.h"
 #include "../external/raygui.h"
+#include "../external/raylib.h"
+#include "../external/raymath.h"
 #include "../include/colors.h"
 #include <math.h>
 #include <stdbool.h>
@@ -13,6 +15,24 @@ CanvasState NewCanvas() {
     c.hoverX = 0;
     c.hoverY = 0;
     c.gridSize = (Vector2){DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE};
+
+    c.scroll = (Vector2){0, 0};
+    c.zoom = 0;
+    c.zoomMin = 0;
+    c.zoomMax = DEFAULT_GRID_SIZE * 4;
+    c.content = (Rectangle){0, 0, 0, 0};
+    c.view = (Rectangle){0, 0, 0, 0};
+    for (int i = 0; i < (int)c.gridSize.y; i++) {
+        for (int j = 0; j < (int)c.gridSize.x; j++) {
+            c.colors[i][j] = BLANK;
+        }
+    }
+
+    c.oldZoom = c.zoom;
+    c.oldCw = c.content.width;
+    c.oldCh = c.content.height;
+    c.oldOffX = 0;
+    c.oldOffY = 0;
 
     return c;
 }
@@ -56,27 +76,81 @@ bool Canvas(CanvasState *state) {
             bounds.height - (CANVAS_DRAW_MARGIN * 2)
         };
 
-        DrawRectangleRec(drawArea, Fade(ColorWhite, 0.1));
+        state->zoomMin = fminf(
+            drawArea.width / state->gridSize.x,
+            drawArea.height / state->gridSize.y
+        );
+        if (state->zoomMin > state->zoomMax) {
+            state->zoomMin = state->zoomMax;
+        }
 
-        float smallestLimit = fminf(drawArea.width, drawArea.height);
-        float smallestCell = fminf(state->gridSize.x, state->gridSize.y);
-        TraceLog(LOG_WARNING, "W[%f] | H[%f]", drawArea.width, drawArea.height);
+        GuiSliderBar(
+            (Rectangle){0, 0, 200, 10}, NULL,
+            TextFormat("Zoom : %.2f", state->zoom), &state->zoom,
+            state->zoomMin, state->zoomMax
+        );
 
-        float cellSize = smallestLimit / 16.0f;
+        mpos = GetMousePosition();
+        if (CheckCollisionPointRec(mpos, drawArea) &&
+            IsKeyDown(KEY_LEFT_SHIFT)) {
+            float wheel = GetMouseWheelMove();
+            if (wheel != 0.0f) {
 
-        for (int row = 0; row < state->gridSize.y; row++) {
-            for (int col = 0; col < state->gridSize.x; col++) {
-                Rectangle cellRect = {
-                    drawArea.x + (col * cellSize),
-                    drawArea.y + (row * cellSize), cellSize, cellSize
-                };
-                DrawRectangleRec(cellRect, ColorWhite);
-                DrawRectangleLinesEx(cellRect, 1, Fade(ColorGrayDarkest, 0.1));
+                state->zoom *= (wheel > 0 ? 1.1f : 0.9f);
+                state->zoom =
+                    Clamp(state->zoom, state->zoomMin, state->zoomMax);
             }
         }
 
-        // GuiGrid(drawArea, NULL, drawArea.height / 16.0f, 1, NULL);
-        // GuiGrid(drawArea, NULL, cellSize, 1, NULL);
+        state->content.width = state->gridSize.x * state->zoom;
+        state->content.height = state->gridSize.y * state->zoom;
+
+        float offsetX = 0.0f;
+        float offsetY = 0.0f;
+
+        if (state->content.width < drawArea.width) {
+            offsetX = (drawArea.width - state->content.width) * 0.5f;
+        }
+
+        if (state->content.height < drawArea.height) {
+            offsetY = (drawArea.height - state->content.height) * 0.5f;
+        }
+
+        BeginScissorMode(
+            drawArea.x, drawArea.y, drawArea.width, drawArea.height
+        );
+
+        for (int row = 0; row < state->gridSize.y; row++) {
+            for (int col = 0; col < state->gridSize.x; col++) {
+                float px =
+                    drawArea.x + state->scroll.x + offsetX + col * state->zoom;
+                float py =
+                    drawArea.y + state->scroll.y + offsetY + row * state->zoom;
+
+                Rectangle cellRect = {px, py, state->zoom, state->zoom};
+                DrawRectangleRec(cellRect, state->colors[row][col]);
+                DrawRectangleLinesEx(cellRect, 1, BLACK);
+
+                if (CheckCollisionPointRec(GetMousePosition(), cellRect) &&
+                    IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+                    if (IsKeyDown(KEY_RIGHT_CONTROL) |
+                        IsKeyDown(KEY_LEFT_CONTROL)) {
+                        state->colors[row][col] = BLANK;
+                    } else {
+                        state->colors[row][col] = BLACK;
+                    }
+                }
+            }
+        }
+
+        EndScissorMode();
+
+        int prev = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
+        GuiSetStyle(DEFAULT, BACKGROUND_COLOR, 0);
+        GuiScrollPanel(
+            drawArea, NULL, state->content, &state->scroll, &state->view
+        );
+        GuiSetStyle(DEFAULT, BACKGROUND_COLOR, prev);
     }
 
     return false;
