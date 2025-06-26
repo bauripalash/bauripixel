@@ -85,7 +85,7 @@ Color currentColor = MAGENTA;
 Color prevColor = RAYWHITE;
 
 void Layout() {
-    ColorBar(&cb);
+/*    ColorBar(&cb);
 
     if (!ColorIsEqual(cb.currentColor, RAYWHITE)) {
         if (!ColorIsEqual(cb.currentColor, prevColor)) {
@@ -94,35 +94,11 @@ void Layout() {
             );
             prevColor = cb.currentColor;
         }
-    }
+    }*/
 
     SetCanvasAnchor(
-        &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){-1, 50}
+        &canvas, (Vector2){50, 50}, (Vector2){-1, 50}
     );
     Canvas(&canvas);
 
-    /*
-    if (IsKeyPressed(KEY_G)) {
-            currentColor = GREEN;
-    }else if (IsKeyPressed(KEY_R)){
-            currentColor = RED;
-    }else if (IsKeyPressed(KEY_W)){
-            currentColor = WHITE;
-    }
-    for (int row = 0; row < GridRow; row++) {
-            for (int col = 0; col < GridCol; col++) {
-                    Rectangle btnRect = {col * CellSize, row * CellSize,
-    CellSize, CellSize}; DrawRectangleRec(btnRect, colorCanvas[row][col]);
-                    //DrawRectangleLinesEx(btnRect, 1 , BLACK);
-
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-    CheckCollisionPointRec(mousePos, btnRect)) { colorCanvas[row][col] =
-    currentColor;
-                    }
-            }
-    }
-
-    Rectangle gridRect = {0,0 , GridCol * CellSize, GridRow * CellSize};
-    //GuiGrid(gridRect, NULL, CellSize, 1, NULL);
-    */
 }
