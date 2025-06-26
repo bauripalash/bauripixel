@@ -9,6 +9,7 @@
 #define CANVAS_MARGIN_R    10
 #define CANVAS_DRAW_MARGIN 20
 #define DEFAULT_GRID_SIZE  32
+#define INIT_CELL_SIZE     16
 
 typedef struct {
     WidgetProp prop;
@@ -21,11 +22,7 @@ typedef struct {
     Vector2 scroll;
     Color colors[DEFAULT_GRID_SIZE][DEFAULT_GRID_SIZE];
     float zoom;
-    float oldZoom;
-    float oldCw;
-    float oldCh;
-    float oldOffX;
-    float oldOffY;
+    float pxSize;
     float zoomMin;
     float zoomMax;
     Rectangle content;

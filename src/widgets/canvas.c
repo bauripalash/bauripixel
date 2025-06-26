@@ -24,15 +24,11 @@ CanvasState NewCanvas() {
     c.view = (Rectangle){0, 0, 0, 0};
     for (int i = 0; i < (int)c.gridSize.y; i++) {
         for (int j = 0; j < (int)c.gridSize.x; j++) {
-            c.colors[i][j] = BLANK;
+            c.colors[i][j] = WHITE;
         }
     }
 
-    c.oldZoom = c.zoom;
-    c.oldCw = c.content.width;
-    c.oldCh = c.content.height;
-    c.oldOffX = 0;
-    c.oldOffY = 0;
+    c.pxSize = INIT_CELL_SIZE;
 
     return c;
 }
@@ -84,62 +80,50 @@ bool Canvas(CanvasState *state) {
             state->zoomMin = state->zoomMax;
         }
 
-        GuiSliderBar(
-            (Rectangle){0, 0, 200, 10}, NULL,
-            TextFormat("Zoom : %.2f", state->zoom), &state->zoom,
-            state->zoomMin, state->zoomMax
-        );
-
-        mpos = GetMousePosition();
-        if (CheckCollisionPointRec(mpos, drawArea) &&
+        if (CheckCollisionPointRec(mpos, drawArea) &
             IsKeyDown(KEY_LEFT_SHIFT)) {
-            float wheel = GetMouseWheelMove();
-            if (wheel != 0.0f) {
-
-                state->zoom *= (wheel > 0 ? 1.1f : 0.9f);
+            float mouseWheel = GetMouseWheelMove();
+            if (mouseWheel != 0) {
+                state->zoom *= (mouseWheel > 0 ? 1.1f : 0.9f);
                 state->zoom =
                     Clamp(state->zoom, state->zoomMin, state->zoomMax);
             }
         }
 
+        GuiSliderBar(
+            (Rectangle){0, 0, 200, 30}, NULL,
+            TextFormat("Zoom : %f", state->zoom), &state->zoom, state->zoomMin,
+            state->zoomMax
+        );
+
         state->content.width = state->gridSize.x * state->zoom;
         state->content.height = state->gridSize.y * state->zoom;
-
-        float offsetX = 0.0f;
-        float offsetY = 0.0f;
-
-        if (state->content.width < drawArea.width) {
-            offsetX = (drawArea.width - state->content.width) * 0.5f;
-        }
-
-        if (state->content.height < drawArea.height) {
-            offsetY = (drawArea.height - state->content.height) * 0.5f;
-        }
 
         BeginScissorMode(
             drawArea.x, drawArea.y, drawArea.width, drawArea.height
         );
 
-        for (int row = 0; row < state->gridSize.y; row++) {
-            for (int col = 0; col < state->gridSize.x; col++) {
-                float px =
-                    drawArea.x + state->scroll.x + offsetX + col * state->zoom;
-                float py =
-                    drawArea.y + state->scroll.y + offsetY + row * state->zoom;
+        for (int y = 0; y < state->gridSize.y; y++) {
+            for (int x = 0; x < state->gridSize.x; x++) {
+                Rectangle rect = {
+                    drawArea.x + state->scroll.x + x * state->zoom,
+                    drawArea.y + state->scroll.y + y * state->zoom,
+                    state->zoom,
+                    state->zoom,
+                };
 
-                Rectangle cellRect = {px, py, state->zoom, state->zoom};
-                DrawRectangleRec(cellRect, state->colors[row][col]);
-                DrawRectangleLinesEx(cellRect, 1, BLACK);
-
-                if (CheckCollisionPointRec(GetMousePosition(), cellRect) &&
-                    IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-                    if (IsKeyDown(KEY_RIGHT_CONTROL) |
-                        IsKeyDown(KEY_LEFT_CONTROL)) {
-                        state->colors[row][col] = BLANK;
-                    } else {
-                        state->colors[row][col] = BLACK;
+                if (CheckCollisionPointRec(mpos, rect)) {
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        if (ColorIsEqual(state->colors[y][x], WHITE)) {
+                            state->colors[y][x] = BLACK;
+                        } else {
+                            state->colors[y][x] = WHITE;
+                        }
                     }
                 }
+
+                DrawRectangleRec(rect, state->colors[y][x]);
+                DrawRectangleLinesEx(rect, 1.0f, GRAY);
             }
         }
 
