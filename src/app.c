@@ -50,9 +50,9 @@ int RunApp() {
 
     canvas = NewCanvas();
     canvas.prop.active = true;
-    SetCanvasAnchor(
-        &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){30, 50}
-    );
+    // SetCanvasAnchor(
+    //     &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){30, 50}
+    //);
 
     for (int row = 0; row < GridRow; row++) {
         for (int col = 0; col < GridCol; col++) {
@@ -85,20 +85,19 @@ Color currentColor = MAGENTA;
 Color prevColor = RAYWHITE;
 
 void Layout() {
-/*    ColorBar(&cb);
+    /*    ColorBar(&cb);
 
-    if (!ColorIsEqual(cb.currentColor, RAYWHITE)) {
-        if (!ColorIsEqual(cb.currentColor, prevColor)) {
-            TraceLog(
-                LOG_WARNING, "Selected -> %d", ColorToInt(cb.currentColor)
-            );
-            prevColor = cb.currentColor;
-        }
-    }*/
+        if (!ColorIsEqual(cb.currentColor, RAYWHITE)) {
+            if (!ColorIsEqual(cb.currentColor, prevColor)) {
+                TraceLog(
+                    LOG_WARNING, "Selected -> %d", ColorToInt(cb.currentColor)
+                );
+                prevColor = cb.currentColor;
+            }
+        }*/
 
-    SetCanvasAnchor(
-        &canvas, (Vector2){50, 50}, (Vector2){-1, 50}
-    );
+    // SetCanvasAnchor(
+    //     &canvas, (Vector2){50, 50}, (Vector2){-1, 50}
+    //);
     Canvas(&canvas);
-
 }
