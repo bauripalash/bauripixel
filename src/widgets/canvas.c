@@ -153,10 +153,41 @@ bool Canvas(CanvasState *state) {
             }
         }
 
-        // int canvasSizeW = (int)(state->gridSize.x * state->pxSize *
-        // state->camera.zoom); if (state->camera.target.x > canvasSizeW) {
-        //	state->camera.target.x = canvasSizeW;
-        // }
+        // Vector2 worldTL = {canvas.x, canvas.y};
+        // Vector2 worldBR = {canvas.width, canvas.height};
+
+        // Vector2 screenTL = GetWorldToScreen2D(worldTL, state->camera);
+        // Vector2 screenBR = GetWorldToScreen2D(worldBR, state->camera);
+
+        Vector2 areaWorldTL = GetScreenToWorld2D(
+            (Vector2){drawArea.x, drawArea.y}, state->camera
+        );
+        Vector2 areaWorldBR = GetScreenToWorld2D(
+            (Vector2){drawArea.width + drawArea.x,
+                      drawArea.height + drawArea.y},
+            state->camera
+        );
+
+        float leftOutside = canvas.width - areaWorldTL.x;
+        float topOutside = canvas.height - areaWorldTL.y;
+        float rightOutside = canvas.x - areaWorldBR.x;
+        float bottomOutside = canvas.y - areaWorldBR.y;
+
+        if (leftOutside < 0) {
+            state->camera.target.x += leftOutside;
+        }
+
+        if (topOutside < 0) {
+            state->camera.target.y += topOutside;
+        }
+
+        if (rightOutside > 0) {
+            state->camera.target.x += rightOutside;
+        }
+
+        if (bottomOutside > 0) {
+            state->camera.target.y += bottomOutside;
+        }
 
         BeginScissorMode(
             drawArea.x, drawArea.y, drawArea.width, drawArea.height
@@ -198,69 +229,9 @@ bool Canvas(CanvasState *state) {
         EndMode2D();
         EndScissorMode();
 
-        Vector2 worldTL = {canvas.x, canvas.y};
-        Vector2 worldBR = {canvas.width, canvas.height};
-
-        Vector2 screenTL = GetWorldToScreen2D(worldTL, state->camera);
-        Vector2 screenBR = GetWorldToScreen2D(worldBR, state->camera);
-
-        Vector2 areaWorldTL = GetScreenToWorld2D(
-            (Vector2){drawArea.x, drawArea.y}, state->camera
-        );
-        Vector2 areaWorldBR = GetScreenToWorld2D(
-            (Vector2){drawArea.width + drawArea.x,
-                      drawArea.height + drawArea.y},
-            state->camera
-        );
-
-        TraceVector(state->camera.target, "Target ->");
-        TraceVector(areaWorldTL, "World TL");
-
-        TraceVector(areaWorldBR, "BR ->");
-
-        TraceRect(canvas, "Canvas -> ");
-        if (areaWorldTL.x > canvas.width) {
-            TraceLog(LOG_ERROR, "Outside [Left]");
-            state->camera.target.x -= areaWorldTL.x - canvas.x - 512;
-        }
-
-        if (areaWorldTL.y > canvas.height) {
-            TraceLog(LOG_ERROR, "Outside [Top]");
-            TraceVector(state->camera.target, "Target ->");
-            state->camera.target.y -= areaWorldTL.y - canvas.y - 512;
-        }
-
-        if (areaWorldBR.x < canvas.x) {
-            TraceLog(LOG_ERROR, "Outside [Right]");
-
-            TraceVector(areaWorldBR, "BR ->");
-            TraceVector(state->camera.target, "Target ->");
-        }
-
-        if (areaWorldBR.y < canvas.y) {
-            TraceLog(LOG_ERROR, "Outside [Bottom]");
-
-            TraceVector(state->camera.target, "Target ->");
-        }
-
-        float contentWidth = 500.0f;
-        float viewWidth = 300.0f;
-
         Rectangle sliderRect = {
             drawArea.x, drawArea.y + drawArea.height, drawArea.width, 20
         };
-        float maxOffset =
-            (state->gridSize.x * state->pxSize * state->camera.zoom);
-
-        /*
-        TraceLog(LOG_WARNING, "CAMERA -> TARGET[%f,%f] | OFFSET[%f,%f] |
-        ZOOM[%f] | ROT[%f]" , state->camera.target.x, state->camera.target.y,
-           state->camera.offset.x,
-           state->camera.offset.y,
-           state->camera.zoom,
-           state->camera.rotation
-        );
-        */
     }
 
     return false;
