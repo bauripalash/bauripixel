@@ -3,10 +3,12 @@
 #include "../external/raylib.h"
 #include "../external/raymath.h"
 #include "../include/colors.h"
-#include "raymath.h"
+#include "raylib.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 
+static Vector2 sPoint = {0, 0};
 CanvasState NewCanvas() {
     CanvasState c = {0};
     c.prop = NewWidgetProp();
@@ -36,6 +38,18 @@ CanvasState NewCanvas() {
     c.camera = (Camera2D){0};
     c.camera.zoom = 1.0f;
 
+    Rectangle bounds = c.prop.bounds;
+    c.drawArea = (Rectangle){bounds.x + CANVAS_DRAW_MARGIN,
+                             bounds.y + CANVAS_DRAW_MARGIN,
+                             bounds.width - (CANVAS_DRAW_MARGIN * 2),
+                             bounds.height - (CANVAS_DRAW_MARGIN * 2)};
+
+    // c.camera.target = (Vector2){c.drawArea.width / 2.0f, c.drawArea.height
+    // / 2.0f};
+
+    // sPoint.x = c.drawArea.width / 2.0f;
+    // sPoint.y = c.drawArea.height / 2.0f;
+
     return c;
 }
 
@@ -45,6 +59,12 @@ void updateBounds(CanvasState *c) {
     c->prop.bounds.width =
         GetScreenWidth() - (CANVAS_MARGIN_L + CANVAS_MARGIN_R);
     c->prop.bounds.height = GetScreenHeight() - (CANVAS_MARGIN_TB * 2);
+
+    Rectangle bounds = c->prop.bounds;
+    c->drawArea = (Rectangle){bounds.x + CANVAS_DRAW_MARGIN,
+                              bounds.y + CANVAS_DRAW_MARGIN,
+                              bounds.width - (CANVAS_DRAW_MARGIN * 2),
+                              bounds.height - (CANVAS_DRAW_MARGIN * 2)};
 }
 
 void TraceVector(Vector2 vec, const char *string) {
@@ -58,181 +78,245 @@ void TraceRect(Rectangle rect, const char *string) {
     );
 }
 
-bool sliderDrag = false;
-int minVal = 0;
-int maxVal = 50;
-int BauScrollBar(Rectangle rect, int *displ) {
-    int value = 0;
-    int borderWidth = 2;
-    Rectangle sliderRect = {
-        rect.x + *displ,
-        rect.y,
-        100,
-        rect.height,
+void drawBorder(CanvasState *state) {
+    DrawRectangleRec(state->drawArea, ColorWhite);
+    DrawRectangleLinesEx(state->drawArea, 1, ColorGrayLighter);
+}
+
+#define TMR 3
+#define TMW 50
+static bool dragging = false;
+static float displ = 0.0f;
+bool BauScroll(
+    Rectangle bounds, Vector2 *s, float move, float left, float right,
+    float width
+) {
+    DrawRectangleRec(bounds, ColorGreenLightest);
+    DrawRectangleLinesEx(bounds, 1, ColorOrange);
+    float totalWidth = width;
+
+    if (left <= 0)
+        totalWidth += fabs(left);
+    if (right <= 0)
+        totalWidth += fabs(right);
+
+    TraceLog(
+        LOG_ERROR, "LEFT %f | RIGHT %f | TOTAL %f", left, right, totalWidth
+    );
+    float thumbX = bounds.x + displ;
+    float thumbWidth = (512 / totalWidth) * bounds.width;
+    Rectangle thumbRect = {
+        thumbX, bounds.y + TMR, thumbWidth, bounds.height - (TMR * 2)
     };
 
-    DrawRectangleRec(rect, Fade(ColorWhite, 0.9));
+    DrawRectangleRec(thumbRect, ColorGreenDarkest);
+    // DrawRectangleLinesEx(thumbRect,2, ColorRedDark);
+    float oldDisp = displ;
+    float oldX = bounds.x + displ;
 
-    float minSliderX = rect.x;
-    float maxSliderX = rect.x + rect.width - sliderRect.width;
+    if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
 
-    if (CheckCollisionPointRec(GetMousePosition(), sliderRect) &&
-        IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        sliderDrag = true;
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            dragging = true;
+        }
+
+        float wheel = GetMouseWheelMove();
+
+        if (wheel != 0.0f) {
+            float scale = 10 * wheel;
+            displ += scale;
+        }
     }
 
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-        sliderDrag = false;
+        dragging = false;
     }
 
-    if (sliderDrag) {
+    if (dragging) {
         Vector2 delta = GetMouseDelta();
-
-        sliderRect.x += delta.x;
-        sliderRect.x = Clamp(sliderRect.x, minSliderX, maxSliderX);
-        *displ = sliderRect.x - rect.x;
+        displ += delta.x;
     }
 
-    DrawRectangleRec(sliderRect, ColorGrayDarkest);
+    if (displ <= 0) {
+        displ = 0;
+    }
 
-    DrawRectangleLinesEx(rect, borderWidth, ColorBlack);
+    if (displ > (bounds.width - thumbWidth)) {
+        displ = bounds.width - thumbWidth;
+    }
 
-    return value;
+    TraceLog(
+        LOG_WARNING, "DISP -> %f | BOUNDS : %f | MAXDISP -> %f", displ,
+        bounds.width, bounds.width - thumbWidth
+    );
+
+    s->x += displ - oldDisp;
+
+    return false;
 }
 
-float value = 0.0f;
-int val = 0;
-float offsetX;
+static float svalue = 0.0f;
+static float oldsvalue = 0.0f;
+static int sliderValue = 0;
+static bool panning = false;
 bool Canvas(CanvasState *state) {
-    if (state->prop.active) {
-        updateBounds(state);
-        Vector2 mpos = GetMousePosition();
-        Rectangle bounds = state->prop.bounds;
+    TraceLog(LOG_WARNING, "--------------------");
+    updateBounds(state);
+    Vector2 mpos = GetMousePosition();
+    bool isHovering = CheckCollisionPointRec(mpos, state->drawArea);
+    Rectangle deadZone;
+    // EndDrawing();
 
-        DrawRectangleRounded(bounds, 0.03, 0, ColorGrayLighter);
+    Vector2 drawVector = (Vector2){state->drawArea.x, state->drawArea.y};
+    Rectangle canvasRect = {
+        state->drawArea.x, state->drawArea.y,
+        (state->gridSize.x * state->pxSize), (state->gridSize.y * state->pxSize)
+    };
 
-        DrawRectangleRoundedLinesEx(bounds, 0.03, 0, 5, Fade(ColorWhite, 0.5));
+    Vector2 canvasVector = {canvasRect.x, canvasRect.y};
 
-        Rectangle drawArea = {
-            bounds.x + CANVAS_DRAW_MARGIN, bounds.y + CANVAS_DRAW_MARGIN,
-            bounds.width - (CANVAS_DRAW_MARGIN * 2),
-            bounds.height - (CANVAS_DRAW_MARGIN * 2)
-        };
+    if (isHovering) {
+        float wheel = GetMouseWheelMove();
 
-        Rectangle canvas = {
-            drawArea.x,
-            drawArea.y,
-            drawArea.x + state->gridSize.x * state->pxSize,
-            drawArea.y + state->gridSize.y * state->pxSize,
-        };
+        if (wheel != 0) {
+            Vector2 mwPos =
+                GetScreenToWorld2D(GetMousePosition(), state->camera);
+            state->camera.offset = GetMousePosition();
+            state->camera.target = mwPos;
+            sPoint = mwPos;
+            float scale = 0.2f * wheel;
+            state->camera.zoom += scale;
+            state->camera.zoom = Clamp(state->camera.zoom, 0.2f, 10.0f);
 
-        DrawRectangleRec(drawArea, ColorWhite);
-
-        if (CheckCollisionPointRec(mpos, drawArea)) {
-            float wheel = GetMouseWheelMove();
-
-            if (wheel != 0) {
-                Vector2 mouseWorldPos =
-                    GetScreenToWorld2D(GetMousePosition(), state->camera);
-                state->camera.offset = GetMousePosition();
-                state->camera.target = mouseWorldPos;
-                float scale = 0.2f * wheel;
-                state->camera.zoom = expf(logf(state->camera.zoom) + scale);
-                state->camera.zoom =
-                    Clamp(state->camera.zoom, state->zoomMin, state->zoomMax);
-                offsetX = state->camera.offset.x;
-
-                TraceLog(LOG_WARNING, "Zoom : %f", state->camera.zoom);
-            }
-
-            if (IsKeyDown(KEY_LEFT_SHIFT) &&
-                IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-                Vector2 delta = GetMouseDelta();
-                delta = Vector2Scale(delta, -1.0 / state->camera.zoom);
-                state->camera.target = Vector2Add(state->camera.target, delta);
-            }
+            Vector2 center = {
+                (state->drawArea.x + state->drawArea.width) / 2.0f,
+                (state->drawArea.y + state->drawArea.height) / 2.0f
+            };
+            center = GetScreenToWorld2D(center, state->camera);
         }
 
-        // Vector2 worldTL = {canvas.x, canvas.y};
-        // Vector2 worldBR = {canvas.width, canvas.height};
+        if (IsKeyDown(KEY_LEFT_SHIFT) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 
-        // Vector2 screenTL = GetWorldToScreen2D(worldTL, state->camera);
-        // Vector2 screenBR = GetWorldToScreen2D(worldBR, state->camera);
+            Vector2 delta =
+                Vector2Scale(GetMouseDelta(), -1.0 / state->camera.zoom);
 
-        Vector2 areaWorldTL = GetScreenToWorld2D(
-            (Vector2){drawArea.x, drawArea.y}, state->camera
-        );
-        Vector2 areaWorldBR = GetScreenToWorld2D(
-            (Vector2){drawArea.width + drawArea.x,
-                      drawArea.height + drawArea.y},
-            state->camera
-        );
+            sPoint = Vector2Add(sPoint, delta);
+            state->camera.target = sPoint;
+            // state->camera.target = Vector2Add(state->camera.target, delta);
 
-        float leftOutside = canvas.width - areaWorldTL.x;
-        float topOutside = canvas.height - areaWorldTL.y;
-        float rightOutside = canvas.x - areaWorldBR.x;
-        float bottomOutside = canvas.y - areaWorldBR.y;
+            panning = true;
+        }
+    }
 
+    if (IsKeyReleased(KEY_LEFT_SHIFT) ||
+        IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        panning = false;
+    }
+
+    TraceLog(LOG_ERROR, "Panning -> %s", panning ? "true" : "false");
+
+    Vector2 dir = {0, 0};
+
+    if (IsKeyDown(KEY_LEFT))
+        dir.x++;
+    if (IsKeyDown(KEY_RIGHT))
+        dir.x--;
+    if (IsKeyDown(KEY_UP))
+        dir.y++;
+    if (IsKeyDown(KEY_DOWN))
+        dir.y--;
+
+    bool movingKb = false;
+    if (Vector2Length(dir) != 0.0f) {
+        movingKb = true;
+
+        dir = Vector2Scale(Vector2Normalize(dir), 200.0f * GetFrameTime());
+        sPoint = Vector2Add(sPoint, dir);
+    }
+
+    Vector2 dTl = GetScreenToWorld2D(drawVector, state->camera);
+    Vector2 dBr = GetScreenToWorld2D(
+        (Vector2){drawVector.x + state->drawArea.width,
+                  state->drawArea.y + state->drawArea.height},
+        state->camera
+    );
+
+    Vector2 cTl = canvasVector;
+    Vector2 cBr = {
+        canvasVector.x + canvasRect.width, canvasVector.y + canvasRect.height
+    };
+
+    float leftEmpty = cTl.x - dTl.x;
+    float rightEmpty = dBr.x - cBr.x;
+
+    float topEmpty = cTl.y - dTl.y;
+    float bottomEmpty = dBr.y - cBr.y;
+
+    Rectangle sRect = {
+        state->drawArea.x, state->drawArea.y + state->drawArea.height,
+        state->drawArea.width, 20
+    };
+    BauScroll(
+        sRect, &sPoint, 200.0f * GetFrameTime(), leftEmpty, rightEmpty,
+        dBr.x - dTl.x
+    );
+
+    if (panning || movingKb) {
+        float leftOutside = (canvasRect.x + canvasRect.width) - dTl.x;
+        float rightOutside = canvasRect.x - dBr.x;
+        float topOutside = (canvasRect.y + canvasRect.height) - dTl.y;
+        float bottomOutside = canvasRect.y - dBr.y;
         if (leftOutside < 0) {
-            state->camera.target.x += leftOutside;
+            sPoint.x += leftOutside;
+        } else if (topOutside < 0) {
+            sPoint.y += topOutside;
+        } else if (rightOutside > 0) {
+            sPoint.x += rightOutside;
+        } else if (bottomOutside > 0) {
+            sPoint.y += bottomOutside;
         }
+    }
 
-        if (topOutside < 0) {
-            state->camera.target.y += topOutside;
-        }
-
-        if (rightOutside > 0) {
-            state->camera.target.x += rightOutside;
-        }
-
-        if (bottomOutside > 0) {
-            state->camera.target.y += bottomOutside;
-        }
-
-        BeginScissorMode(
-            drawArea.x, drawArea.y, drawArea.width, drawArea.height
-        );
+    drawBorder(state);
+    BeginScissorMode(
+        state->drawArea.x, state->drawArea.y, state->drawArea.width,
+        state->drawArea.height
+    );
+    {
         BeginMode2D(state->camera);
         {
-            for (int row = 0; row < (int)state->gridSize.y; row++) {
-                for (int col = 0; col < (int)state->gridSize.x; col++) {
-                    Rectangle rect = {
-                        drawArea.x + (col * state->pxSize),
-                        drawArea.y + (row * state->pxSize),
-                        state->pxSize,
-                        state->pxSize,
-                    };
+            DrawRectangleRec(canvasRect, ColorWhite);
+            GuiGrid(canvasRect, NULL, (state)->gridSize.x, 1, NULL);
+            DrawCircleV(dTl, 30, ColorRedDark);
+            DrawCircleV(cTl, 30, ColorYellow);
+            DrawLineEx(dTl, cTl, 3, ColorOrange);
+            DrawCircleV(dBr, 30, ColorGreenLighter);
+            DrawCircleV(cBr, 30, ColorBlueLighter);
+            // DrawCircleV(state->camera.target, 30, PINK);
+            // DrawText("T", state->camera.target.x, state->camera.target.y, 30,
+            // BLACK); DrawCircleV(state->camera.offset, 30, PURPLE);
 
-                    Vector2 mouseWorldPos =
-                        GetScreenToWorld2D(GetMousePosition(), state->camera);
-                    if (CheckCollisionPointRec(mouseWorldPos, rect) &&
-                        IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        if (ColorIsEqual(state->colors[row][col], ColorWhite)) {
-                            state->colors[row][col] = ColorBlack;
-                        } else {
-                            state->colors[row][col] = ColorWhite;
-                        }
-                        TraceLog(LOG_WARNING, "CLICKED->[%d,%d]", col, row);
-                    }
+            DrawLineEx(dBr, cBr, 3, ColorOrange);
 
-                    DrawRectangleRec(rect, state->colors[row][col]);
-                    DrawRectangleLinesEx(rect, 1, Fade(ColorGrayDarkest, 0.5));
-                }
-            }
+            DrawRectangleLinesEx(canvasRect, 2, ColorRedDark);
 
-            DrawLineEx(
-                (Vector2){drawArea.x, drawArea.y}, state->camera.target, 2,
-                ColorGreenLighter
-            );
+            // DrawCircleV(sPoint, 20, GREEN);
+
+            // DrawRectangleLinesEx(deadZone, 2, ColorRedDark);
         }
-
         EndMode2D();
-        EndScissorMode();
-
-        Rectangle sliderRect = {
-            drawArea.x, drawArea.y + drawArea.height, drawArea.width, 20
-        };
     }
+    EndScissorMode();
+
+    TraceLog(
+        LOG_WARNING, "VIEWPORT [%f][%f]", dBr.x - dTl.x,
+        (cBr.x - cTl.x) * state->camera.zoom
+    );
+    // BauScroll(sRect, &sPoint, move, leftEmpty, rightEmpty, dBr.x - dTl.x);
+
+    state->camera.target.x = sPoint.x;
+    state->camera.target.y = sPoint.y;
+    TraceLog(LOG_WARNING, "--------------------");
 
     return false;
 }

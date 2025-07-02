@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #define CANVAS_MARGIN_TB   10
-#define CANVAS_MARGIN_L    50
+#define CANVAS_MARGIN_L    10
 #define CANVAS_MARGIN_R    10
 #define CANVAS_DRAW_MARGIN 20
 #define DEFAULT_GRID_SIZE  32
@@ -28,6 +28,9 @@ typedef struct {
 
     float worldWidth;
     float worldHeight;
+
+    RenderTexture2D canvasTx;
+    Rectangle drawArea;
 
 } CanvasState;
 
