@@ -23,6 +23,8 @@ typedef struct {
     float zoomMax;
 
     Vector2 scroll;
+    Rectangle vScrollRect;
+    Rectangle hScrollRect;
 
     Camera2D camera;
 

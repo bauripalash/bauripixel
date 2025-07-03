@@ -44,11 +44,11 @@ CanvasState NewCanvas() {
                              bounds.width - (CANVAS_DRAW_MARGIN * 2),
                              bounds.height - (CANVAS_DRAW_MARGIN * 2)};
 
-    // c.camera.target = (Vector2){c.drawArea.width / 2.0f, c.drawArea.height
-    // / 2.0f};
+    c.hScrollRect = (Rectangle){c.drawArea.x, c.drawArea.y + c.drawArea.height,
+                                c.drawArea.width, 20};
 
-    // sPoint.x = c.drawArea.width / 2.0f;
-    // sPoint.y = c.drawArea.height / 2.0f;
+    c.vScrollRect = (Rectangle){c.drawArea.x + c.drawArea.width, c.drawArea.y,
+                                20, c.drawArea.height};
 
     return c;
 }
@@ -65,6 +65,13 @@ void updateBounds(CanvasState *c) {
                               bounds.y + CANVAS_DRAW_MARGIN,
                               bounds.width - (CANVAS_DRAW_MARGIN * 2),
                               bounds.height - (CANVAS_DRAW_MARGIN * 2)};
+
+    c->vScrollRect = (Rectangle){c->drawArea.x + c->drawArea.width,
+                                 c->drawArea.y, 20, c->drawArea.height};
+
+    c->hScrollRect =
+        (Rectangle){c->drawArea.x, c->drawArea.y + c->drawArea.height,
+                    c->drawArea.width, 20};
 }
 
 void TraceVector(Vector2 vec, const char *string) {
@@ -85,32 +92,115 @@ void drawBorder(CanvasState *state) {
 
 #define TMR 3
 #define TMW 50
+
+static bool vDragging = false;
+static float vDispl = 0.0f;
+
+bool BauVScroll(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
+
+    Rectangle bounds = state->vScrollRect;
+    Camera2D cam = state->camera;
+    float zoom = cam.zoom;
+
+    Vector2 dTl = {drawArea.x, drawArea.y};
+    Vector2 dBr = {drawArea.z, drawArea.w};
+    Vector2 cTl = {canvas.x, canvas.y};
+    Vector2 cBr = {canvas.z, canvas.w};
+
+    float viewHeight = dBr.y - dTl.y;
+    float canvasHeight = cBr.y - cTl.y;
+
+    float scrollHeight = viewHeight + canvasHeight * 2;
+
+    DrawRectangleRec(bounds, ColorGreenLightest);
+    DrawRectangleLinesEx(bounds, 1, ColorOrange);
+
+    float scale = scrollHeight / bounds.height;
+    float maxPosY = viewHeight;
+    float minPosY = -canvasHeight;
+
+    vDispl = (dBr.y - cTl.y) / scale;
+
+    float thumbY = bounds.y + vDispl;
+    float thumbHeight = (canvasHeight / scrollHeight) * bounds.height;
+
+    Rectangle thumbRect = {
+        bounds.x + TMR, thumbY, bounds.width - (TMR * 2), thumbHeight
+    };
+
+    DrawRectangleRec(thumbRect, ColorGreenDarkest);
+    float oldDisp = vDispl;
+    float oldY = bounds.y + vDispl;
+
+    if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
+
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            vDragging = true;
+        }
+
+        float wheel = GetMouseWheelMove();
+
+        if (wheel != 0.0f) {
+            float scale = 10 * wheel;
+            vDispl += scale;
+        }
+    }
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        vDragging = false;
+    }
+
+    if (vDragging) {
+        Vector2 delta = GetMouseDelta();
+        vDispl += delta.y;
+    }
+
+    if (vDispl <= 0) {
+        vDispl = 0;
+    }
+
+    if (vDispl > (bounds.height - thumbHeight)) {
+        vDispl = bounds.height - thumbHeight;
+    }
+
+    sPoint.y += (vDispl - oldDisp) * scale;
+
+    return false;
+}
+
 static bool dragging = false;
 static float displ = 0.0f;
 bool BauScroll(
-    Rectangle bounds, Vector2 *s, float move, float left, float right,
-    float width
+    Rectangle bounds, Vector2 *point, float move, Vector4 drawArea,
+    Vector4 canvas, Camera2D cam
 ) {
+    float zoom = cam.zoom;
+    Vector2 dTl = {drawArea.x, drawArea.y};
+    Vector2 dBr = {drawArea.z, drawArea.w};
+    Vector2 cTl = {canvas.x, canvas.y};
+    Vector2 cBr = {canvas.z, canvas.w};
+    float viewWidth = dBr.x - dTl.x;
+    float canvasWidth = cBr.x - cTl.x;
+
+    float scrollWidth = viewWidth + canvasWidth * 2;
+
     DrawRectangleRec(bounds, ColorGreenLightest);
     DrawRectangleLinesEx(bounds, 1, ColorOrange);
-    float totalWidth = width;
 
-    if (left <= 0)
-        totalWidth += fabs(left);
-    if (right <= 0)
-        totalWidth += fabs(right);
+    // 1px = `scale`px in viewport
+    float scale = scrollWidth / bounds.width;
+    float maxPosX = viewWidth;
+    float minPosX = -(cBr.x - cTl.x);
 
-    TraceLog(
-        LOG_ERROR, "LEFT %f | RIGHT %f | TOTAL %f", left, right, totalWidth
-    );
+    displ = ((dBr.x - cTl.x) / scale);
+
     float thumbX = bounds.x + displ;
-    float thumbWidth = (512 / totalWidth) * bounds.width;
+    float thumbWidth = (canvasWidth / scrollWidth) * bounds.width;
     Rectangle thumbRect = {
         thumbX, bounds.y + TMR, thumbWidth, bounds.height - (TMR * 2)
     };
 
     DrawRectangleRec(thumbRect, ColorGreenDarkest);
-    // DrawRectangleLinesEx(thumbRect,2, ColorRedDark);
     float oldDisp = displ;
     float oldX = bounds.x + displ;
 
@@ -145,12 +235,12 @@ bool BauScroll(
         displ = bounds.width - thumbWidth;
     }
 
-    TraceLog(
+    /*TraceLog(
         LOG_WARNING, "DISP -> %f | BOUNDS : %f | MAXDISP -> %f", displ,
         bounds.width, bounds.width - thumbWidth
-    );
+    );*/
 
-    s->x += displ - oldDisp;
+    point->x += (displ - oldDisp) * scale;
 
     return false;
 }
@@ -256,10 +346,35 @@ bool Canvas(CanvasState *state) {
         state->drawArea.x, state->drawArea.y + state->drawArea.height,
         state->drawArea.width, 20
     };
-    BauScroll(
-        sRect, &sPoint, 200.0f * GetFrameTime(), leftEmpty, rightEmpty,
-        dBr.x - dTl.x
-    );
+
+    state->vScrollRect =
+        (Rectangle){state->drawArea.x + state->drawArea.width,
+                    state->drawArea.y, 20, state->drawArea.height};
+
+    /*BauScroll(
+    sRect, &sPoint, 200.0f * GetFrameTime(), leftEmpty, rightEmpty,
+    dBr.x - dTl.x, (cBr.x - cTl.x) * state->camera.zoom
+);*/
+
+    float mv = 200.0f * GetFrameTime();
+    Vector4 drw = {
+        .x = dTl.x,
+        .y = dTl.y,
+        .z = dBr.x,
+        .w = dBr.y,
+    };
+    Vector4 cvs = {
+        .x = cTl.x,
+        .y = cTl.y,
+        .z = cBr.x,
+        .w = cBr.y,
+    };
+    BauScroll(sRect, &sPoint, mv, drw, cvs, state->camera);
+    BauVScroll(state, drw, cvs);
+
+    // BauScroll(sRect, &sPoint, 200.0f * GetFrameTime(), dTl, dBr, cTl, CBr,
+    // state->camera.zoom);
+    //
 
     if (panning || movingKb) {
         float leftOutside = (canvasRect.x + canvasRect.width) - dTl.x;
@@ -297,10 +412,18 @@ bool Canvas(CanvasState *state) {
             // BLACK); DrawCircleV(state->camera.offset, 30, PURPLE);
 
             DrawLineEx(dBr, cBr, 3, ColorOrange);
+            // DrawText(TextFormat("%f, %f", cTl.x - dTl.x , cTl.y, dTl.y),dTl.x
+            // + 10, dTl.y + 10, 20 / state->camera.zoom, ColorBlack);
+            // DrawLineEx(cTl, sPoint, 3, ColorGreenLighter);
+            // Vector2 diff = Vector2Subtract(cTl, sPoint);
+            // DrawTextPro(GetFontDefault(), TextFormat("%f,%f", diff.x,
+            // diff.y), sPoint, sPoint, Vector2Angle(cTl, sPoint), floor(16 /
+            // state->camera.zoom), 1, ColorBlack);
 
             DrawRectangleLinesEx(canvasRect, 2, ColorRedDark);
 
             // DrawCircleV(sPoint, 20, GREEN);
+            // DrawRectangleLinesEx(state->drawArea, 2, ColorBlueLighter);
 
             // DrawRectangleLinesEx(deadZone, 2, ColorRedDark);
         }
@@ -309,8 +432,8 @@ bool Canvas(CanvasState *state) {
     EndScissorMode();
 
     TraceLog(
-        LOG_WARNING, "VIEWPORT [%f][%f]", dBr.x - dTl.x,
-        (cBr.x - cTl.x) * state->camera.zoom
+        LOG_WARNING, "VIEWPORT [%f] | C[%f] | Z[%f]", dBr.x - dTl.x,
+        (cBr.x - cTl.x) * state->camera.zoom, state->camera.zoom
     );
     // BauScroll(sRect, &sPoint, move, leftEmpty, rightEmpty, dBr.x - dTl.x);
 
