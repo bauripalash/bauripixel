@@ -16,28 +16,34 @@ typedef struct {
     int hoverX;
     int hoverY;
     Vector2 gridSize;
+    Vector2 anchor;
+    Vector2 bottomAnchor;
 
     Color colors[DEFAULT_GRID_SIZE][DEFAULT_GRID_SIZE];
+    Color current;
     float pxSize;
     float zoomMin;
     float zoomMax;
 
+    bool enablePanning;
+    bool panning;
+
     Vector2 scroll;
     Rectangle vScrollRect;
     Rectangle hScrollRect;
+    bool vScrollDragging;
+    bool hScrollDragging;
 
     Camera2D camera;
-
-    float worldWidth;
-    float worldHeight;
-
-    RenderTexture2D canvasTx;
+    Vector2 point;
     Rectangle drawArea;
 
 } CanvasState;
 
 CanvasState NewCanvas();
 void SetCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
+void CenterAlignCanvas(CanvasState *state);
+void SetCurrentCanvasColor(CanvasState *state, Color color);
 bool Canvas(CanvasState *state);
 
 #endif

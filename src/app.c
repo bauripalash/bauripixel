@@ -6,7 +6,7 @@
 #include "include/widgets/widget.h"
 #include <stdbool.h>
 
-#define RAYGUI_GRID_ALPHA 0.7f
+// #define RAYGUI_GRID_ALPHA 1.0f
 #define RAYGUI_IMPLEMENTATION
 #include "external/raygui.h"
 #define STB_DS_IMPLEMENTATION
@@ -21,7 +21,6 @@ Vector2 mousePos = {0, 0};
 #define GridRow 16
 int CellSize = 40;
 
-Color colorCanvas[GridRow][GridCol];
 ColorBarState cb;
 CanvasState canvas;
 
@@ -50,15 +49,11 @@ int RunApp() {
 
     canvas = NewCanvas();
     canvas.prop.active = true;
-    // SetCanvasAnchor(
-    //     &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){30, 50}
-    //);
+    SetCanvasAnchor(
+        &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){30, 50}
+    );
 
-    for (int row = 0; row < GridRow; row++) {
-        for (int col = 0; col < GridCol; col++) {
-            colorCanvas[row][col] = WHITE;
-        }
-    }
+    CenterAlignCanvas(&canvas);
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
@@ -85,19 +80,12 @@ Color currentColor = MAGENTA;
 Color prevColor = RAYWHITE;
 
 void Layout() {
-    /*    ColorBar(&cb);
+    ColorBar(&cb);
+    SetCanvasAnchor(
+        &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){-1, 50}
+    );
 
-        if (!ColorIsEqual(cb.currentColor, RAYWHITE)) {
-            if (!ColorIsEqual(cb.currentColor, prevColor)) {
-                TraceLog(
-                    LOG_WARNING, "Selected -> %d", ColorToInt(cb.currentColor)
-                );
-                prevColor = cb.currentColor;
-            }
-        }*/
+    SetCurrentCanvasColor(&canvas, cb.currentColor);
 
-    // SetCanvasAnchor(
-    //     &canvas, (Vector2){50, 50}, (Vector2){-1, 50}
-    //);
     Canvas(&canvas);
 }
