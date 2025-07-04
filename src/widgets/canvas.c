@@ -50,6 +50,14 @@ CanvasState NewCanvas() {
     c.vScrollRect = (Rectangle){c.drawArea.x + c.drawArea.width, c.drawArea.y,
                                 20, c.drawArea.height};
 
+    c.camera.target = (Vector2){0};
+
+    Vector2 canvasSize = {c.gridSize.x * c.pxSize, c.gridSize.y * c.pxSize};
+
+    c.camera.offset =
+        (Vector2){(c.drawArea.width / 2.0f) - (canvasSize.x / 2.0f),
+                  (c.drawArea.height / 2.0f) - (canvasSize.y / 2.0f)};
+
     return c;
 }
 
