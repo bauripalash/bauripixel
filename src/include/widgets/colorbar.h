@@ -6,13 +6,13 @@
 
 #define NOCOLOR           (Color){0, 0, 0, 0}
 #define DEFAULT_BOX_SIZE  30
-#define DEFAULT_BOX_SPACE 5
+#define DEFAULT_BOX_SPACE 0
 #define ColorsCount(c)    (sizeof(c) / sizeof(Color))
 #define PANEL_PADDING     5
 #define MARGIN_TOPBOTTOM  10
 #define MARGIN_LEFT       10
 #define INIT_WIDTH        80.0f
-#define HANDLE_THICKNESS  10
+#define HANDLE_THICKNESS  20
 
 typedef struct {
     WidgetProp prop;
@@ -28,6 +28,8 @@ typedef struct {
     Vector2 scroll;
     int boxSize;
     int boxSpacing;
+    Color cbBg;
+    Color cbBorder;
 
     Rectangle content;
     Rectangle view;

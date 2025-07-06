@@ -20,6 +20,8 @@ ColorBarState NewColorBar() {
 
     cb.boxSize = DEFAULT_BOX_SIZE;
     cb.boxSpacing = DEFAULT_BOX_SPACE;
+    cb.cbBg = ColorGrayDarkest;
+    cb.cbBorder = ColorGrayLightest;
 
     cb.content = (Rectangle){0, 0, DEFAULT_BOX_SIZE,
                              DEFAULT_BOX_SPACE + DEFAULT_BOX_SIZE};
@@ -37,6 +39,12 @@ ColorBarState NewColorBar() {
     return cb;
 }
 
+static void updateBounds(ColorBarState *cb) {
+    cb->prop.bounds.x = cb->anchor.x + MARGIN_LEFT;
+    cb->prop.bounds.y = cb->anchor.y + MARGIN_TOPBOTTOM;
+    cb->prop.bounds.height = GetScreenHeight() - cb->anchor.y -
+                             cb->bottomStop.y - MARGIN_TOPBOTTOM * 2;
+}
 void SetColorBarAnchor(ColorBarState *cb, Vector2 anchor, Vector2 bottom) {
     if (anchor.x != -1) {
         cb->anchor.x = anchor.x;
@@ -51,10 +59,7 @@ void SetColorBarAnchor(ColorBarState *cb, Vector2 anchor, Vector2 bottom) {
     if (bottom.y != -1) {
         cb->bottomStop.y = bottom.y;
     }
-
-    cb->prop.bounds.height =
-        GetScreenHeight() - cb->anchor.y - cb->bottomStop.y -
-        MARGIN_TOPBOTTOM * 2; // how to handle according to anchor.y
+    updateBounds(cb);
 }
 
 int AddToColorBar(ColorBarState *cb, Color color) {
@@ -73,6 +78,7 @@ void ClearColorBar(ColorBarState *cb) {
 bool ColorBar(ColorBarState *state) {
     if (state->prop.active) {
 
+        updateBounds(state);
         Vector2 mpos = GetMousePosition();
         int boxSize = state->boxSize;
         int boxSpacing = state->boxSpacing;
@@ -80,8 +86,6 @@ bool ColorBar(ColorBarState *state) {
         int minScrollSize =
             boxSpacing + boxSize + boxSpacing + state->scrollBarWidth;
         int minSize = minScrollSize + MARGIN_LEFT * 2;
-        state->prop.bounds.x = state->anchor.x + MARGIN_LEFT;
-        state->prop.bounds.y = state->anchor.y + MARGIN_TOPBOTTOM;
 
         Rectangle bounds = state->prop.bounds;
 
@@ -104,9 +108,11 @@ bool ColorBar(ColorBarState *state) {
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 state->widthDragging = true;
             }
+
+            // SetMouseCursor(MOUSE_CURSOR_RESIZE_EW);
         } else {
             hHandleHover = false;
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
 
         if (CheckCollisionPointRec(mpos, vResizeHandle)) {
@@ -114,9 +120,11 @@ bool ColorBar(ColorBarState *state) {
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 state->heightDragging = true;
             }
+
+            // SetMouseCursor(MOUSE_CURSOR_RESIZE_NS);
         } else {
             vHandleHover = false;
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
@@ -145,20 +153,17 @@ bool ColorBar(ColorBarState *state) {
         bounds.width = state->prop.bounds.width;
         bounds.height = state->prop.bounds.height;
 
-        DrawRectangleRounded(bounds, 0.05, 0, ColorGrayLighter);
-        DrawRectangleRoundedLinesEx(
-            bounds, 0.05, 0, 5, Fade(ColorGrayLighter, 0.5)
-        );
+        DrawRectangleRounded(bounds, 0.01, 0, state->cbBg);
+        DrawRectangleRoundedLinesEx(bounds, 0.01, 0, 2, state->cbBorder);
         if (hHandleHover || state->widthDragging) {
-
             SetMouseCursor(MOUSE_CURSOR_RESIZE_EW);
             int handleHeight = bounds.height * 0.5;
-            DrawRectangleRounded(
-                (Rectangle){hResizeHandle.x,
-                            hResizeHandle.y + (handleHeight * 0.5),
-                            hResizeHandle.width, handleHeight},
-                1, 0, Fade(ColorWhite, 0.3)
-            );
+            // DrawRectangleRounded(
+            //     (Rectangle){hResizeHandle.x,
+            //                 hResizeHandle.y + (handleHeight * 0.5),
+            //                 hResizeHandle.width, handleHeight},
+            //     1, 0, Fade(ColorWhite, 0.3)
+            //);
         }
 
         if (vHandleHover || state->heightDragging) {
@@ -251,5 +256,6 @@ bool ColorBar(ColorBarState *state) {
 
         EndScissorMode();
     }
+
     return false;
 }

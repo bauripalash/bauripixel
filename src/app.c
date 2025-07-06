@@ -80,12 +80,14 @@ Color currentColor = MAGENTA;
 Color prevColor = RAYWHITE;
 
 void Layout() {
-    ColorBar(&cb);
     SetCanvasAnchor(
-        &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){-1, 50}
+        &canvas, (Vector2){cb.anchor.x + cb.prop.bounds.width, 50},
+        (Vector2){0, 50}
     );
 
     SetCurrentCanvasColor(&canvas, cb.currentColor);
 
     Canvas(&canvas);
+
+    ColorBar(&cb);
 }

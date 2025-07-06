@@ -14,6 +14,8 @@ CanvasState NewCanvas() {
     c.gridSize = (Vector2){DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE};
     c.anchor = (Vector2){0, 0};
     c.bottomAnchor = (Vector2){0, 0};
+    c.scrollBody = ColorBlack;
+    c.scrollThumb = ColorBlueLighter;
 
     c.scroll = (Vector2){0, 0};
     c.zoomMin = 0.2f;
@@ -21,9 +23,10 @@ CanvasState NewCanvas() {
 
     for (int i = 0; i < (int)c.gridSize.y; i++) {
         for (int j = 0; j < (int)c.gridSize.x; j++) {
-            c.colors[i][j] = BLANK;
+            c.colors[i][j] = ColorWhite;
         }
     }
+    c.scrollThickness = 10.0f;
 
     c.current = ColorBlack;
     c.pxSize = INIT_CELL_SIZE;
@@ -44,15 +47,15 @@ CanvasState NewCanvas() {
                              bounds.height - (CANVAS_DRAW_MARGIN * 2)};
 
     c.hScrollRect = (Rectangle){c.drawArea.x, c.drawArea.y + c.drawArea.height,
-                                c.drawArea.width, 20};
+                                c.drawArea.width, c.scrollThickness};
 
     c.vScrollRect = (Rectangle){c.drawArea.x + c.drawArea.width, c.drawArea.y,
-                                20, c.drawArea.height};
+                                c.scrollThickness, c.drawArea.height};
 
     c.vScrollDragging = false;
     c.hScrollDragging = false;
     c.panning = false;
-    c.enablePanning = false;
+    c.enablePanning = true;
 
     c.camera.target = (Vector2){0};
 
@@ -70,23 +73,27 @@ void updateBounds(CanvasState *c) {
     c->prop.bounds.y = c->anchor.y + CANVAS_MARGIN_TB;
     c->prop.bounds.width = GetScreenWidth() -
                            (CANVAS_MARGIN_L + CANVAS_MARGIN_R) - c->anchor.x -
-                           c->bottomAnchor.x - c->vScrollRect.width;
+                           c->bottomAnchor.x;
     c->prop.bounds.height = GetScreenHeight() - (CANVAS_MARGIN_TB * 2) -
-                            c->anchor.y - c->bottomAnchor.y -
-                            c->hScrollRect.height;
+                            c->anchor.y - c->bottomAnchor.y;
 
     Rectangle bounds = c->prop.bounds;
-    c->drawArea = (Rectangle){bounds.x + CANVAS_DRAW_MARGIN,
-                              bounds.y + CANVAS_DRAW_MARGIN,
-                              bounds.width - (CANVAS_DRAW_MARGIN * 2),
-                              bounds.height - (CANVAS_DRAW_MARGIN * 2)};
+    c->drawArea = (Rectangle){
+        bounds.x + CANVAS_DRAW_MARGIN + c->scrollThickness,
+        bounds.y + CANVAS_DRAW_MARGIN + c->scrollThickness,
+        bounds.width - (CANVAS_DRAW_MARGIN * 2) - c->scrollThickness * 3,
+        bounds.height - (CANVAS_DRAW_MARGIN * 2) - c->scrollThickness * 3
+    };
 
-    c->vScrollRect = (Rectangle){c->drawArea.x + c->drawArea.width,
-                                 c->drawArea.y, 20, c->drawArea.height};
+    c->vScrollRect = (Rectangle){c->prop.bounds.x + c->prop.bounds.width -
+                                     c->scrollThickness,
+                                 c->prop.bounds.y, c->scrollThickness,
+                                 c->prop.bounds.height};
 
-    c->hScrollRect =
-        (Rectangle){c->drawArea.x, c->drawArea.y + c->drawArea.height,
-                    c->drawArea.width, 20};
+    c->hScrollRect = (Rectangle){c->prop.bounds.x,
+                                 c->prop.bounds.y + c->prop.bounds.height -
+                                     c->scrollThickness,
+                                 c->prop.bounds.width, c->scrollThickness};
 }
 
 void SetCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
@@ -135,16 +142,11 @@ void TraceRect(Rectangle rect, const char *string) {
     );
 }
 
-void drawBorder(CanvasState *state) {
-    DrawRectangleRec(state->drawArea, ColorWhite);
-    DrawRectangleLinesEx(state->drawArea, 1, ColorGrayLighter);
-}
+#define DA_ROUNDNESS     0.01f
 
-#define TMR 3
-#define TMW 50
+#define TMR              3
+#define TMW              50
 
-static bool vDragging = false;
-static float vDispl = 0.0f;
 #define SCROLL_ROUNDNESS 0.9
 
 bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
@@ -198,10 +200,10 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
 
     Rectangle vThumbRect = {vBounds.x, vThumbY, vBounds.width, vThumbHeight};
 
-    DrawRectangleRounded(vBounds, SCROLL_ROUNDNESS, 0, ColorGreenLightest);
-    DrawRectangleRounded(hBounds, SCROLL_ROUNDNESS, 0, ColorGreenLightest);
-    DrawRectangleRounded(hThumbRect, SCROLL_ROUNDNESS, 0, ColorGreenDarkest);
-    DrawRectangleRounded(vThumbRect, SCROLL_ROUNDNESS, 0, ColorGreenDarkest);
+    DrawRectangleRounded(vBounds, SCROLL_ROUNDNESS, 0, state->scrollBody);
+    DrawRectangleRounded(hBounds, SCROLL_ROUNDNESS, 0, state->scrollBody);
+    DrawRectangleRounded(hThumbRect, SCROLL_ROUNDNESS, 0, state->scrollThumb);
+    DrawRectangleRounded(vThumbRect, SCROLL_ROUNDNESS, 0, state->scrollThumb);
 
     if (CheckCollisionPointRec(GetMousePosition(), hBounds)) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
@@ -279,14 +281,20 @@ void DrawingGrid(CanvasState *state, Rectangle bounds) {
                 state->colors[row][col] = state->current;
             }
 
+            if (cellHover(rect, state->camera)) {
+                DrawRectangleRec(rect, state->current);
+            }
+
             DrawRectangleRec(rect, state->colors[row][col]);
-            DrawRectangleLinesEx(rect, 0.5, Fade(ColorGrayLighter, 0.5));
+            // DrawRectangleLinesEx(rect, 0.5, Fade(ColorGrayLighter, 0.5));
         }
     }
 }
 
 bool Canvas(CanvasState *state) {
     updateBounds(state);
+
+    DrawRectangleRounded(state->prop.bounds, DA_ROUNDNESS, 0, ColorGrayDarkest);
     Vector2 mpos = GetMousePosition();
     bool isHovering = CheckCollisionPointRec(mpos, state->drawArea);
 
@@ -373,15 +381,6 @@ bool Canvas(CanvasState *state) {
     float topEmpty = cTl.y - dTl.y;
     float bottomEmpty = dBr.y - cBr.y;
 
-    Rectangle sRect = {
-        state->drawArea.x, state->drawArea.y + state->drawArea.height,
-        state->drawArea.width, 20
-    };
-
-    state->vScrollRect =
-        (Rectangle){state->drawArea.x + state->drawArea.width,
-                    state->drawArea.y, 20, state->drawArea.height};
-
     float mv = 200.0f * GetFrameTime();
     Vector4 drw = {
         .x = dTl.x,
@@ -417,37 +416,34 @@ bool Canvas(CanvasState *state) {
         state->hScrollDragging = false;
     }
 
-    drawBorder(state);
     BeginScissorMode(
         state->drawArea.x, state->drawArea.y, state->drawArea.width,
         state->drawArea.height
     );
     {
-        GuiGrid(state->drawArea, NULL, state->gridSize.x * 2, 2, NULL);
         BeginMode2D(state->camera);
         {
             DrawingGrid(state, canvasRect);
-            // DrawCircleV(dTl, 30, ColorRedDark);
-            // DrawCircleV(cTl, 30, ColorYellow);
-            // DrawLineEx(dTl, cTl, 3, ColorOrange);
-            // DrawCircleV(dBr, 30, ColorGreenLighter);
-            // DrawCircleV(cBr, 30, ColorBlueLighter);
-            // DrawLineEx(dBr, cBr, 3, ColorOrange);
+
             DrawRectangleLinesEx(canvasRect, 2, ColorBlack);
+            GuiGrid(canvasRect, NULL, 8 * state->pxSize, 1, NULL);
         }
         EndMode2D();
     }
     EndScissorMode();
 
-    // TraceLog(
-    //     LOG_WARNING, "VIEWPORT [%f] | C[%f] | Z[%f]", dBr.x - dTl.x,
-    //     (cBr.x - cTl.x) * state->camera.zoom, state->camera.zoom
-    //);
-    //  BauScroll(sRect, &sPoint, move, leftEmpty, rightEmpty, dBr.x - dTl.x);
+    if (CheckCollisionPointRec(GetMousePosition(), canvasRect)) {
+        SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+    } else {
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    }
+
+    DrawRectangleRoundedLinesEx(
+        state->prop.bounds, DA_ROUNDNESS, 0, 2, ColorGrayLightest
+    );
 
     state->camera.target.x = state->point.x;
     state->camera.target.y = state->point.y;
-    // TraceLog(LOG_WARNING, "--------------------");
 
     return false;
 }

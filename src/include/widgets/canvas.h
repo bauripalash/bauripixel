@@ -5,9 +5,9 @@
 #include <stdbool.h>
 
 #define CANVAS_MARGIN_TB   10
-#define CANVAS_MARGIN_L    10
+#define CANVAS_MARGIN_L    20
 #define CANVAS_MARGIN_R    10
-#define CANVAS_DRAW_MARGIN 20
+#define CANVAS_DRAW_MARGIN 0
 #define DEFAULT_GRID_SIZE  32
 #define INIT_CELL_SIZE     16
 
@@ -24,7 +24,6 @@ typedef struct {
     float pxSize;
     float zoomMin;
     float zoomMax;
-
     bool enablePanning;
     bool panning;
 
@@ -33,6 +32,9 @@ typedef struct {
     Rectangle hScrollRect;
     bool vScrollDragging;
     bool hScrollDragging;
+    Color scrollBody;
+    Color scrollThumb;
+    float scrollThickness;
 
     Camera2D camera;
     Vector2 point;
