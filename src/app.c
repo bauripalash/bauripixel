@@ -1,3 +1,5 @@
+// #define DEBUG
+
 #include "external/raylib.h"
 #include "include/colors.h"
 #include "include/themes/theme.h"
@@ -33,7 +35,7 @@ int RunApp() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    SetTargetFPS(60);
+    SetTargetFPS(120);
     LoadAppLightTheme();
 
     cb = NewColorBar();

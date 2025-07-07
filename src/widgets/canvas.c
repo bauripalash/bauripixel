@@ -3,6 +3,7 @@
 #include "../external/raylib.h"
 #include "../external/raymath.h"
 #include "../include/colors.h"
+#include "../include/utils.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -55,7 +56,9 @@ CanvasState NewCanvas() {
     c.vScrollDragging = false;
     c.hScrollDragging = false;
     c.panning = false;
+#ifdef DEBUG
     c.enablePanning = true;
+#endif
 
     c.camera.target = (Vector2){0};
 
@@ -129,17 +132,6 @@ void CenterAlignCanvas(CanvasState *state) {
 
 void SetCurrentCanvasColor(CanvasState *state, Color color) {
     state->current = color;
-}
-
-void TraceVector(Vector2 vec, const char *string) {
-    TraceLog(LOG_WARNING, "%s [%f, %f]", string, vec.x, vec.y);
-}
-
-void TraceRect(Rectangle rect, const char *string) {
-    TraceLog(
-        LOG_WARNING, "%s [[%f, %f],[%f, %f]]", string, rect.x, rect.y,
-        rect.width, rect.height
-    );
 }
 
 #define DA_ROUNDNESS     0.01f
@@ -264,29 +256,29 @@ bool cellClicked(Rectangle rect, Camera2D cam) {
     return IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cellHover(rect, cam);
 }
 
-void DrawingGrid(CanvasState *state, Rectangle bounds) {
+#define G_GRID_X 8
+#define G_GRID_Y 8
 
+void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     int maxRow = (int)state->gridSize.y;
     int maxColumn = (int)state->gridSize.x;
     float pxSize = state->pxSize;
 
     for (int row = 0; row < maxRow; row++) {
+        Rectangle rect = {0, bounds.y + ((float)row * pxSize), pxSize, pxSize};
         for (int col = 0; col < maxColumn; col++) {
-            Rectangle rect = {
-                bounds.x + ((float)col * pxSize),
-                bounds.y + ((float)row * pxSize), pxSize, pxSize
-            };
 
-            if (!state->panning && cellClicked(rect, state->camera)) {
+            rect.x = bounds.x + (float)col * pxSize;
+
+            if (!state->panning && !state->hScrollDragging &&
+                !state->vScrollDragging && cellClicked(rect, state->camera)) {
                 state->colors[row][col] = state->current;
             }
 
+            DrawRectangleRec(rect, state->colors[row][col]);
             if (cellHover(rect, state->camera)) {
                 DrawRectangleRec(rect, state->current);
             }
-
-            DrawRectangleRec(rect, state->colors[row][col]);
-            // DrawRectangleLinesEx(rect, 0.5, Fade(ColorGrayLighter, 0.5));
         }
     }
 }
@@ -316,14 +308,16 @@ bool Canvas(CanvasState *state) {
             state->camera.target = mwPos;
             state->point = mwPos;
             float scale = 0.2f * wheel;
-            state->camera.zoom += scale;
-            state->camera.zoom = Clamp(state->camera.zoom, 0.2f, 10.0f);
-
+            // state->camera.zoom += scale;
+            // state->camera.zoom = Clamp(state->camera.zoom, 0.2f, 10.0f);
+            state->camera.zoom =
+                Clamp(expf(logf(state->camera.zoom) + scale), 0.125f, 64.0f);
             Vector2 center = {
                 (state->drawArea.x + state->drawArea.width) / 2.0f,
                 (state->drawArea.y + state->drawArea.height) / 2.0f
             };
             center = GetScreenToWorld2D(center, state->camera);
+            TraceVector(center, "Center");
         }
 
         if (state->enablePanning && IsKeyDown(KEY_LEFT_SHIFT) &&
@@ -423,10 +417,10 @@ bool Canvas(CanvasState *state) {
     {
         BeginMode2D(state->camera);
         {
-            DrawingGrid(state, canvasRect);
+            DrawingCanvas(state, canvasRect);
 
-            DrawRectangleLinesEx(canvasRect, 2, ColorBlack);
-            GuiGrid(canvasRect, NULL, 8 * state->pxSize, 1, NULL);
+            // DrawRectangleLinesEx(canvasRect, 2, ColorBlack);
+            // GuiGrid(canvasRect, NULL, 8 * state->pxSize, 1, NULL);
         }
         EndMode2D();
     }

@@ -40,6 +40,9 @@ typedef struct {
     Vector2 point;
     Rectangle drawArea;
 
+    Image canvasImg;
+    Texture canvasTxt;
+
 } CanvasState;
 
 CanvasState NewCanvas();

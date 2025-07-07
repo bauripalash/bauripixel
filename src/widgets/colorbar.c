@@ -10,7 +10,7 @@ ColorBarState NewColorBar() {
     cb.prop = NewWidgetProp();
 
     cb.currentIndex = -1;
-    cb.currentColor = NOCOLOR;
+    cb.currentColor = BLACK;
     cb.colors = NULL;
     cb.colorCount = 0;
 
