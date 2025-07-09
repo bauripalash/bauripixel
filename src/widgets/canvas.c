@@ -291,22 +291,29 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
                                        state->gridSize.x, state->gridSize.y};
     Vector2 mPos = GetMousePosition();
     Vector2 worldMPos = GetScreenToWorld2D(mPos, state->camera);
-    if (CheckCollisionPointRec(worldMPos, canvasRect) &&
-        IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        int px = (int)worldMPos.x - (int)canvasRect.x;
-        int py = (int)worldMPos.y - (int)canvasRect.y;
+    int px = (int)worldMPos.x - (int)canvasRect.x;
+    int py = (int)worldMPos.y - (int)canvasRect.y;
 
-        // TraceLog(LOG_WARNING, "INDEX [%d, %d]" , px, py);
+    bool pxAtCanvas = (px >= 0 && px < (int)state->gridSize.x) &&
+                      (py >= 0 && py < (int)state->gridSize.y);
+    // if (pxAtCanvas) SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
 
-        if ((px >= 0 && px < (int)state->gridSize.x) &&
-            (py >= 0 && py < (int)state->gridSize.y)) {
-            ImageDrawPixel(&state->canvasImg, px, py, state->current);
-            UpdateTexture(state->canvasTxt, state->canvasImg.data);
-            // UpdateTextureRec(state->canvasTxt, (Rectangle){px,py,px,py},
-            // state->canvasImg.data); // FIX THIS
-        }
+    if (pxAtCanvas && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        ImageDrawPixel(&state->canvasImg, px, py, state->current);
+        UpdateTexture(state->canvasTxt, state->canvasImg.data);
+        // UpdateTextureRec(state->canvasTxt, (Rectangle){px,py,px,py},
+        // state->canvasImg.data); // FIX THIS
     }
     DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
+
+    if (pxAtCanvas) {
+        DrawRectangleRec(
+            (Rectangle){canvasRect.x + px, canvasRect.y + py, 1, 1},
+            state->current
+        );
+    }
+
+    // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 }
 
 bool Canvas(CanvasState *state) {
@@ -338,7 +345,7 @@ bool Canvas(CanvasState *state) {
             // state->camera.zoom = Clamp(state->camera.zoom, 0.2f, 10.0f);
             state->camera.zoom =
                 Clamp(expf(logf(state->camera.zoom) + scale), 0.125f, 64.0f);
-            TraceLog(LOG_ERROR, "Zoom %f", state->camera.zoom);
+            // TraceLog(LOG_ERROR, "Zoom %f", state->camera.zoom);
         }
 
         if (state->enablePanning && IsKeyDown(KEY_LEFT_SHIFT) &&
@@ -352,7 +359,7 @@ bool Canvas(CanvasState *state) {
 
             state->panning = true;
 
-            TraceVector(state->camera.offset, "OFFSET");
+            // TraceVector(state->camera.offset, "OFFSET");
         }
     }
 
@@ -438,9 +445,14 @@ bool Canvas(CanvasState *state) {
         state->drawArea.height
     );
     {
+
+        DrawRectangleRec(state->drawArea, ColorGrayLighter);
+        GuiGrid(state->drawArea, NULL, state->gridSize.x * 2.0f, 1, NULL);
         BeginMode2D(state->camera);
         {
             DrawingCanvas(state, canvasRect);
+            // DrawRectangleLinesEx(canvasRect, 0.1, BLACK);
+
             // DrawRectangleLinesEx(state->drawArea, 2, MAROON);
             // DrawCircleV(canvasVector, 10, ColorRedDark);
         }

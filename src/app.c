@@ -97,11 +97,11 @@ void Layout() {
     if (ColorIsEqual(txtClr, ColorGrayDarkest)) {
         txtClr = WHITE;
     }
-    DrawTextEx(
-        GetFontDefault(),
-        TextFormat("C [%d, %d, %d, %d]", clr.r, clr.g, clr.b, clr.a),
-        (Vector2){10, 10}, 20, 1, txtClr
-    );
+    // DrawTextEx(
+    //     GetFontDefault(),
+    //     TextFormat("C [%d, %d, %d, %d]", clr.r, clr.g, clr.b, clr.a),
+    //     (Vector2){10, 10}, 20, 1, txtClr
+    //);
     Canvas(&canvas);
 
     ColorBar(&cb);
