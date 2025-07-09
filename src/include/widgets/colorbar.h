@@ -14,6 +14,10 @@
 #define INIT_WIDTH        80.0f
 #define HANDLE_THICKNESS  20
 
+#define CB_STATUS_NONE    1
+#define CB_STATUS_HDRAG   2
+#define CB_STATUS_VDRAG   3
+
 typedef struct {
     WidgetProp prop;
     int currentIndex;
@@ -42,7 +46,7 @@ typedef struct {
 
 ColorBarState NewColorBar();
 void SetColorBarAnchor(ColorBarState *cb, Vector2 anchor, Vector2 bottom);
-bool ColorBar(ColorBarState *state);
+int ColorBar(ColorBarState *state);
 int AddToColorBar(ColorBarState *cb, Color color);
 void ClearColorBar(ColorBarState *cb);
 #endif

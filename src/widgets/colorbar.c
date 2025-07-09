@@ -75,7 +75,7 @@ void ClearColorBar(ColorBarState *cb) {
     }
 }
 
-bool ColorBar(ColorBarState *state) {
+int ColorBar(ColorBarState *state) {
     if (state->prop.active) {
 
         updateBounds(state);
@@ -257,5 +257,5 @@ bool ColorBar(ColorBarState *state) {
         EndScissorMode();
     }
 
-    return false;
+    return CB_STATUS_NONE;
 }

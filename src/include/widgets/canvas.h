@@ -42,11 +42,13 @@ typedef struct {
 
     Image canvasImg;
     Texture canvasTxt;
+    Vector2 txtPos;
 
 } CanvasState;
 
 CanvasState NewCanvas();
 void SetCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
+void UpdateCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
 void CenterAlignCanvas(CanvasState *state);
 void SetCurrentCanvasColor(CanvasState *state, Color color);
 bool Canvas(CanvasState *state);
