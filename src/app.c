@@ -81,6 +81,7 @@ int RunApp() {
         EndDrawing();
     }
 
+    ExportImage(canvas.canvasImg, "_temp.png");
     ClearColorBar(&cb);
     CloseWindow();
 
@@ -91,22 +92,21 @@ Color currentColor = MAGENTA;
 Color prevColor = RAYWHITE;
 
 void Layout() {
-    /*TraceLog(LOG_ERROR , "I -> %d", i);
-    Vector2 off = canvas.camera.offset;
-    Vector2 tgt = canvas.camera.target;
-    Rectangle da = canvas.drawArea;
-    TraceLog(LOG_ERROR, "OFF [%f, %f] | TGT [%f, %f]", off.x, off.y, tgt.x,
-    tgt.y); TraceRect(canvas.drawArea, "DA ->"); DrawText(TextFormat("I -> %d |
-    OFF [%f, %f] | TGT [%f, %f]" , i, off.x, off.y, tgt.x, tgt.y), 0, 0, 20,
-    ColorWhite); DrawText(TextFormat("DA [ [%f, %f] [%f, %f] ]", da.x, da.y,
-    da.width, da.height) , 0, 21, 20, ColorWhite);*/
-
-    SetCurrentCanvasColor(&canvas, cb.currentColor);
-
+    Color clr = cb.currentColor;
+    Color txtClr = clr;
+    if (ColorIsEqual(txtClr, ColorGrayDarkest)) {
+        txtClr = WHITE;
+    }
+    DrawTextEx(
+        GetFontDefault(),
+        TextFormat("C [%d, %d, %d, %d]", clr.r, clr.g, clr.b, clr.a),
+        (Vector2){10, 10}, 20, 1, txtClr
+    );
     Canvas(&canvas);
 
     ColorBar(&cb);
 
+    SetCurrentCanvasColor(&canvas, cb.currentColor);
     float d = cb.prop.bounds.width;
 
     if (oldHCb != cb.prop.bounds.width) {

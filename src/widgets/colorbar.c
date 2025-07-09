@@ -156,7 +156,7 @@ int ColorBar(ColorBarState *state) {
         DrawRectangleRounded(bounds, 0.01, 0, state->cbBg);
         DrawRectangleRoundedLinesEx(bounds, 0.01, 0, 2, state->cbBorder);
         if (hHandleHover || state->widthDragging) {
-            SetMouseCursor(MOUSE_CURSOR_RESIZE_EW);
+            // SetMouseCursor(MOUSE_CURSOR_RESIZE_EW);
             int handleHeight = bounds.height * 0.5;
             // DrawRectangleRounded(
             //     (Rectangle){hResizeHandle.x,
@@ -168,7 +168,7 @@ int ColorBar(ColorBarState *state) {
 
         if (vHandleHover || state->heightDragging) {
 
-            SetMouseCursor(MOUSE_CURSOR_RESIZE_NS);
+            // SetMouseCursor(MOUSE_CURSOR_RESIZE_NS);
             int handleWidth = bounds.width * 0.5;
             DrawRectangleRounded(
                 (Rectangle){

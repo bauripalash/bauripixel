@@ -42,7 +42,7 @@ typedef struct {
 
     Image canvasImg;
     Texture canvasTxt;
-    Vector2 txtPos;
+    // Vector2 txtPos;
 
 } CanvasState;
 

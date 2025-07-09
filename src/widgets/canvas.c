@@ -58,20 +58,10 @@ CanvasState NewCanvas() {
     c.hScrollDragging = false;
     c.panning = false;
     c.enablePanning = true;
-    c.txtPos = (Vector2){
-        c.drawArea.x,
-        c.drawArea.y,
-    };
 
     float zm = c.drawArea.width / c.gridSize.x / 2.0f;
-    TraceLog(LOG_WARNING, "INIT ZM -> %f", zm);
 
     c.camera.target = (Vector2){0, 0};
-
-    // c.camera.offset = (Vector2){
-    //	(c.drawArea.width / zm / 2.0f) - (c.gridSize.x * zm / 2.0f),
-    //	(c.drawArea.height / zm / 2.0f) - (c.gridSize.y * zm / 2.0f)
-    // };
 
     c.camera.zoom = zm;
 
@@ -79,8 +69,8 @@ CanvasState NewCanvas() {
     c.canvasTxt = LoadTextureFromImage(c.canvasImg);
 
     Vector2 txtCenter = {
-        c.txtPos.x + c.canvasTxt.width * 0.5f,
-        c.txtPos.y + c.canvasTxt.height * 0.5f,
+        c.drawArea.x + c.canvasTxt.width * 0.5f,
+        c.drawArea.y + c.canvasTxt.height * 0.5f,
     };
 
     Vector2 daCenter = {
@@ -145,19 +135,14 @@ void UpdateCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
     updateBounds(state);
     state->point.x -= oldX - state->drawArea.x;
     state->camera.target.x = state->point.x;
-    state->txtPos.x = state->drawArea.x;
-    state->txtPos.y = state->drawArea.y;
 }
 
 void SetCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
     UpdateCanvasAnchor(state, anchor, bottom);
 
-    state->txtPos.x = state->drawArea.x;
-    state->txtPos.y = state->drawArea.y;
-
     Vector2 txtCenter = {
-        state->txtPos.x + state->canvasTxt.width * 0.5f,
-        state->txtPos.y + state->canvasTxt.height * 0.5f,
+        state->drawArea.x + state->canvasTxt.width * 0.5f,
+        state->drawArea.y + state->canvasTxt.height * 0.5f,
     };
 
     Vector2 daCenter = {
@@ -168,10 +153,6 @@ void SetCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
     state->camera.target = txtCenter;
     state->point = txtCenter;
     state->camera.offset = daCenter;
-
-    TraceVector(state->camera.offset, "OffSet [Anchor]");
-    TraceVector(state->camera.target, "Target [Anchor]");
-    TraceRect(state->drawArea, "DA");
 }
 
 void CenterAlignCanvas(CanvasState *state) {}
@@ -306,12 +287,26 @@ bool cellClicked(Rectangle rect, Camera2D cam) {
 #define G_GRID_Y 8
 
 void DrawingCanvas(CanvasState *state, Rectangle bounds) {
+    Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
+                                       state->gridSize.x, state->gridSize.y};
+    Vector2 mPos = GetMousePosition();
+    Vector2 worldMPos = GetScreenToWorld2D(mPos, state->camera);
+    if (CheckCollisionPointRec(worldMPos, canvasRect) &&
+        IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        int px = (int)worldMPos.x - (int)canvasRect.x;
+        int py = (int)worldMPos.y - (int)canvasRect.y;
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        Vector2 mpos = GetWorldToScreen2D(GetMousePosition(), state->camera);
-        TraceLog(LOG_ERROR, "CLICK [%f %f]", mpos.x, mpos.y);
+        // TraceLog(LOG_WARNING, "INDEX [%d, %d]" , px, py);
+
+        if ((px >= 0 && px < (int)state->gridSize.x) &&
+            (py >= 0 && py < (int)state->gridSize.y)) {
+            ImageDrawPixel(&state->canvasImg, px, py, state->current);
+            UpdateTexture(state->canvasTxt, state->canvasImg.data);
+            // UpdateTextureRec(state->canvasTxt, (Rectangle){px,py,px,py},
+            // state->canvasImg.data); // FIX THIS
+        }
     }
-    DrawTexture(state->canvasTxt, state->txtPos.x, state->txtPos.y, WHITE);
+    DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
 }
 
 bool Canvas(CanvasState *state) {
@@ -452,12 +447,6 @@ bool Canvas(CanvasState *state) {
         EndMode2D();
     }
     EndScissorMode();
-
-    if (CheckCollisionPointRec(GetMousePosition(), canvasRect)) {
-        SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
-    } else {
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-    }
 
     DrawRectangleRoundedLinesEx(
         state->prop.bounds, DA_ROUNDNESS, 0, 2, ColorGrayLightest
