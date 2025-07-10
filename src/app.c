@@ -34,6 +34,8 @@ CanvasState canvas;
 void Layout();
 void ApplyStyle();
 
+#define DISABLE_COLORBAR
+
 int RunApp() {
 
     SetTraceLogLevel(LOG_WARNING);
@@ -56,10 +58,12 @@ int RunApp() {
 
     canvas = NewCanvas();
     canvas.prop.active = true;
+#ifndef DISABLE_COLORBAR
     SetCanvasAnchor(
         &canvas, (Vector2){cb.anchor.x + cb.prop.bounds.width, 50},
         (Vector2){30, 50}
     );
+#endif
 
     oldHCb = cb.prop.bounds.width;
     oldVCb = cb.prop.bounds.height;
@@ -104,6 +108,7 @@ void Layout() {
     //);
     Canvas(&canvas);
 
+#ifndef DISABLE_COLORBAR
     ColorBar(&cb);
 
     SetCurrentCanvasColor(&canvas, cb.currentColor);
@@ -116,6 +121,7 @@ void Layout() {
     }
 
     oldHCb = cb.prop.bounds.width;
+#endif
 
     i++;
 }
