@@ -6,6 +6,7 @@
 #include "include/utils.h"
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
+#include "include/widgets/drawtoolbar.h"
 #include "include/widgets/widget.h"
 #include <stdbool.h>
 
@@ -17,12 +18,6 @@
 
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 700
-int WinWidth = WINDOW_WIDTH;
-int WinHeight = WINDOW_HEIGHT;
-Vector2 mousePos = {0, 0};
-#define GridCol 16
-#define GridRow 16
-int CellSize = 40;
 
 static int i = 0;
 static int oldHCb = 0;
@@ -30,6 +25,7 @@ static int oldVCb = 0;
 
 ColorBarState cb;
 CanvasState canvas;
+DrawToolBarState dtb;
 
 void Layout();
 void ApplyStyle();
@@ -53,6 +49,8 @@ int RunApp() {
         AddToColorBar(&cb, PINK);
         AddToColorBar(&cb, MAGENTA);
     }
+
+    dtb = NewDrawToolBar();
     SetColorBarAnchor(&cb, (Vector2){0, 50}, (Vector2){-1, 50});
     cb.prop.active = true;
 
@@ -63,8 +61,14 @@ int RunApp() {
         &canvas, (Vector2){cb.anchor.x + cb.prop.bounds.width, 50},
         (Vector2){30, 50}
     );
+#else
+    SetCanvasAnchor(
+        &canvas, (Vector2){dtb.prop.bounds.width, 50}, (Vector2){-1, 50}
+    );
 #endif
 
+    dtb.anchor.x = 0;
+    dtb.anchor.y = 50 + CANVAS_MARGIN_TB;
     oldHCb = cb.prop.bounds.width;
     oldVCb = cb.prop.bounds.height;
 
@@ -73,10 +77,6 @@ int RunApp() {
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
     while (!WindowShouldClose()) {
-        WinWidth = GetScreenWidth();
-        WinHeight = GetScreenHeight();
-        mousePos = GetMousePosition();
-
         BeginDrawing();
         {
             ClearBackground(ColorGrayDarkest);
@@ -106,6 +106,8 @@ void Layout() {
     //     TextFormat("C [%d, %d, %d, %d]", clr.r, clr.g, clr.b, clr.a),
     //     (Vector2){10, 10}, 20, 1, txtClr
     //);
+    DrawToolbar(&dtb);
+    canvas.curTool = dtb.currentTool;
     Canvas(&canvas);
 
 #ifndef DISABLE_COLORBAR

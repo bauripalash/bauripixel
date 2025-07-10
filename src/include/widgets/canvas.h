@@ -2,6 +2,8 @@
 #define CANVAS_H
 
 #include "widget.h"
+
+#include "../drawtools.h"
 #include <stdbool.h>
 
 #define CANVAS_MARGIN_TB   10
@@ -43,6 +45,7 @@ typedef struct {
     Image canvasImg;
     Texture canvasTxt;
     // Vector2 txtPos;
+    DrawTool curTool;
 
 } CanvasState;
 

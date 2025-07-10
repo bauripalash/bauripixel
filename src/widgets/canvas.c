@@ -3,7 +3,7 @@
 #include "../external/raylib.h"
 #include "../external/raymath.h"
 #include "../include/colors.h"
-#include "../include/utils.h"
+#include "../include/drawtools.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -19,6 +19,7 @@ CanvasState NewCanvas() {
     c.bottomAnchor = (Vector2){0, 0};
     c.scrollBody = ColorBlack;
     c.scrollThumb = ColorBlueLighter;
+    c.curTool = DT_PENCIL;
 
     c.scroll = (Vector2){0, 0};
     c.zoomMin = 0.2f;
@@ -35,8 +36,9 @@ CanvasState NewCanvas() {
     c.pxSize = INIT_CELL_SIZE;
     c.prop.bounds.x = CANVAS_MARGIN_L;
     c.prop.bounds.y = CANVAS_MARGIN_TB;
-    c.prop.bounds.width =
-        GetScreenWidth() - (CANVAS_MARGIN_L + CANVAS_MARGIN_R);
+    c.prop.bounds.width = GetScreenWidth() -
+                          (CANVAS_MARGIN_L + CANVAS_MARGIN_R) -
+                          c.bottomAnchor.x;
     c.prop.bounds.height = GetScreenHeight() - (CANVAS_MARGIN_TB * 2);
 
     c.camera = (Camera2D){0};
@@ -287,6 +289,7 @@ bool cellClicked(Rectangle rect, Camera2D cam) {
 #define G_GRID_Y 8
 
 void DrawingCanvas(CanvasState *state, Rectangle bounds) {
+    TraceLog(LOG_ERROR, "CURTOOL -> %d", state->curTool);
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
                                        state->gridSize.x, state->gridSize.y};
     Vector2 mPos = GetMousePosition();
@@ -294,12 +297,14 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     int px = (int)worldMPos.x - (int)canvasRect.x;
     int py = (int)worldMPos.y - (int)canvasRect.y;
 
+    Color dClr = state->curTool == DT_ERASER ? WHITE : state->current;
+
     bool pxAtCanvas = (px >= 0 && px < (int)state->gridSize.x) &&
                       (py >= 0 && py < (int)state->gridSize.y);
     // if (pxAtCanvas) SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
 
     if (pxAtCanvas && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        ImageDrawPixel(&state->canvasImg, px, py, state->current);
+        ImageDrawPixel(&state->canvasImg, px, py, dClr);
         UpdateTexture(state->canvasTxt, state->canvasImg.data);
         // UpdateTextureRec(state->canvasTxt, (Rectangle){px,py,px,py},
         // state->canvasImg.data); // FIX THIS
@@ -308,8 +313,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
     if (pxAtCanvas) {
         DrawRectangleRec(
-            (Rectangle){canvasRect.x + px, canvasRect.y + py, 1, 1},
-            state->current
+            (Rectangle){canvasRect.x + px, canvasRect.y + py, 1, 1}, dClr
         );
     }
 
