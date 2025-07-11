@@ -3,8 +3,9 @@
 #include "../external/raylib.h"
 #include "../include/colors.h"
 #include "../include/drawtools.h"
+#include <stdbool.h>
 
-#define VISIBLE_BTN_COUNT 3
+#define VISIBLE_BTN_COUNT 4
 
 DrawToolBarState NewDrawToolBar() {
     DrawToolBarState dtb = {0};
@@ -12,7 +13,7 @@ DrawToolBarState NewDrawToolBar() {
     dtb.currentTool = DT_PENCIL;
     dtb.anchor = (Vector2){0, 0};
     dtb.toolbarPadding = (Vector2){0, 10};
-    dtb.toolBtnMargin = (Vector2){10, 5};
+    dtb.toolBtnMargin = (Vector2){10, 9};
 
     dtb.prop.bounds.width = DEFAULT_DTBAR_WIDTH;
     dtb.prop.bounds.height = 0;
@@ -30,26 +31,68 @@ static void updateBounds(DrawToolBarState *dtb) {
 
 GuiIconName getIconName(int b) {
     if (b == (int)DT_PENCIL) {
-        return ICON_PENCIL_BIG;
+        return ICON_PENCIL;
     } else if (b == (int)DT_ERASER) {
         return ICON_RUBBER;
     } else if (b == (int)DT_LINE) {
         return ICON_WAVE_TRIANGULAR;
+    } else if (b == (int)DT_PAN) {
+        return ICON_CURSOR_HAND;
     }
 
     return ICON_BOX;
 }
 
+#define XBTN_SZ 50
+
+bool xBtn(Rectangle bounds, const char *text, GuiIconName icon, bool isActive) {
+    float bx = bounds.x;
+    float by = bounds.y;
+    float bw = bounds.width;
+    float bh = bounds.height;
+    Color fg = ColorGrayDarkest;
+
+    bool clicked = CheckCollisionPointRec(GetMousePosition(), bounds) &&
+                   IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    if (clicked || isActive) {
+        by += 3;
+        fg = Fade(ColorGrayLighter, 0.5);
+    } else {
+        DrawRectangleRounded(
+            (Rectangle){bx, by, bw, bh + 3}, 0.2, 0, ColorBlack
+        );
+    }
+
+    Rectangle bRect = {bx, by, bw, bh};
+    DrawRectangleRounded(bRect, 0.2, 0, fg);
+    DrawRectangleRoundedLinesEx(bRect, 0.2, 0, 2, ColorBlack);
+    DrawRectangleRoundedLinesEx(
+        (Rectangle){
+            bx + 2,
+            by + 2,
+            bw - 4,
+            bh - 4,
+        },
+        0.2, 0, 2, ColorGrayLightest
+    );
+    // GuiLabelButton(bounds, text);
+    GuiDrawIcon(icon, bx + 8, by + 8, 2, ColorWhite);
+
+    return clicked;
+}
+
 int DrawToolbar(DrawToolBarState *state) {
     updateBounds(state);
+    Rectangle bounds = state->prop.bounds;
+
+    if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    }
+
     DrawRectangleRounded(
         (Rectangle){state->prop.bounds.x, state->prop.bounds.y,
                     state->prop.bounds.width, state->prop.bounds.height},
-        0.125, 0, ColorGrayLighter
-    );
-
-    DrawRectangleRoundedLinesEx(
-        state->prop.bounds, 0.125, 0, 2, ColorGrayLightest
+        0.125, 0, ColorFDGrayLighter
     );
 
     for (int btnI = 0; btnI < VISIBLE_BTN_COUNT; btnI++) {
@@ -60,17 +103,23 @@ int DrawToolbar(DrawToolBarState *state) {
             DEFAULT_DT_BTN_SIZE,
             DEFAULT_DT_BTN_SIZE,
         };
-
-        DrawRectangleRec(btnRect, ColorGrayLightest);
-        DrawRectangleLinesEx(btnRect, 1, ColorBlack);
-        btnRect.x += 16;
-        GuiLabelButton(btnRect, GuiIconText(getIconName(btnI), ""));
-
-        if (CheckCollisionPointRec(GetMousePosition(), btnRect) &&
-            IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            state->currentTool = (DrawTool)btnI;
+        if (xBtn(
+                btnRect, "", getIconName(btnI), btnI == (int)state->currentTool
+            )) {
+            if ((int)state->currentTool == btnI) {
+                state->currentTool = DT_NOTOOL;
+            } else {
+                state->currentTool = (DrawTool)btnI;
+            }
         }
     }
+
+    DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
+    DrawRectangleRoundedLinesEx(
+        (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
+                    bounds.height - 4},
+        0.125, 0, 2, ColorGrayLightest
+    );
 
     return -1;
 }

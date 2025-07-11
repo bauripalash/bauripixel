@@ -47,4 +47,6 @@
 // Custom Colors
 #define HexColorTransparent 0
 #define ColorTransparent    (Color){0, 0, 0, 0}
+
+#define ColorFDGrayLighter  (Fade(ColorGrayLighter, 0.4))
 #endif

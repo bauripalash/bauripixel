@@ -59,7 +59,7 @@ CanvasState NewCanvas() {
     c.vScrollDragging = false;
     c.hScrollDragging = false;
     c.panning = false;
-    c.enablePanning = true;
+    c.enablePanning = false;
 
     float zm = c.drawArea.width / c.gridSize.x / 2.0f;
 
@@ -289,7 +289,8 @@ bool cellClicked(Rectangle rect, Camera2D cam) {
 #define G_GRID_Y 8
 
 void DrawingCanvas(CanvasState *state, Rectangle bounds) {
-    TraceLog(LOG_ERROR, "CURTOOL -> %d", state->curTool);
+    // TraceLog(LOG_ERROR, "CURTOOL -> %d", state->curTool);
+
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
                                        state->gridSize.x, state->gridSize.y};
     Vector2 mPos = GetMousePosition();
@@ -303,7 +304,8 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
                       (py >= 0 && py < (int)state->gridSize.y);
     // if (pxAtCanvas) SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
 
-    if (pxAtCanvas && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+    if (pxAtCanvas && IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
+        !state->enablePanning) {
         ImageDrawPixel(&state->canvasImg, px, py, dClr);
         UpdateTexture(state->canvasTxt, state->canvasImg.data);
         // UpdateTextureRec(state->canvasTxt, (Rectangle){px,py,px,py},
@@ -311,7 +313,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     }
     DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
 
-    if (pxAtCanvas) {
+    if (pxAtCanvas && !state->enablePanning) {
         DrawRectangleRec(
             (Rectangle){canvasRect.x + px, canvasRect.y + py, 1, 1}, dClr
         );
@@ -320,10 +322,48 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 }
 
+void handleTools(CanvasState *state) {
+    bool atDrawArea =
+        CheckCollisionPointRec(GetMousePosition(), state->drawArea);
+    bool atCanvas = CheckCollisionPointRec(
+        GetScreenToWorld2D(GetMousePosition(), state->camera),
+        (Rectangle){state->drawArea.x, state->drawArea.y, state->gridSize.x,
+                    state->gridSize.y}
+    );
+
+    if (state->curTool != DT_PAN) {
+        state->enablePanning = false;
+    }
+    switch (state->curTool) {
+    case DT_PENCIL: {
+        if (atCanvas) {
+            SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+        }
+        break;
+    }
+
+    case DT_PAN: {
+        state->enablePanning = true;
+        if (atDrawArea) {
+            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        }
+
+        break;
+    }
+
+    default: {
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    }
+    }
+}
+
 bool Canvas(CanvasState *state) {
     updateBounds(state);
+    handleTools(state);
 
-    DrawRectangleRounded(state->prop.bounds, DA_ROUNDNESS, 0, ColorGrayDarkest);
+    DrawRectangleRounded(
+        state->prop.bounds, DA_ROUNDNESS, 0, ColorFDGrayLighter
+    );
     Vector2 mpos = GetMousePosition();
     bool isHovering = CheckCollisionPointRec(mpos, state->drawArea);
 
@@ -345,15 +385,11 @@ bool Canvas(CanvasState *state) {
             state->camera.target = mwPos;
             state->point = mwPos;
             float scale = 0.2f * wheel;
-            // state->camera.zoom += scale;
-            // state->camera.zoom = Clamp(state->camera.zoom, 0.2f, 10.0f);
             state->camera.zoom =
                 Clamp(expf(logf(state->camera.zoom) + scale), 0.125f, 64.0f);
-            // TraceLog(LOG_ERROR, "Zoom %f", state->camera.zoom);
         }
 
-        if (state->enablePanning && IsKeyDown(KEY_LEFT_SHIFT) &&
-            IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        if (state->enablePanning && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
 
             Vector2 delta =
                 Vector2Scale(GetMouseDelta(), -1.0 / state->camera.zoom);
@@ -362,8 +398,6 @@ bool Canvas(CanvasState *state) {
             state->camera.target = state->point;
 
             state->panning = true;
-
-            // TraceVector(state->camera.offset, "OFFSET");
         }
     }
 
@@ -450,7 +484,7 @@ bool Canvas(CanvasState *state) {
     );
     {
 
-        DrawRectangleRec(state->drawArea, ColorGrayLighter);
+        // DrawRectangleRec(state->drawArea, ColorGrayLighter);
         GuiGrid(state->drawArea, NULL, state->gridSize.x * 2.0f, 1, NULL);
         BeginMode2D(state->camera);
         {
@@ -465,7 +499,16 @@ bool Canvas(CanvasState *state) {
     EndScissorMode();
 
     DrawRectangleRoundedLinesEx(
-        state->prop.bounds, DA_ROUNDNESS, 0, 2, ColorGrayLightest
+        state->prop.bounds, DA_ROUNDNESS, 0, 3, ColorBlack
+    );
+
+    DrawRectangleRoundedLinesEx(
+        (Rectangle){
+            state->prop.bounds.x + 2, state->prop.bounds.y + 2,
+            state->prop.bounds.width - 4, state->prop.bounds.height - 4
+
+        },
+        DA_ROUNDNESS, 0, 2, ColorGrayLightest
     );
 
     state->camera.target.x = state->point.x;

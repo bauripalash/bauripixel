@@ -96,6 +96,13 @@ Color currentColor = MAGENTA;
 Color prevColor = RAYWHITE;
 
 void Layout() {
+    DrawRectangleLinesEx(
+        (Rectangle){-2, 0, GetScreenWidth() + 4, 22}, 2, ColorGrayLightest
+    );
+    DrawText("File", 10, 5, 10, ColorWhite);
+    DrawText("Edit", 40, 5, 10, ColorWhite);
+    DrawText("View", 70, 5, 10, ColorWhite);
+    DrawText("Help", 100, 5, 10, ColorWhite);
     Color clr = cb.currentColor;
     Color txtClr = clr;
     if (ColorIsEqual(txtClr, ColorGrayDarkest)) {
