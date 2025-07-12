@@ -1,6 +1,7 @@
 // #define DEBUG
 
 #include "external/raylib.h"
+#include "external/raymath.h"
 #include "include/colors.h"
 #include "include/themes/theme.h"
 #include "include/utils.h"
@@ -8,6 +9,7 @@
 #include "include/widgets/colorbar.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/widget.h"
+#include <math.h>
 #include <stdbool.h>
 
 // #define RAYGUI_GRID_ALPHA 1.0f
@@ -43,29 +45,27 @@ int RunApp() {
 
     cb = NewColorBar();
     for (int i = 0; i < 8; i++) {
-        AddToColorBar(&cb, RED);
-        AddToColorBar(&cb, GREEN);
-        AddToColorBar(&cb, BLUE);
-        AddToColorBar(&cb, PINK);
-        AddToColorBar(&cb, MAGENTA);
+        AddToColorBar(&cb, ColorRedDark);
+        AddToColorBar(&cb, ColorGreenDarkest);
+        AddToColorBar(&cb, ColorGreenLighter);
+        AddToColorBar(&cb, ColorGreenLightest);
+        AddToColorBar(&cb, ColorBlueDarkest);
+        AddToColorBar(&cb, ColorBlueLighter);
+        AddToColorBar(&cb, ColorBlueLightest);
     }
 
     dtb = NewDrawToolBar();
-    SetColorBarAnchor(&cb, (Vector2){0, 50}, (Vector2){-1, 50});
     cb.prop.active = true;
 
     canvas = NewCanvas();
     canvas.prop.active = true;
-#ifndef DISABLE_COLORBAR
+
+    SetColorBarAnchor(&cb, (Vector2){-1, 50}, Vector2Zero());
+
     SetCanvasAnchor(
-        &canvas, (Vector2){cb.anchor.x + cb.prop.bounds.width, 50},
-        (Vector2){30, 50}
+        &canvas, (Vector2){dtb.prop.bounds.width, 50},
+        (Vector2){cb.prop.bounds.width, 50}
     );
-#else
-    SetCanvasAnchor(
-        &canvas, (Vector2){dtb.prop.bounds.width, 50}, (Vector2){-1, 50}
-    );
-#endif
 
     dtb.anchor.x = 0;
     dtb.anchor.y = 50 + CANVAS_MARGIN_TB;
@@ -92,8 +92,107 @@ int RunApp() {
     return 0;
 }
 
-Color currentColor = MAGENTA;
-Color prevColor = RAYWHITE;
+float cw = 100.0f;
+float handleT = 20.0f;
+float cboxSize = 30.0f;
+
+int colorCount = 10;
+
+bool handlDragging = false;
+Vector2 scroll = {0, 0};
+
+void cBar() {
+    colorCount = cb.colorCount;
+    Vector2 mpos = GetMousePosition();
+    float canvasEnd = canvas.prop.bounds.x + canvas.prop.bounds.width;
+    Rectangle rect = {GetScreenWidth() - cw, 50 + CANVAS_MARGIN_TB, cw, 200};
+
+    Rectangle handleRect = {
+        rect.x - (handleT / 2.0f), rect.y + handleT, handleT,
+        rect.height - handleT * 2
+    };
+
+    bool atRect = CheckCollisionPointRec(mpos, rect);
+    bool atHandle = CheckCollisionPointRec(mpos, handleRect);
+
+    if (atHandle && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        handlDragging = true;
+    }
+
+    if (handlDragging) {
+        Vector2 delta = GetMouseDelta();
+        cw -= delta.x;
+    }
+
+    cw = Clamp(cw, 100.0f, 200.0f);
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        handlDragging = false;
+    }
+
+    DrawRectangleLinesEx(rect, 2, ColorGrayLightest);
+    DrawRectangleRec(
+        handleRect, Fade(ColorBlueLightest, atHandle ? 0.5f : 0.2f)
+    );
+
+    float halfBox = cboxSize / 2.0f;
+    Rectangle uRect = {
+        rect.x + halfBox,
+        rect.y + halfBox,
+        rect.width - (halfBox * 2),
+        rect.height - (halfBox * 2),
+    };
+
+    int columnMax = (int)floorf(uRect.width / cboxSize);
+    int rowMax = (int)floorf(uRect.height / cboxSize);
+
+    int rowsUsed = colorCount / columnMax;
+    int columnUsed = (colorCount < columnMax) ? colorCount : columnMax;
+    int lastRowColum = colorCount % columnMax;
+
+    if (lastRowColum > 0) {
+        rowsUsed++;
+    }
+
+    Rectangle usedRect = {
+        uRect.x,
+        uRect.y,
+        columnUsed * cboxSize,
+        rowsUsed * cboxSize,
+    };
+
+    BeginScissorMode(uRect.x, uRect.y, uRect.width, uRect.height);
+
+    for (int b = 0; b < colorCount; b++) {
+        int col = b % columnMax;
+        int row = b / columnMax;
+        Rectangle bRect = {
+            uRect.x + scroll.x + (col * cboxSize),
+            uRect.y + scroll.y + (row * cboxSize), cboxSize, cboxSize
+        };
+
+        DrawRectangleRec(bRect, cb.colors[b]);
+    }
+
+    // DrawRectangleLinesEx(usedRect, 2, MAROON);
+
+    EndScissorMode();
+
+    int ogDefBG = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
+    int ogBorderWidth = GuiGetStyle(LISTVIEW, BORDER_WIDTH);
+    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, HexColorTransparent);
+    GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
+
+    GuiScrollPanel(uRect, NULL, usedRect, &scroll, NULL);
+
+    GuiSetStyle(LISTVIEW, BORDER_WIDTH, ogBorderWidth);
+    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ogDefBG);
+
+    TraceLog(
+        LOG_ERROR, "USED [%d %d %d] | MAX [%d %d]", rowsUsed, columnUsed,
+        lastRowColum, rowMax, columnMax
+    );
+}
 
 void Layout() {
     DrawRectangleLinesEx(
@@ -115,22 +214,14 @@ void Layout() {
     //);
     DrawToolbar(&dtb);
     canvas.curTool = dtb.currentTool;
+    // canvas.current = cb.currentColor;
     Canvas(&canvas);
-
-#ifndef DISABLE_COLORBAR
+    UpdateCanvasAnchor(
+        &canvas, (Vector2){-1, -1},
+        (Vector2){cb.prop.bounds.width + CBAR_MARGIN_LEFT, -1}
+    );
+    // cBar();
     ColorBar(&cb);
-
-    SetCurrentCanvasColor(&canvas, cb.currentColor);
-    float d = cb.prop.bounds.width;
-
-    if (oldHCb != cb.prop.bounds.width) {
-        UpdateCanvasAnchor(
-            &canvas, (Vector2){cb.prop.bounds.width, 50}, (Vector2){0, 50}
-        );
-    }
-
-    oldHCb = cb.prop.bounds.width;
-#endif
 
     i++;
 }

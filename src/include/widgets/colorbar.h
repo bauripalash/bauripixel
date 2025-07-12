@@ -4,19 +4,21 @@
 #include "widget.h"
 #include <stdbool.h>
 
-#define NOCOLOR           (Color){0, 0, 0, 0}
-#define DEFAULT_BOX_SIZE  30
-#define DEFAULT_BOX_SPACE 0
-#define ColorsCount(c)    (sizeof(c) / sizeof(Color))
-#define PANEL_PADDING     5
-#define MARGIN_TOPBOTTOM  10
-#define MARGIN_LEFT       10
-#define INIT_WIDTH        80.0f
-#define HANDLE_THICKNESS  20
+#define CBAR_NOCOLOR          (Color){0, 0, 0, 0}
 
-#define CB_STATUS_NONE    1
-#define CB_STATUS_HDRAG   2
-#define CB_STATUS_VDRAG   3
+#define CBAR_MARGIN_TOPBOTTOM 10.0f
+#define CBAR_MARGIN_LEFT      10.0f
+
+#define CBAR_INIT_WIDTH       100.0f
+#define CBAR_INIT_HEIGHT      300.0f
+#define CBAR_HANDLE_THICKNESS 20.0f
+#define CBAR_BOX_SIZE         30.0f
+
+#define CB_STATUS_NONE        1
+#define CB_STATUS_HDRAG       2
+#define CB_STATUS_VDRAG       3
+
+#define ColorsCount(c)        (sizeof(c) / sizeof(Color))
 
 typedef struct {
     WidgetProp prop;
@@ -32,15 +34,9 @@ typedef struct {
     Vector2 scroll;
     int boxSize;
     int boxSpacing;
-    Color cbBg;
-    Color cbBorder;
 
-    Rectangle content;
-    Rectangle view;
     bool widthDragging;
     bool heightDragging;
-
-    int scrollBarWidth; // should be filled after theme stuff
 
 } ColorBarState;
 

@@ -1,8 +1,10 @@
 #include "../include/widgets/colorbar.h"
 #include "../external/raygui.h"
 #include "../external/raylib.h"
+#include "../external/raymath.h"
 #include "../external/stb/stb_ds.h"
 #include "../include/colors.h"
+#include <math.h>
 #include <stdbool.h>
 
 ColorBarState NewColorBar() {
@@ -18,48 +20,34 @@ ColorBarState NewColorBar() {
     cb.bottomStop = (Vector2){0, 0};
     cb.scroll = (Vector2){0, 0};
 
-    cb.boxSize = DEFAULT_BOX_SIZE;
-    cb.boxSpacing = DEFAULT_BOX_SPACE;
-    cb.cbBg = ColorGrayDarkest;
-    cb.cbBorder = ColorGrayLightest;
+    cb.prop.bounds.x = cb.anchor.x + CBAR_MARGIN_LEFT;
+    cb.prop.bounds.y = cb.anchor.y + CBAR_MARGIN_TOPBOTTOM;
+    cb.prop.bounds.width = CBAR_INIT_WIDTH;
+    cb.prop.bounds.height = CBAR_INIT_HEIGHT;
 
-    cb.content = (Rectangle){0, 0, DEFAULT_BOX_SIZE,
-                             DEFAULT_BOX_SPACE + DEFAULT_BOX_SIZE};
-    cb.view = (Rectangle){0};
+    cb.boxSize = CBAR_BOX_SIZE;
+
     cb.widthDragging = false;
     cb.heightDragging = false;
-    cb.scrollBarWidth = GuiGetStyle(LISTVIEW, SCROLLBAR_WIDTH);
-
-    cb.prop.bounds.width = DEFAULT_BOX_SIZE + (DEFAULT_BOX_SPACE * 2) +
-                           cb.scrollBarWidth + MARGIN_LEFT * 2;
-    cb.prop.bounds.height =
-        GetScreenHeight() - cb.anchor.y - cb.bottomStop.y -
-        MARGIN_TOPBOTTOM * 2; // how to handle according to anchor.y
 
     return cb;
 }
 
-static void updateBounds(ColorBarState *cb) {
-    cb->prop.bounds.x = cb->anchor.x + MARGIN_LEFT;
-    cb->prop.bounds.y = cb->anchor.y + MARGIN_TOPBOTTOM;
-    cb->prop.bounds.height = GetScreenHeight() - cb->anchor.y -
-                             cb->bottomStop.y - MARGIN_TOPBOTTOM * 2;
+static void updateBounds(ColorBarState *state) {
+    state->prop.bounds.x = GetScreenWidth() - state->prop.bounds.width;
+    state->prop.bounds.y = state->anchor.y + CBAR_MARGIN_TOPBOTTOM;
 }
-void SetColorBarAnchor(ColorBarState *cb, Vector2 anchor, Vector2 bottom) {
-    if (anchor.x != -1) {
-        cb->anchor.x = anchor.x;
-    }
-    if (anchor.y != -1) {
-        cb->anchor.y = anchor.y;
-    }
-    if (bottom.x != -1) {
-        cb->bottomStop.x = bottom.x;
+void SetColorBarAnchor(ColorBarState *state, Vector2 anchor, Vector2 bottom) {
+
+    if (anchor.x >= 0) {
+        state->anchor.x = anchor.x;
     }
 
-    if (bottom.y != -1) {
-        cb->bottomStop.y = bottom.y;
+    if (anchor.y >= 0) {
+        state->anchor.y = anchor.y;
     }
-    updateBounds(cb);
+
+    updateBounds(state);
 }
 
 int AddToColorBar(ColorBarState *cb, Color color) {
@@ -77,185 +65,113 @@ void ClearColorBar(ColorBarState *cb) {
 
 int ColorBar(ColorBarState *state) {
     if (state->prop.active) {
-
         updateBounds(state);
-        Vector2 mpos = GetMousePosition();
-        int boxSize = state->boxSize;
-        int boxSpacing = state->boxSpacing;
-
-        int minScrollSize =
-            boxSpacing + boxSize + boxSpacing + state->scrollBarWidth;
-        int minSize = minScrollSize + MARGIN_LEFT * 2;
 
         Rectangle bounds = state->prop.bounds;
+        Vector2 mpos = GetMousePosition();
 
-        Rectangle hResizeHandle = {
-            bounds.x + bounds.width - HANDLE_THICKNESS * 0.5f, bounds.y,
-            HANDLE_THICKNESS, bounds.height
-        };
-        Rectangle vResizeHandle = {
-            bounds.x,
-            bounds.y + bounds.height - HANDLE_THICKNESS * 0.5f,
-            bounds.width,
-            HANDLE_THICKNESS,
+        Rectangle handleRect = {
+            bounds.x - (CBAR_HANDLE_THICKNESS / 2.0f), bounds.y,
+            CBAR_HANDLE_THICKNESS, bounds.height
         };
 
-        // Width Slider
-        bool hHandleHover = false;
-        bool vHandleHover = false;
-        if (CheckCollisionPointRec(mpos, hResizeHandle)) {
-            hHandleHover = true;
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                state->widthDragging = true;
-            }
+        bool atBounds = CheckCollisionPointRec(mpos, bounds);
+        bool atHandle = CheckCollisionPointRec(mpos, handleRect);
 
-            // SetMouseCursor(MOUSE_CURSOR_RESIZE_EW);
-        } else {
-            hHandleHover = false;
-            // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-        }
-
-        if (CheckCollisionPointRec(mpos, vResizeHandle)) {
-            vHandleHover = true;
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                state->heightDragging = true;
-            }
-
-            // SetMouseCursor(MOUSE_CURSOR_RESIZE_NS);
-        } else {
-            vHandleHover = false;
-            // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-        }
-
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            state->widthDragging = false;
-            state->heightDragging = false;
+        if (atHandle && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            state->widthDragging = true;
         }
 
         if (state->widthDragging) {
-            state->prop.bounds.width = mpos.x - state->prop.bounds.x;
-
-            if (state->prop.bounds.width < minSize) {
-                state->prop.bounds.width = minSize;
-            }
+            Vector2 delta = GetMouseDelta();
+            state->prop.bounds.width -= delta.x;
         }
 
-        int minHeight =
-            boxSize + boxSpacing * 2 + state->scrollBarWidth + PANEL_PADDING;
+        state->prop.bounds.width = Clamp(
+            state->prop.bounds.width, CBAR_INIT_WIDTH, CBAR_INIT_WIDTH * 2.0f
+        );
 
-        if (state->heightDragging) {
-            state->prop.bounds.height = mpos.y - state->prop.bounds.y;
-            if (state->prop.bounds.height < minHeight) {
-                state->prop.bounds.height = minHeight;
-            }
+        bounds = state->prop.bounds;
+
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            state->widthDragging = false;
         }
 
-        bounds.width = state->prop.bounds.width;
-        bounds.height = state->prop.bounds.height;
+        DrawRectangleRounded(bounds, 0.125f, 0, ColorFDGrayLighter);
 
-        DrawRectangleRounded(bounds, 0.01, 0, state->cbBg);
-        DrawRectangleRoundedLinesEx(bounds, 0.01, 0, 2, state->cbBorder);
-        if (hHandleHover || state->widthDragging) {
-            // SetMouseCursor(MOUSE_CURSOR_RESIZE_EW);
-            int handleHeight = bounds.height * 0.5;
-            // DrawRectangleRounded(
-            //     (Rectangle){hResizeHandle.x,
-            //                 hResizeHandle.y + (handleHeight * 0.5),
-            //                 hResizeHandle.width, handleHeight},
-            //     1, 0, Fade(ColorWhite, 0.3)
-            //);
-        }
+        float boxSize = state->boxSize;
+        float halfBox = boxSize / 2.0f;
+        int colorCount = state->colorCount;
 
-        if (vHandleHover || state->heightDragging) {
-
-            // SetMouseCursor(MOUSE_CURSOR_RESIZE_NS);
-            int handleWidth = bounds.width * 0.5;
-            DrawRectangleRounded(
-                (Rectangle){
-                    vResizeHandle.x + (handleWidth * 0.5),
-                    vResizeHandle.y,
-                    handleWidth,
-                    vResizeHandle.height,
-                },
-                1, 0, Fade(ColorWhite, 0.3)
-            );
-        }
-
-        Rectangle scrollBound = {
-            bounds.x + PANEL_PADDING,
-            bounds.y + PANEL_PADDING,
-            bounds.width - (PANEL_PADDING * 2),
-            bounds.height - (PANEL_PADDING * 2),
+        Rectangle usableRect = {
+            bounds.x + halfBox, bounds.y + halfBox, bounds.width - boxSize,
+            bounds.height - boxSize
         };
 
-        // How many color boxes can be in a row
-        int cBoxCols = scrollBound.width / (boxSize + boxSpacing * 2);
+        int maxColumns = (int)floorf(usableRect.width / boxSize);
+        int maxRows = (int)floorf(usableRect.height / boxSize);
 
-        int colorCount = arrlen(state->colors);
-        if (cBoxCols < 1) {
-            cBoxCols = 1;
+        int usedRows = colorCount / maxColumns;
+        int usedColumns = (colorCount < maxColumns) ? colorCount : maxColumns;
+        // how many boxes are in last row
+        int lastRow = colorCount % maxColumns;
+
+        if (lastRow > 0) {
+            usedRows++;
         }
 
-        // How many rows there will be
-        int cBoxRows = (colorCount + cBoxCols + 1) / cBoxCols;
+        Rectangle usedRect = {
+            usableRect.x,
+            usableRect.y,
+            usedColumns * boxSize,
+            usedRows * boxSize,
+        };
 
-        // total amount will the color boxes will take
-        int totalCBoxWidth = cBoxCols * boxSize + (cBoxCols - 1) * boxSpacing;
+        BeginScissorMode(
+            usableRect.x, usableRect.y, usableRect.width, usableRect.height
+        );
+        {
+            for (int b = 0; b < colorCount; b++) {
+                int col = b % maxColumns;
+                int row = b / maxColumns;
+                Color clr = state->colors[b];
 
-        int boxesMargin = (scrollBound.width - totalCBoxWidth) / 2;
-        if (boxesMargin < boxSpacing) {
-            boxesMargin = boxSpacing;
+                Rectangle boxRect = {
+                    usableRect.x + state->scroll.x + (col * boxSize),
+                    usableRect.y + state->scroll.y + (row * boxSize), boxSize,
+                    boxSize
+                };
+
+                DrawRectangleRec(boxRect, clr);
+
+                if (ColorIsEqual(state->currentColor, clr)) {
+                    DrawRectangleLinesEx(boxRect, 1.5, BLACK);
+                }
+
+                if (CheckCollisionPointRec(mpos, boxRect) &&
+                    IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    state->currentColor = clr;
+                }
+            }
         }
-
-        state->content.width = cBoxCols * (boxSize + boxSpacing);
-        state->content.height =
-            PANEL_PADDING + cBoxRows * (boxSize + boxSpacing);
+        EndScissorMode();
 
         int ogDefBG = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
         int ogBorderWidth = GuiGetStyle(LISTVIEW, BORDER_WIDTH);
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, HexColorTransparent);
         GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
-        GuiScrollPanel(
-            scrollBound, NULL, state->content, &state->scroll, &state->view
-        );
+
+        GuiScrollPanel(usableRect, NULL, usedRect, &state->scroll, NULL);
 
         GuiSetStyle(LISTVIEW, BORDER_WIDTH, ogBorderWidth);
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ogDefBG);
 
-        BeginScissorMode(
-            scrollBound.x, scrollBound.y, scrollBound.width, scrollBound.height
+        DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
+        DrawRectangleRoundedLinesEx(
+            (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
+                        bounds.height - 4},
+            0.125, 0, 2, ColorGrayLightest
         );
-
-        for (int i = 0; i < colorCount; i++) {
-            int row = i / cBoxCols;
-            int col = i % cBoxCols;
-
-            float x =
-                scrollBound.x + boxesMargin + col * (boxSize + boxSpacing);
-            float y = scrollBound.y + MARGIN_TOPBOTTOM +
-                      row * (boxSize + boxSpacing) + state->scroll.y;
-            Rectangle rect = {x, y, boxSize, boxSize};
-            DrawRectangleRec(rect, state->colors[i]);
-            DrawRectangleLinesEx(rect, 2, ColorBlack);
-
-            if (state->currentIndex == i) {
-                DrawRectangleLinesEx(rect, 3, BLACK);
-            }
-
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-                CheckCollisionPointRec(mpos, rect)) {
-                if (state->currentIndex == i) {
-                    state->currentIndex = -1;
-                    state->currentColor = NOCOLOR;
-                } else {
-                    state->currentIndex = i;
-                    state->currentColor = state->colors[i];
-                }
-            }
-        }
-
-        EndScissorMode();
     }
-
     return CB_STATUS_NONE;
 }
