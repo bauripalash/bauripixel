@@ -120,10 +120,6 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
 
             100, bounds.height
         };
-
-        if (GuiValueBoxFloat(rect, "Size", penSizeStr, &penSize, editPenSize)) {
-            editPenSize = !editPenSize;
-        }
     }
 }
 

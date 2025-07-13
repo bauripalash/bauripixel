@@ -4,6 +4,7 @@
 #include "../external/raymath.h"
 #include "../external/stb/stb_ds.h"
 #include "../include/colors.h"
+#include "../include/utils.h"
 #include <math.h>
 #include <stdbool.h>
 
@@ -68,6 +69,9 @@ bool CurrentColorChanged(ColorBarState *state) {
     return state->prevIndex != state->currentIndex;
 }
 
+Rectangle view = {0};
+#define SELECT_THICKNESSS 3.0f
+
 int ColorBar(ColorBarState *state) {
     if (state->prop.active) {
         updateBounds(state);
@@ -85,6 +89,17 @@ int ColorBar(ColorBarState *state) {
 
         if (atBounds) {
             SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+            if (IsKeyDown(KEY_LEFT_CONTROL)) {
+                float wheel = GetMouseWheelMove();
+                if (wheel != 0) {
+                    float scale = 0.2f * wheel;
+                    state->boxSize = Clamp(
+                        expf(logf(state->boxSize) + scale),
+                        CBAR_BOX_SIZE / 2.0f, CBAR_BOX_SIZE * 2
+                    );
+                }
+            }
         }
 
         if (atHandle && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -137,7 +152,6 @@ int ColorBar(ColorBarState *state) {
         };
 
         state->prevIndex = state->currentIndex;
-
         BeginScissorMode(
             usableRect.x, usableRect.y, usableRect.width, usableRect.height
         );
@@ -146,6 +160,7 @@ int ColorBar(ColorBarState *state) {
                 int col = b % maxColumns;
                 int row = b / maxColumns;
                 Color clr = state->colors[b];
+                Color borderClr = ColorBlack;
 
                 Rectangle boxRect = {
                     usableRect.x + state->scroll.x + (col * boxSize),
@@ -156,8 +171,10 @@ int ColorBar(ColorBarState *state) {
                 DrawRectangleRec(boxRect, clr);
 
                 if (b == state->currentIndex) {
-                    DrawRectangleLinesEx(boxRect, 2, BLACK);
+                    borderClr = ColorWhite;
                 }
+
+                DrawRectangleLinesEx(boxRect, 2, borderClr);
 
                 if (CheckCollisionPointRec(mpos, boxRect) &&
                     IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -173,7 +190,7 @@ int ColorBar(ColorBarState *state) {
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, HexColorTransparent);
         GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
 
-        GuiScrollPanel(usableRect, NULL, usedRect, &state->scroll, NULL);
+        GuiScrollPanel(usableRect, NULL, usedRect, &state->scroll, &view);
 
         GuiSetStyle(LISTVIEW, BORDER_WIDTH, ogBorderWidth);
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ogDefBG);
