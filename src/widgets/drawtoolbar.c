@@ -5,6 +5,7 @@
 #include "../include/drawtools.h"
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define VISIBLE_BTN_COUNT 4
 
@@ -104,13 +105,44 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
     return tool;
 }
 
+static float penSize = 0.0f;
+static bool editPenSize = false;
+static char penSizeStr[512];
+Color clr;
+
+static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
+    if (state->currentTool == DT_PENCIL) {
+        float px = bounds.x;
+        float py = bounds.y;
+
+        Rectangle rect = {
+            px + 32, py,
+
+            100, bounds.height
+        };
+
+        if (GuiValueBoxFloat(rect, "Size", penSizeStr, &penSize, editPenSize)) {
+            editPenSize = !editPenSize;
+        }
+    }
+}
+
 static int DrawOptToolbar(DrawToolBarState *state) {
     Rectangle bounds = {
         state->prop.bounds.x, state->optAnchor.y + DTBAR_MARGIN_TB,
         GetScreenWidth() - DTBAR_MARGIN_R - DTBAR_MARGIN_L, 60 - DTBAR_MARGIN_TB
     };
 
+    Rectangle drawBounds = {
+        bounds.x + DTBAR_MARGIN_L, bounds.y + DTBAR_MARGIN_TB,
+        bounds.width - DTBAR_MARGIN_L - DTBAR_MARGIN_R,
+        bounds.height - DTBAR_MARGIN_TB * 2
+    };
+
     DrawRectangleRounded(bounds, 0.125, 0, ColorFDGrayLighter);
+
+    OptToolsPencil(state, drawBounds);
+
     DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
     DrawRectangleRoundedLinesEx(
         (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
