@@ -13,6 +13,7 @@
 
 typedef struct {
     WidgetProp prop;
+    Vector2 optAnchor;
     Vector2 anchor;
 
     Vector2 toolBtnMargin;

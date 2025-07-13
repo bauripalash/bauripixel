@@ -7,8 +7,6 @@
 #include <stdbool.h>
 
 #define VISIBLE_BTN_COUNT 4
-#define DT_ICON_SCALE     1
-#define DT_ICON_SIZE      (DT_ICON_SCALE * 16)
 
 DrawToolBarState NewDrawToolBar() {
     DrawToolBarState dtb = {0};
@@ -106,11 +104,29 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
     return tool;
 }
 
+static int DrawOptToolbar(DrawToolBarState *state) {
+    Rectangle bounds = {
+        state->prop.bounds.x, state->optAnchor.y + DTBAR_MARGIN_TB,
+        GetScreenWidth() - DTBAR_MARGIN_R - DTBAR_MARGIN_L, 60 - DTBAR_MARGIN_TB
+    };
+
+    DrawRectangleRounded(bounds, 0.125, 0, ColorFDGrayLighter);
+    DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
+    DrawRectangleRoundedLinesEx(
+        (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
+                    bounds.height - 4},
+        0.125, 0, 2, ColorGrayLightest
+    );
+    return -1;
+}
+
 int DrawToolbar(DrawToolBarState *state) {
     updateBounds(state);
     handleShortcuts(state);
 
     Rectangle bounds = state->prop.bounds;
+
+    DrawOptToolbar(state);
 
     if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);

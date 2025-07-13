@@ -33,6 +33,7 @@ void Layout();
 void ApplyStyle();
 
 #define DISABLE_COLORBAR
+#define TOP_SPACE 80
 
 int RunApp() {
 
@@ -60,15 +61,16 @@ int RunApp() {
     canvas = NewCanvas();
     canvas.prop.active = true;
 
-    SetColorBarAnchor(&cb, (Vector2){-1, 50}, Vector2Zero());
+    SetColorBarAnchor(&cb, (Vector2){-1, TOP_SPACE}, Vector2Zero());
 
     SetCanvasAnchor(
-        &canvas, (Vector2){dtb.prop.bounds.width, 50},
+        &canvas, (Vector2){dtb.prop.bounds.width, TOP_SPACE},
         (Vector2){cb.prop.bounds.width, 50}
     );
 
     dtb.anchor.x = 0;
-    dtb.anchor.y = 50 + CANVAS_MARGIN_TB;
+    dtb.anchor.y = TOP_SPACE + CANVAS_MARGIN_TB;
+    dtb.optAnchor.y = 20;
     oldHCb = cb.prop.bounds.width;
     oldVCb = cb.prop.bounds.height;
 
@@ -90,108 +92,6 @@ int RunApp() {
     CloseWindow();
 
     return 0;
-}
-
-float cw = 100.0f;
-float handleT = 20.0f;
-float cboxSize = 30.0f;
-
-int colorCount = 10;
-
-bool handlDragging = false;
-Vector2 scroll = {0, 0};
-
-void cBar() {
-    colorCount = cb.colorCount;
-    Vector2 mpos = GetMousePosition();
-    float canvasEnd = canvas.prop.bounds.x + canvas.prop.bounds.width;
-    Rectangle rect = {GetScreenWidth() - cw, 50 + CANVAS_MARGIN_TB, cw, 200};
-
-    Rectangle handleRect = {
-        rect.x - (handleT / 2.0f), rect.y + handleT, handleT,
-        rect.height - handleT * 2
-    };
-
-    bool atRect = CheckCollisionPointRec(mpos, rect);
-    bool atHandle = CheckCollisionPointRec(mpos, handleRect);
-
-    if (atHandle && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        handlDragging = true;
-    }
-
-    if (handlDragging) {
-        Vector2 delta = GetMouseDelta();
-        cw -= delta.x;
-    }
-
-    cw = Clamp(cw, 100.0f, 200.0f);
-
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-        handlDragging = false;
-    }
-
-    DrawRectangleLinesEx(rect, 2, ColorGrayLightest);
-    DrawRectangleRec(
-        handleRect, Fade(ColorBlueLightest, atHandle ? 0.5f : 0.2f)
-    );
-
-    float halfBox = cboxSize / 2.0f;
-    Rectangle uRect = {
-        rect.x + halfBox,
-        rect.y + halfBox,
-        rect.width - (halfBox * 2),
-        rect.height - (halfBox * 2),
-    };
-
-    int columnMax = (int)floorf(uRect.width / cboxSize);
-    int rowMax = (int)floorf(uRect.height / cboxSize);
-
-    int rowsUsed = colorCount / columnMax;
-    int columnUsed = (colorCount < columnMax) ? colorCount : columnMax;
-    int lastRowColum = colorCount % columnMax;
-
-    if (lastRowColum > 0) {
-        rowsUsed++;
-    }
-
-    Rectangle usedRect = {
-        uRect.x,
-        uRect.y,
-        columnUsed * cboxSize,
-        rowsUsed * cboxSize,
-    };
-
-    BeginScissorMode(uRect.x, uRect.y, uRect.width, uRect.height);
-
-    for (int b = 0; b < colorCount; b++) {
-        int col = b % columnMax;
-        int row = b / columnMax;
-        Rectangle bRect = {
-            uRect.x + scroll.x + (col * cboxSize),
-            uRect.y + scroll.y + (row * cboxSize), cboxSize, cboxSize
-        };
-
-        DrawRectangleRec(bRect, cb.colors[b]);
-    }
-
-    // DrawRectangleLinesEx(usedRect, 2, MAROON);
-
-    EndScissorMode();
-
-    int ogDefBG = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
-    int ogBorderWidth = GuiGetStyle(LISTVIEW, BORDER_WIDTH);
-    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, HexColorTransparent);
-    GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
-
-    GuiScrollPanel(uRect, NULL, usedRect, &scroll, NULL);
-
-    GuiSetStyle(LISTVIEW, BORDER_WIDTH, ogBorderWidth);
-    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ogDefBG);
-
-    TraceLog(
-        LOG_ERROR, "USED [%d %d %d] | MAX [%d %d]", rowsUsed, columnUsed,
-        lastRowColum, rowMax, columnMax
-    );
 }
 
 void Layout() {
