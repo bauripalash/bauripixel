@@ -5,8 +5,11 @@
 #include "../drawtools.h"
 #include "widget.h"
 
-#define DEFAULT_DT_BTN_SIZE 50
-#define DEFAULT_DTBAR_WIDTH 80
+#define DEFAULT_DT_BTN_SIZE 40
+#define DEFAULT_DTBAR_WIDTH 60
+#define DTBAR_MARGIN_L      10
+#define DTBAR_MARGIN_R      DTBAR_MARGIN_L
+#define DTBAR_MARGIN_TB     10
 
 typedef struct {
     WidgetProp prop;

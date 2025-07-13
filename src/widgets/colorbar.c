@@ -20,7 +20,7 @@ ColorBarState NewColorBar() {
     cb.bottomStop = (Vector2){0, 0};
     cb.scroll = (Vector2){0, 0};
 
-    cb.prop.bounds.x = cb.anchor.x + CBAR_MARGIN_LEFT;
+    cb.prop.bounds.x = cb.anchor.x + CBAR_MARGIN_LEFT - CBAR_MARGIN_RIGHT;
     cb.prop.bounds.y = cb.anchor.y + CBAR_MARGIN_TOPBOTTOM;
     cb.prop.bounds.width = CBAR_INIT_WIDTH;
     cb.prop.bounds.height = CBAR_INIT_HEIGHT;
@@ -34,7 +34,8 @@ ColorBarState NewColorBar() {
 }
 
 static void updateBounds(ColorBarState *state) {
-    state->prop.bounds.x = GetScreenWidth() - state->prop.bounds.width;
+    state->prop.bounds.x =
+        GetScreenWidth() - state->prop.bounds.width - CBAR_MARGIN_RIGHT;
     state->prop.bounds.y = state->anchor.y + CBAR_MARGIN_TOPBOTTOM;
 }
 void SetColorBarAnchor(ColorBarState *state, Vector2 anchor, Vector2 bottom) {
@@ -63,6 +64,10 @@ void ClearColorBar(ColorBarState *cb) {
     }
 }
 
+bool CurrentColorChanged(ColorBarState *state) {
+    return state->prevIndex != state->currentIndex;
+}
+
 int ColorBar(ColorBarState *state) {
     if (state->prop.active) {
         updateBounds(state);
@@ -78,6 +83,10 @@ int ColorBar(ColorBarState *state) {
         bool atBounds = CheckCollisionPointRec(mpos, bounds);
         bool atHandle = CheckCollisionPointRec(mpos, handleRect);
 
+        if (atBounds) {
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        }
+
         if (atHandle && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             state->widthDragging = true;
         }
@@ -88,7 +97,7 @@ int ColorBar(ColorBarState *state) {
         }
 
         state->prop.bounds.width = Clamp(
-            state->prop.bounds.width, CBAR_INIT_WIDTH, CBAR_INIT_WIDTH * 2.0f
+            state->prop.bounds.width, CBAR_MIN_WIDTH, CBAR_INIT_WIDTH * 2.0f
         );
 
         bounds = state->prop.bounds;
@@ -127,6 +136,8 @@ int ColorBar(ColorBarState *state) {
             usedRows * boxSize,
         };
 
+        state->prevIndex = state->currentIndex;
+
         BeginScissorMode(
             usableRect.x, usableRect.y, usableRect.width, usableRect.height
         );
@@ -144,12 +155,13 @@ int ColorBar(ColorBarState *state) {
 
                 DrawRectangleRec(boxRect, clr);
 
-                if (ColorIsEqual(state->currentColor, clr)) {
-                    DrawRectangleLinesEx(boxRect, 1.5, BLACK);
+                if (b == state->currentIndex) {
+                    DrawRectangleLinesEx(boxRect, 2, BLACK);
                 }
 
                 if (CheckCollisionPointRec(mpos, boxRect) &&
                     IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    state->currentIndex = b;
                     state->currentColor = clr;
                 }
             }
@@ -173,5 +185,6 @@ int ColorBar(ColorBarState *state) {
             0.125, 0, 2, ColorGrayLightest
         );
     }
+
     return CB_STATUS_NONE;
 }

@@ -8,11 +8,13 @@
 
 #define CBAR_MARGIN_TOPBOTTOM 10.0f
 #define CBAR_MARGIN_LEFT      10.0f
+#define CBAR_MARGIN_RIGHT     CBAR_MARGIN_LEFT
 
-#define CBAR_INIT_WIDTH       100.0f
+#define CBAR_BOX_SIZE         30.0f
+#define CBAR_INIT_WIDTH       130.0f
+#define CBAR_MIN_WIDTH        70.0f
 #define CBAR_INIT_HEIGHT      300.0f
 #define CBAR_HANDLE_THICKNESS 20.0f
-#define CBAR_BOX_SIZE         30.0f
 
 #define CB_STATUS_NONE        1
 #define CB_STATUS_HDRAG       2
@@ -22,6 +24,7 @@
 
 typedef struct {
     WidgetProp prop;
+    int prevIndex;
     int currentIndex;
     Color currentColor;
     Vector2 anchor;
@@ -45,4 +48,5 @@ void SetColorBarAnchor(ColorBarState *cb, Vector2 anchor, Vector2 bottom);
 int ColorBar(ColorBarState *state);
 int AddToColorBar(ColorBarState *cb, Color color);
 void ClearColorBar(ColorBarState *cb);
+bool CurrentColorChanged(ColorBarState *state);
 #endif

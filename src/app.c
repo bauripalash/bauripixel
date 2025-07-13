@@ -223,5 +223,9 @@ void Layout() {
     // cBar();
     ColorBar(&cb);
 
+    if (CurrentColorChanged(&cb)) {
+        canvas.current = cb.currentColor;
+    }
+
     i++;
 }

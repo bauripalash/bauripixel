@@ -3,9 +3,12 @@
 #include "../external/raylib.h"
 #include "../include/colors.h"
 #include "../include/drawtools.h"
+#include <math.h>
 #include <stdbool.h>
 
 #define VISIBLE_BTN_COUNT 4
+#define DT_ICON_SCALE     1
+#define DT_ICON_SIZE      (DT_ICON_SCALE * 16)
 
 DrawToolBarState NewDrawToolBar() {
     DrawToolBarState dtb = {0};
@@ -22,7 +25,7 @@ DrawToolBarState NewDrawToolBar() {
 void FreeDrawToolBar(DrawToolBarState *state) { return; }
 
 static void updateBounds(DrawToolBarState *dtb) {
-    dtb->prop.bounds.x = dtb->anchor.x;
+    dtb->prop.bounds.x = dtb->anchor.x + DTBAR_MARGIN_L;
     dtb->prop.bounds.y = dtb->anchor.y;
 
     dtb->prop.bounds.width = DEFAULT_DTBAR_WIDTH;
@@ -45,13 +48,15 @@ GuiIconName getIconName(int b) {
 
 #define XBTN_SZ 50
 
-bool xBtn(Rectangle bounds, const char *text, GuiIconName icon, bool isActive) {
+static bool
+DtButton(Rectangle bounds, const char *text, GuiIconName icon, bool isActive) {
     float bx = bounds.x;
     float by = bounds.y;
     float bw = bounds.width;
     float bh = bounds.height;
     Color fg = ColorGrayDarkest;
-
+    int iconScale = (int)floorf((float)DEFAULT_DT_BTN_SIZE / 16.0f);
+    int iconSize = iconScale * 16;
     bool clicked = CheckCollisionPointRec(GetMousePosition(), bounds) &&
                    IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
     if (clicked || isActive) {
@@ -75,14 +80,36 @@ bool xBtn(Rectangle bounds, const char *text, GuiIconName icon, bool isActive) {
         },
         0.2, 0, 2, ColorGrayLightest
     );
-    // GuiLabelButton(bounds, text);
-    GuiDrawIcon(icon, bx + 8, by + 8, 2, ColorWhite);
+    GuiDrawIcon(
+        icon, (bx) + (bw / 2.0f) - (iconSize / 2.0f),
+        (by) + (bh / 2.0f) - (iconSize / 2.0f), iconScale, ColorWhite
+    );
 
     return clicked;
 }
 
+static DrawTool handleShortcuts(DrawToolBarState *state) {
+    DrawTool tool = state->currentTool;
+
+    if (IsKeyPressed(KEY_B)) {
+        tool = DT_PENCIL;
+    } else if (IsKeyPressed(KEY_E)) {
+        tool = DT_ERASER;
+    } else if (IsKeyPressed(KEY_M)) {
+        tool = DT_PAN;
+    }
+
+    if (tool != state->currentTool) {
+        state->currentTool = tool;
+    }
+
+    return tool;
+}
+
 int DrawToolbar(DrawToolBarState *state) {
     updateBounds(state);
+    handleShortcuts(state);
+
     Rectangle bounds = state->prop.bounds;
 
     if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
@@ -97,13 +124,14 @@ int DrawToolbar(DrawToolBarState *state) {
 
     for (int btnI = 0; btnI < VISIBLE_BTN_COUNT; btnI++) {
         Rectangle btnRect = {
-            (state->prop.bounds.width / 2.0f) - (DEFAULT_DT_BTN_SIZE / 2.0f),
+            (state->prop.bounds.x + state->prop.bounds.width / 2.0f) -
+                (DEFAULT_DT_BTN_SIZE / 2.0f),
             state->prop.bounds.y + state->toolbarPadding.y +
                 ((DEFAULT_DT_BTN_SIZE + state->toolBtnMargin.y) * btnI),
             DEFAULT_DT_BTN_SIZE,
             DEFAULT_DT_BTN_SIZE,
         };
-        if (xBtn(
+        if (DtButton(
                 btnRect, "", getIconName(btnI), btnI == (int)state->currentTool
             )) {
             if ((int)state->currentTool == btnI) {
