@@ -4,6 +4,7 @@
 #include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/drawtools.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -69,6 +70,8 @@ CanvasState NewCanvas() {
 
     c.canvasImg = GenImageColor(c.gridSize.x, c.gridSize.y, WHITE);
     c.canvasTxt = LoadTextureFromImage(c.canvasImg);
+    c.previewImg = GenImageColor(c.gridSize.x, c.gridSize.y, BLANK);
+    c.previewTxt = LoadTextureFromImage(c.previewImg);
 
     Vector2 txtCenter = {
         c.drawArea.x + c.canvasTxt.width * 0.5f,
@@ -285,41 +288,112 @@ bool cellClicked(Rectangle rect, Camera2D cam) {
     return IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cellHover(rect, cam);
 }
 
-#define G_GRID_X 8
-#define G_GRID_Y 8
+// Returns position of mouse if inside a canvas.
+// x,y => canvas cord || w,z => worldMousePos
+Vector4 getCanvasPos(CanvasState *state, Rectangle canvasRect) {
+    Vector2 mpos = GetMousePosition();
+    Vector2 wMpos = GetScreenToWorld2D(mpos, state->camera);
+
+    if (CheckCollisionPointRec(mpos, state->drawArea)) {
+        if (CheckCollisionPointRec(wMpos, canvasRect)) {
+            float px = floorf(wMpos.x - canvasRect.x);
+            float py = floorf(wMpos.y - canvasRect.y);
+
+            return (Vector4){px, py, wMpos.x, wMpos.y};
+        }
+    }
+    return (Vector4){-1, -1, wMpos.x, wMpos.y};
+}
+
+bool validCanvasPos(Vector2 gridSize, Vector4 pos) {
+    if ((pos.x < 0 || pos.x >= gridSize.x) ||
+        (pos.y < 0 || pos.y >= gridSize.y)) {
+        return false;
+    }
+    return true;
+}
+
+static Vector2 lineStart = {-1, -1};
+static Vector2 wLineStart = {-1, -1};
+static bool lineDragging = false;
+
+static void syncPreviewTxt(CanvasState *state) {}
 
 void DrawingCanvas(CanvasState *state, Rectangle bounds) {
-    // TraceLog(LOG_ERROR, "CURTOOL -> %d", state->curTool);
-
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
                                        state->gridSize.x, state->gridSize.y};
-    Vector2 mPos = GetMousePosition();
-    Vector2 worldMPos = GetScreenToWorld2D(mPos, state->camera);
-    int px = (int)worldMPos.x - (int)canvasRect.x;
-    int py = (int)worldMPos.y - (int)canvasRect.y;
+    Vector4 canvasPos = getCanvasPos(state, canvasRect);
+
+    bool pxAtCanvas = validCanvasPos(state->gridSize, canvasPos);
+
+    int px = (int)canvasPos.x;
+    int py = (int)canvasPos.y;
 
     Color dClr = state->curTool == DT_ERASER ? WHITE : state->current;
 
-    bool pxAtCanvas = (px >= 0 && px < (int)state->gridSize.x) &&
-                      (py >= 0 && py < (int)state->gridSize.y);
-    // if (pxAtCanvas) SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+    if (state->curTool == DT_PENCIL || state->curTool == DT_ERASER) {
 
-    if (pxAtCanvas && IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
-        !state->enablePanning) {
-        ImageDrawPixel(&state->canvasImg, px, py, dClr);
-        UpdateTexture(state->canvasTxt, state->canvasImg.data);
-        // UpdateTextureRec(state->canvasTxt, (Rectangle){px,py,px,py},
-        // state->canvasImg.data); // FIX THIS
+        if (pxAtCanvas && IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
+            !state->enablePanning) {
+            ImageDrawPixel(&state->canvasImg, px, py, dClr);
+            UpdateTexture(state->canvasTxt, state->canvasImg.data);
+        }
+    } else if (state->curTool == DT_LINE) {
+        if (pxAtCanvas && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            lineStart.x = px;
+            lineStart.y = py;
+
+            wLineStart.x = canvasPos.w;
+            wLineStart.y = canvasPos.z;
+
+            lineDragging = true;
+        }
+
+        if (pxAtCanvas && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            if (px == lineStart.x && py == lineStart.y) {
+                ImageDrawPixel(&state->canvasImg, px, py, dClr);
+                UpdateTexture(state->canvasTxt, state->canvasImg.data);
+
+            } else {
+                canvasPos = getCanvasPos(state, canvasRect);
+                ImageDrawLineEx(
+                    &state->canvasImg, lineStart,
+                    (Vector2){canvasPos.x, canvasPos.y}, 1, dClr
+                );
+                UpdateTexture(state->canvasTxt, state->canvasImg.data);
+                ImageClearBackground(&state->previewImg, BLANK);
+
+                ImageClearBackground(&state->previewImg, BLANK);
+            }
+
+            lineStart.x = -1;
+            lineStart.y = -1;
+            wLineStart.x = -1;
+            wLineStart.y = -1;
+            lineDragging = false;
+        }
     }
+
     DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
 
-    if (pxAtCanvas && !state->enablePanning) {
+    if (pxAtCanvas && !state->enablePanning &&
+        (state->curTool == DT_PENCIL || state->curTool == DT_ERASER)) {
         DrawRectangleRec(
             (Rectangle){canvasRect.x + px, canvasRect.y + py, 1, 1}, dClr
         );
     }
 
-    // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    if (lineDragging) {
+        ImageClearBackground(&state->previewImg, BLANK);
+        ImageDrawLineEx(
+            &state->previewImg, lineStart, (Vector2){canvasPos.x, canvasPos.y},
+            1, dClr
+        );
+
+        UpdateTexture(state->previewTxt, state->previewImg.data);
+    }
+
+    DrawTexture(state->previewTxt, state->drawArea.x, state->drawArea.y, WHITE);
 }
 
 void handleTools(CanvasState *state) {

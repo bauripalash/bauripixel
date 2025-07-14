@@ -44,6 +44,8 @@ typedef struct {
 
     Image canvasImg;
     Texture canvasTxt;
+    Texture previewTxt;
+    Image previewImg;
     // Vector2 txtPos;
     DrawTool curTool;
 
