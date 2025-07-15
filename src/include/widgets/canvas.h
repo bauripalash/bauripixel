@@ -49,6 +49,10 @@ typedef struct {
     // Vector2 txtPos;
     DrawTool curTool;
 
+    // NOTE: must be changed :
+
+    int brushSize;
+
 } CanvasState;
 
 CanvasState NewCanvas();

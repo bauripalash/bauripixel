@@ -87,6 +87,10 @@ CanvasState NewCanvas() {
     c.camera.offset = daCenter;
     c.point = txtCenter;
 
+    // --
+    c.brushSize = 1;
+    // --
+
     return c;
 }
 
@@ -314,7 +318,6 @@ bool validCanvasPos(Vector2 gridSize, Vector4 pos) {
 }
 
 static Vector2 lineStart = {-1, -1};
-static Vector2 wLineStart = {-1, -1};
 static bool lineDragging = false;
 
 static void syncPreviewTxt(CanvasState *state) {}
@@ -343,9 +346,6 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
             lineStart.x = px;
             lineStart.y = py;
 
-            wLineStart.x = canvasPos.w;
-            wLineStart.y = canvasPos.z;
-
             lineDragging = true;
         }
 
@@ -368,8 +368,6 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
             lineStart.x = -1;
             lineStart.y = -1;
-            wLineStart.x = -1;
-            wLineStart.y = -1;
             lineDragging = false;
         }
     }

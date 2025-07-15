@@ -19,6 +19,9 @@ DrawToolBarState NewDrawToolBar() {
 
     dtb.prop.bounds.width = DEFAULT_DTBAR_WIDTH;
     dtb.prop.bounds.height = 0;
+
+    dtb.brushSize = 1;
+    dtb.brushSizeEdit = false;
     return dtb;
 }
 void FreeDrawToolBar(DrawToolBarState *state) { return; }
@@ -105,21 +108,59 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
     return tool;
 }
 
-static float penSize = 0.0f;
 static bool editPenSize = false;
-static char penSizeStr[512];
 Color clr;
+static float bValue = 1.0;
+static char strValue[100] = {0};
+static bool editClicked = false;
+
+static void valueSlider(Rectangle bounds) {
+    Vector2 mpos = GetMousePosition();
+
+    Rectangle sBounds = {bounds.x, bounds.y + bounds.height, 150, 20};
+    bool atB = CheckCollisionPointRec(mpos, bounds);
+
+    bool atSb = CheckCollisionPointRec(mpos, sBounds);
+
+    DrawRectangleRounded(bounds, 0.2, 0, ColorGrayLighter);
+    DrawRectangleRoundedLinesEx(bounds, 0.2, 0, 2, ColorGrayLightest);
+
+    if (GuiTextBox(
+            (Rectangle){bounds.x, bounds.y, bounds.width, bounds.height},
+            strValue, 16, editPenSize
+        )) {
+        bValue = (float)TextToInteger(strValue);
+        editPenSize = !editPenSize;
+    }
+
+    if (atB) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            editClicked = true;
+        }
+    }
+
+    if ((!atB && !atSb) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (editClicked) {
+            editClicked = false;
+        }
+    }
+
+    if (editClicked) {
+        if (GuiSliderBar(sBounds, NULL, NULL, &bValue, 1, 100)) {
+            TextCopy(strValue, TextFormat("%d", (int)bValue));
+        }
+    }
+}
 
 static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
+    Vector2 mpos = GetMousePosition();
     if (state->currentTool == DT_PENCIL) {
         float px = bounds.x;
         float py = bounds.y;
 
-        Rectangle rect = {
-            px + 32, py,
+        Rectangle rect = {px, py, 50, bounds.height};
 
-            100, bounds.height
-        };
+        valueSlider(rect);
     }
 }
 
@@ -137,14 +178,14 @@ static int DrawOptToolbar(DrawToolBarState *state) {
 
     DrawRectangleRounded(bounds, 0.125, 0, ColorFDGrayLighter);
 
-    OptToolsPencil(state, drawBounds);
-
     DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
     DrawRectangleRoundedLinesEx(
         (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
                     bounds.height - 4},
         0.125, 0, 2, ColorGrayLightest
     );
+
+    OptToolsPencil(state, drawBounds);
     return -1;
 }
 
@@ -153,8 +194,6 @@ int DrawToolbar(DrawToolBarState *state) {
     handleShortcuts(state);
 
     Rectangle bounds = state->prop.bounds;
-
-    DrawOptToolbar(state);
 
     if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
@@ -192,6 +231,8 @@ int DrawToolbar(DrawToolBarState *state) {
                     bounds.height - 4},
         0.125, 0, 2, ColorGrayLightest
     );
+
+    DrawOptToolbar(state);
 
     return -1;
 }

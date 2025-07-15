@@ -4,6 +4,7 @@
 #include "../../external/raylib.h"
 #include "../drawtools.h"
 #include "widget.h"
+#include <stdbool.h>
 
 #define DEFAULT_DT_BTN_SIZE 40
 #define DEFAULT_DTBAR_WIDTH 60
@@ -20,6 +21,9 @@ typedef struct {
     Vector2 toolbarPadding;
 
     DrawTool currentTool;
+
+    int brushSize;
+    bool brushSizeEdit;
 } DrawToolBarState;
 
 DrawToolBarState NewDrawToolBar();

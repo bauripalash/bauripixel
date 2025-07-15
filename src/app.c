@@ -4,12 +4,11 @@
 #include "external/raymath.h"
 #include "include/colors.h"
 #include "include/themes/theme.h"
-#include "include/utils.h"
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/widget.h"
-#include <math.h>
+
 #include <stdbool.h>
 
 // #define RAYGUI_GRID_ALPHA 1.0f
@@ -112,7 +111,6 @@ void Layout() {
     //     TextFormat("C [%d, %d, %d, %d]", clr.r, clr.g, clr.b, clr.a),
     //     (Vector2){10, 10}, 20, 1, txtClr
     //);
-    DrawToolbar(&dtb);
     canvas.curTool = dtb.currentTool;
     // canvas.current = cb.currentColor;
     Canvas(&canvas);
@@ -126,6 +124,8 @@ void Layout() {
     if (CurrentColorChanged(&cb)) {
         canvas.current = cb.currentColor;
     }
+
+    DrawToolbar(&dtb);
 
     i++;
 }
