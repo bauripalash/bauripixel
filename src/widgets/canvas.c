@@ -179,6 +179,12 @@ void SetCurrentCanvasColor(CanvasState *state, Color color) {
 bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
     Rectangle vBounds = state->vScrollRect;
     Rectangle hBounds = state->hScrollRect;
+
+    Color scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_BG));
+    Color scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_BG));
+    Color scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_FG));
+    Color scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_FG));
+
     Camera2D cam = state->camera;
     float zoom = state->camera.zoom;
 
@@ -227,15 +233,8 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
 
     Rectangle vThumbRect = {vBounds.x, vThumbY, vBounds.width, vThumbHeight};
 
-    Color scrollBg = GetColor(OptThemeGet(T_SCROLLBAR_BG));
-    Color scrollFg = GetColor(OptThemeGet(T_SCROLLBAR_FG));
-
-    DrawRectangleRounded(vBounds, SCROLL_ROUNDNESS, 0, scrollBg);
-    DrawRectangleRounded(hBounds, SCROLL_ROUNDNESS, 0, scrollBg);
-    DrawRectangleRounded(hThumbRect, SCROLL_ROUNDNESS, 0, scrollFg);
-    DrawRectangleRounded(vThumbRect, SCROLL_ROUNDNESS, 0, scrollFg);
-
     if (CheckCollisionPointRec(GetMousePosition(), hBounds)) {
+        scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_HVR_BG));
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             state->hScrollDragging = true;
         }
@@ -249,6 +248,8 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
     }
 
     if (CheckCollisionPointRec(GetMousePosition(), vBounds)) {
+
+        scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_HVR_BG));
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             state->vScrollDragging = true;
         }
@@ -267,13 +268,33 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
     }
 
     if (state->vScrollDragging) {
+        scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_BG));
+        scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
         Vector2 delta = GetMouseDelta();
         state->scroll.y += delta.y;
     }
 
     if (state->hScrollDragging) {
+        scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_BG));
+        scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
         Vector2 delta = GetMouseDelta();
         state->scroll.x += delta.x;
+    }
+    Vector2 mpos = GetMousePosition();
+    if (CheckCollisionPointRec(mpos, hThumbRect)) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
+        } else {
+            scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_HVR_FG));
+        }
+    }
+
+    if (CheckCollisionPointRec(mpos, vThumbRect)) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
+        } else {
+            scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_HVR_FG));
+        }
     }
 
     state->scroll.x = Clamp(state->scroll.x, 0, hBounds.width - hThumbWidth);
@@ -281,6 +302,12 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
 
     state->point.x += (state->scroll.x - oldScrollX) * xScale;
     state->point.y += (state->scroll.y - oldScrollY) * yScale;
+
+    DrawRectangleRounded(vBounds, SCROLL_ROUNDNESS, 0, scrollBgV);
+    DrawRectangleRounded(hBounds, SCROLL_ROUNDNESS, 0, scrollBgH);
+    DrawRectangleRounded(hThumbRect, SCROLL_ROUNDNESS, 0, scrollFgH);
+    DrawRectangleRounded(vThumbRect, SCROLL_ROUNDNESS, 0, scrollFgV);
+
     return state->vScrollDragging || state->hScrollDragging;
 }
 

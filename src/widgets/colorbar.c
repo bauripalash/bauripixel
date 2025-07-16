@@ -4,7 +4,6 @@
 #include "../external/raymath.h"
 #include "../external/stb/stb_ds.h"
 #include "../include/colors.h"
-#include "../include/utils.h"
 #include "../include/options/options.h"
 #include <math.h>
 #include <stdbool.h>
@@ -188,16 +187,31 @@ int ColorBar(ColorBarState *state) {
 
         int ogDefBG = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
         int ogBorderWidth = GuiGetStyle(LISTVIEW, BORDER_WIDTH);
-		int ogBtnBase = GuiGetStyle(BUTTON, BASE_COLOR_NORMAL);
+        int ogBtnBase = GuiGetStyle(BUTTON, BASE_COLOR_NORMAL);
+        int ogSliderBorderN = GuiGetStyle(SLIDER, BORDER_COLOR_NORMAL);
+        int ogSliderBorderF = GuiGetStyle(SLIDER, BORDER_COLOR_FOCUSED);
+        int ogSliderBorderP = GuiGetStyle(SLIDER, BORDER_COLOR_PRESSED);
+
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, HexColorTransparent);
         GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
-		GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, OptThemeGet(T_SCROLLBAR_BG));
+
+        GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, OptThemeGet(T_SCROLLBAR_BG));
+        GuiSetStyle(SLIDER, BORDER_COLOR_NORMAL, OptThemeGet(T_SCROLLBAR_FG));
+        GuiSetStyle(
+            SLIDER, BORDER_COLOR_FOCUSED, OptThemeGet(T_SCROLLBAR_HVR_FG)
+        );
+        GuiSetStyle(
+            SLIDER, BORDER_COLOR_PRESSED, OptThemeGet(T_SCROLLBAR_CLK_FG)
+        );
 
         GuiScrollPanel(usableRect, NULL, usedRect, &state->scroll, &view);
 
         GuiSetStyle(LISTVIEW, BORDER_WIDTH, ogBorderWidth);
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ogDefBG);
-		GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ogBtnBase);
+        GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ogBtnBase);
+        GuiSetStyle(SLIDER, BORDER_COLOR_NORMAL, ogSliderBorderN);
+        GuiSetStyle(SLIDER, BORDER_COLOR_FOCUSED, ogSliderBorderF);
+        GuiSetStyle(SLIDER, BORDER_COLOR_PRESSED, ogSliderBorderP);
 
         DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
         DrawRectangleRoundedLinesEx(

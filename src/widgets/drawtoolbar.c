@@ -1,8 +1,10 @@
 #include "../include/widgets/drawtoolbar.h"
 #include "../external/raygui.h"
 #include "../external/raylib.h"
+#include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/drawtools.h"
+#include "../include/options/options.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -114,6 +116,34 @@ static float bValue = 1.0;
 static char strValue[100] = {0};
 static bool editClicked = false;
 
+static bool mySlider(Rectangle bounds, float *value, float min, float max) {
+    Color sliderBg = GetColor(OptThemeGet(T_SLIDER_BG));
+    Color sliderBorder = GetColor(OptThemeGet(T_SLIDER_BORDER));
+    Color sliderFg = GetColor(OptThemeGet(T_SLIDER_FG));
+    float oldValue = *value;
+
+    *value = Clamp(*value, min, max);
+
+    float scale = bounds.width / 100.0f;
+    float tWidth = scale * (*value);
+
+    Rectangle thumbRect = {bounds.x, bounds.y, tWidth, bounds.height};
+
+    Vector2 mpos = GetMousePosition();
+    if (CheckCollisionPointRec(mpos, bounds)) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            float disp = mpos.x - bounds.x;
+            *value = ceil(disp / scale);
+        }
+    }
+
+    DrawRectangleRounded(bounds, 0.2, 0, sliderBg);
+    DrawRectangleRounded(thumbRect, 0.2, 0, sliderFg);
+    DrawRectangleRoundedLinesEx(bounds, 0.2, 0, 2, sliderBorder);
+
+    return oldValue != *value;
+}
+
 static void valueSlider(Rectangle bounds) {
     Vector2 mpos = GetMousePosition();
 
@@ -146,9 +176,11 @@ static void valueSlider(Rectangle bounds) {
     }
 
     if (editClicked) {
-        if (GuiSliderBar(sBounds, NULL, NULL, &bValue, 1, 100)) {
+        if (mySlider(sBounds, &bValue, 1, 100))
             TextCopy(strValue, TextFormat("%d", (int)bValue));
-        }
+        /*if (GuiSliderBar(sBounds, NULL, NULL, &bValue, 1, 100)) {
+            TextCopy(strValue, TextFormat("%d", (int)bValue));
+        }*/
     }
 }
 
