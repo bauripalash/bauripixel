@@ -4,6 +4,7 @@
 #include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/drawtools.h"
+#include "../include/options/options.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -18,8 +19,6 @@ CanvasState NewCanvas() {
     c.gridSize = (Vector2){DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE};
     c.anchor = (Vector2){0, 0};
     c.bottomAnchor = (Vector2){0, 0};
-    c.scrollBody = ColorBlack;
-    c.scrollThumb = ColorBlueLighter;
     c.curTool = DT_PENCIL;
 
     c.scroll = (Vector2){0, 0};
@@ -228,10 +227,13 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
 
     Rectangle vThumbRect = {vBounds.x, vThumbY, vBounds.width, vThumbHeight};
 
-    DrawRectangleRounded(vBounds, SCROLL_ROUNDNESS, 0, state->scrollBody);
-    DrawRectangleRounded(hBounds, SCROLL_ROUNDNESS, 0, state->scrollBody);
-    DrawRectangleRounded(hThumbRect, SCROLL_ROUNDNESS, 0, state->scrollThumb);
-    DrawRectangleRounded(vThumbRect, SCROLL_ROUNDNESS, 0, state->scrollThumb);
+    Color scrollBg = GetColor(OptThemeGet(T_SCROLLBAR_BG));
+    Color scrollFg = GetColor(OptThemeGet(T_SCROLLBAR_FG));
+
+    DrawRectangleRounded(vBounds, SCROLL_ROUNDNESS, 0, scrollBg);
+    DrawRectangleRounded(hBounds, SCROLL_ROUNDNESS, 0, scrollBg);
+    DrawRectangleRounded(hThumbRect, SCROLL_ROUNDNESS, 0, scrollFg);
+    DrawRectangleRounded(vThumbRect, SCROLL_ROUNDNESS, 0, scrollFg);
 
     if (CheckCollisionPointRec(GetMousePosition(), hBounds)) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {

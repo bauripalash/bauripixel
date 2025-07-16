@@ -3,7 +3,7 @@
 #include "external/raylib.h"
 #include "external/raymath.h"
 #include "include/colors.h"
-#include "include/themes/theme.h"
+#include "include/theme.h"
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
 #include "include/widgets/drawtoolbar.h"
@@ -41,7 +41,8 @@ int RunApp() {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     SetTargetFPS(60);
-    LoadAppLightTheme();
+    // LoadAppLightTheme();
+    LoadAppDarkTheme();
 
     cb = NewColorBar();
     for (int i = 0; i < 8; i++) {

@@ -5,6 +5,7 @@
 #include "../external/stb/stb_ds.h"
 #include "../include/colors.h"
 #include "../include/utils.h"
+#include "../include/options/options.h"
 #include <math.h>
 #include <stdbool.h>
 
@@ -187,13 +188,16 @@ int ColorBar(ColorBarState *state) {
 
         int ogDefBG = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
         int ogBorderWidth = GuiGetStyle(LISTVIEW, BORDER_WIDTH);
+		int ogBtnBase = GuiGetStyle(BUTTON, BASE_COLOR_NORMAL);
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, HexColorTransparent);
         GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
+		GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, OptThemeGet(T_SCROLLBAR_BG));
 
         GuiScrollPanel(usableRect, NULL, usedRect, &state->scroll, &view);
 
         GuiSetStyle(LISTVIEW, BORDER_WIDTH, ogBorderWidth);
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ogDefBG);
+		GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ogBtnBase);
 
         DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
         DrawRectangleRoundedLinesEx(

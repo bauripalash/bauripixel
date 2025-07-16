@@ -34,8 +34,6 @@ typedef struct {
     Rectangle hScrollRect;
     bool vScrollDragging;
     bool hScrollDragging;
-    Color scrollBody;
-    Color scrollThumb;
     float scrollThickness;
 
     Camera2D camera;
