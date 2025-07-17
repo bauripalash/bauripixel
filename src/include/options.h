@@ -13,6 +13,11 @@ typedef enum OptThemeKey {
     T_SLIDER_BG,
     T_SLIDER_BORDER,
     T_SLIDER_FG,
+    T_SLIDER_TEXT_PRE,
+    T_SLIDER_TEXT_POST,
+
+    T_ISLIDER_BG,
+    T_ISLIDER_FG,
 
     T_MAX_THEME_KEYS
 } OptThemeKey;

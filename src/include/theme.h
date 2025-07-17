@@ -3,7 +3,7 @@
 
 #include "../external/raygui.h"
 #include "colors.h"
-#include "options/options.h"
+#include "options.h"
 #include "utils.h"
 
 // ============== OPT THEME START ============
@@ -16,7 +16,11 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_SCROLLBAR_CLK_FG, HexColorBlueLighter},
     {T_SLIDER_BG, HexColorBlack},
     {T_SLIDER_BORDER, HexColorGrayLighter},
-    {T_SLIDER_FG, HexColorGreenLighter},
+    {T_SLIDER_FG, HexColorGrayLightest},
+    {T_SLIDER_TEXT_PRE, HexColorWhite},
+    {T_SLIDER_TEXT_POST, HexColorBlack},
+    {T_ISLIDER_BG, HexColorBlack},
+    {T_ISLIDER_FG, HexColorWhite},
 };
 
 static const OptThemeProp lightThemeOpts[] = {

@@ -1,4 +1,4 @@
-#include "../include/options/options.h"
+#include "../include/options.h"
 
 static int ThemeOptions[T_MAX_THEME_KEYS];
 

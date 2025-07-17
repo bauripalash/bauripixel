@@ -4,7 +4,7 @@
 #include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/drawtools.h"
-#include "../include/options/options.h"
+#include "../include/options.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -508,16 +508,17 @@ bool Canvas(CanvasState *state) {
     }
 
     Vector2 dir = {0, 0};
+    /*
 
-    if (IsKeyDown(KEY_LEFT))
-        dir.x++;
-    if (IsKeyDown(KEY_RIGHT))
-        dir.x--;
-    if (IsKeyDown(KEY_UP))
-        dir.y++;
-    if (IsKeyDown(KEY_DOWN))
-        dir.y--;
-
+if (IsKeyDown(KEY_LEFT))
+    dir.x++;
+if (IsKeyDown(KEY_RIGHT))
+    dir.x--;
+if (IsKeyDown(KEY_UP))
+    dir.y++;
+if (IsKeyDown(KEY_DOWN))
+    dir.y--;
+    */
     bool movingKb = false;
     if (Vector2Length(dir) != 0.0f) {
         movingKb = true;

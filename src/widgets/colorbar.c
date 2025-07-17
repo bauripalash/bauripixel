@@ -4,7 +4,7 @@
 #include "../external/raymath.h"
 #include "../external/stb/stb_ds.h"
 #include "../include/colors.h"
-#include "../include/options/options.h"
+#include "../include/options.h"
 #include <math.h>
 #include <stdbool.h>
 
