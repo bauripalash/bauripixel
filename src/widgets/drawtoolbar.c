@@ -22,7 +22,7 @@ DrawToolBarState NewDrawToolBar() {
     dtb.prop.bounds.width = DEFAULT_DTBAR_WIDTH;
     dtb.prop.bounds.height = 0;
 
-    dtb.brushSize = 1;
+    dtb.brushSize = 1.0;
     dtb.brushSizeEdit = false;
     return dtb;
 }
@@ -110,48 +110,7 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
     return tool;
 }
 
-static bool editPenSize = false;
 Color clr;
-static float bValue = 1.0;
-static char strValue[100] = {0};
-static bool editClicked = false;
-
-static void valueSlider(Rectangle bounds) {
-    Vector2 mpos = GetMousePosition();
-
-    Rectangle sBounds = {bounds.x, bounds.y + bounds.height, 200, 25};
-    bool atB = CheckCollisionPointRec(mpos, bounds);
-
-    bool atSb = CheckCollisionPointRec(mpos, sBounds);
-
-    DrawRectangleRounded(bounds, 0.2, 0, ColorGrayLighter);
-    DrawRectangleRoundedLinesEx(bounds, 0.2, 0, 2, ColorGrayLightest);
-
-    if (GuiTextBox(
-            (Rectangle){bounds.x, bounds.y, bounds.width, bounds.height},
-            strValue, 16, editPenSize
-        )) {
-        bValue = (float)TextToInteger(strValue);
-        editPenSize = !editPenSize;
-    }
-
-    if (atB) {
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            editClicked = true;
-        }
-    }
-
-    if ((!atB && !atSb) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-        if (editClicked) {
-            editClicked = false;
-        }
-    }
-
-    if (editClicked) {
-        if (BpSlider(sBounds, &bValue, 1, 32))
-            TextCopy(strValue, TextFormat("%d", (int)bValue));
-    }
-}
 
 static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
     Vector2 mpos = GetMousePosition();
@@ -161,8 +120,10 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
 
         Rectangle rect = {px, py, 50, bounds.height};
 
-        // valueSlider(rect);
-        BpInputSlider(rect, &bValue, 0, 32, strValue, &editClicked);
+        BpInputSlider(
+            rect, &state->brushSize, 0, 32, state->strBrushSize,
+            &state->brushSizeEdit
+        );
     }
 }
 

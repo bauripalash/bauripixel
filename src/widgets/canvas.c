@@ -346,10 +346,25 @@ bool validCanvasPos(Vector2 gridSize, Vector4 pos) {
     return true;
 }
 
+bool MouseIsAtCanvas(CanvasState *state, Rectangle rect) {
+    Vector2 mpos = GetMousePosition();
+    return (
+        CheckCollisionPointRec(mpos, state->drawArea) &&
+        CheckCollisionPointRec(GetScreenToWorld2D(mpos, state->camera), rect)
+    );
+}
+
+bool PointIsAtCanvas(CanvasState *state, Rectangle rect, Vector2 point) {
+    return false;
+}
+
 static Vector2 lineStart = {-1, -1};
 static bool lineDragging = false;
 
-static void syncPreviewTxt(CanvasState *state) {}
+// BUG: atCanvas should be `true` until the bottom-right corner of the brush is
+// out of canvas (when brushSize > 1)
+// for Left side -> BOTTOM-RIGHT is inside
+// for Right Side -> TOP-LEFT is inside
 
 void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
@@ -358,8 +373,14 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
     bool pxAtCanvas = validCanvasPos(state->gridSize, canvasPos);
 
-    int px = (int)canvasPos.x;
-    int py = (int)canvasPos.y;
+    // int px = (int)canvasPos.x;
+    // int py = (int)canvasPos.y;
+
+    int pl = (int)ceilf(canvasPos.x - state->brushSize * 0.5f);
+    int pt = (int)ceilf(canvasPos.y - state->brushSize * 0.5f);
+    int pr = pl + state->brushSize;
+    int pb = pt + state->brushSize;
+    bool atCanvas = MouseIsAtCanvas(state, canvasRect);
 
     Color dClr = state->curTool == DT_ERASER ? WHITE : state->current;
 
@@ -367,27 +388,36 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
         if (pxAtCanvas && IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
             !state->enablePanning) {
-            ImageDrawPixel(&state->canvasImg, px, py, dClr);
-            UpdateTexture(state->canvasTxt, state->canvasImg.data);
+            if (state->brushSize >= 1) {
+                if (state->brushSize == 1) {
+                    ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
+                } else if (state->brushSize > 1) {
+                    ImageDrawRectangle(
+                        &state->canvasImg, pl, pt, state->brushSize,
+                        state->brushSize, dClr
+                    );
+                }
+                UpdateTexture(state->canvasTxt, state->canvasImg.data);
+            }
         }
     } else if (state->curTool == DT_LINE) {
         if (pxAtCanvas && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            lineStart.x = px;
-            lineStart.y = py;
+            lineStart.x = pl;
+            lineStart.y = pt;
 
             lineDragging = true;
         }
 
         if (pxAtCanvas && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if (px == lineStart.x && py == lineStart.y) {
-                ImageDrawPixel(&state->canvasImg, px, py, dClr);
+            if (pl == lineStart.x && pt == lineStart.y) {
+                ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
 
             } else {
                 canvasPos = getCanvasPos(state, canvasRect);
                 ImageDrawLineEx(
                     &state->canvasImg, lineStart,
-                    (Vector2){canvasPos.x, canvasPos.y}, 1, dClr
+                    (Vector2){canvasPos.x, canvasPos.y}, state->brushSize, dClr
                 );
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
                 ImageClearBackground(&state->previewImg, BLANK);
@@ -401,25 +431,30 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         }
     }
 
-    DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
+    ImageClearBackground(&state->previewImg, BLANK);
 
-    if (pxAtCanvas && !state->enablePanning &&
-        (state->curTool == DT_PENCIL || state->curTool == DT_ERASER)) {
-        DrawRectangleRec(
-            (Rectangle){canvasRect.x + px, canvasRect.y + py, 1, 1}, dClr
-        );
+    if (atCanvas && !state->enablePanning) {
+        if (state->brushSize >= 1) {
+            if (state->brushSize == 1) {
+                ImageDrawPixel(&state->previewImg, pl, pt, dClr);
+            } else if (state->brushSize > 1) {
+                ImageDrawRectangle(
+                    &state->previewImg, pl, pt, state->brushSize,
+                    state->brushSize, dClr
+                );
+            }
+        }
     }
 
     if (lineDragging) {
-        ImageClearBackground(&state->previewImg, BLANK);
         ImageDrawLineEx(
             &state->previewImg, lineStart, (Vector2){canvasPos.x, canvasPos.y},
-            1, dClr
+            state->brushSize * 2, dClr
         );
-
-        UpdateTexture(state->previewTxt, state->previewImg.data);
     }
 
+    DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
+    UpdateTexture(state->previewTxt, state->previewImg.data);
     DrawTexture(state->previewTxt, state->drawArea.x, state->drawArea.y, WHITE);
 }
 

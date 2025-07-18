@@ -9,6 +9,7 @@
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/widget.h"
 
+#include <math.h>
 #include <stdbool.h>
 
 // #define RAYGUI_GRID_ALPHA 1.0f
@@ -113,6 +114,7 @@ void Layout() {
     //     (Vector2){10, 10}, 20, 1, txtClr
     //);
     canvas.curTool = dtb.currentTool;
+    canvas.brushSize = (int)floorf(dtb.brushSize);
     // canvas.current = cb.currentColor;
     Canvas(&canvas);
     UpdateCanvasAnchor(
