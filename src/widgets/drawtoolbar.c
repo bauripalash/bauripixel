@@ -4,10 +4,8 @@
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
-#include "../include/options.h"
 #include <math.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
 #define VISIBLE_BTN_COUNT 4
 
@@ -110,19 +108,16 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
     return tool;
 }
 
-Color clr;
-
 static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
-    Vector2 mpos = GetMousePosition();
-    if (state->currentTool == DT_PENCIL) {
+    if (state->currentTool == DT_PENCIL || state->currentTool == DT_ERASER ||
+        state->currentTool == DT_LINE) {
         float px = bounds.x;
         float py = bounds.y;
 
         Rectangle rect = {px, py, 50, bounds.height};
 
-        BpInputSlider(
-            rect, &state->brushSize, 0, 32, state->strBrushSize,
-            &state->brushSizeEdit
+        BpInputSliderInt(
+            rect, &state->brushSize, 0, 32, "px", &state->brushSizeEdit
         );
     }
 }

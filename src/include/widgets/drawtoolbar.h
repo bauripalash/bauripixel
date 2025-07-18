@@ -22,8 +22,7 @@ typedef struct {
 
     DrawTool currentTool;
 
-    float brushSize;
-    char strBrushSize[10];
+    int brushSize;
     bool brushSizeEdit;
 } DrawToolBarState;
 

@@ -1,16 +1,19 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
-#include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/options.h"
+#include "../include/utils.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
 #define SLIDER_PADDING_TB 5.0f
 #define SLIDER_PADDING_LR 5.0f
 
-bool BpSlider(Rectangle bounds, float *value, float min, float max) {
+bool BpSliderInt(
+    Rectangle bounds, int *value, int min, int max, const char *unit
+) {
     Color sliderBg = GetColor(OptThemeGet(T_SLIDER_BG));
     Color sliderBorder = GetColor(OptThemeGet(T_SLIDER_BORDER));
     Color sliderFg = GetColor(OptThemeGet(T_SLIDER_FG));
@@ -24,49 +27,47 @@ bool BpSlider(Rectangle bounds, float *value, float min, float max) {
         bounds.height - SLIDER_PADDING_TB * 2.0f,
     };
 
-    float oldValue = *value;
-
-    float scale = (*value - min) / (max - min);
-    float thumbW = scale * rect.width;
+    int oldValue = *value;
+    float thumbW = rect.width * (float)(*value - min) / (max - min);
 
     Rectangle thumbRect = {rect.x, rect.y, thumbW, rect.height};
 
     Vector2 mpos = GetMousePosition();
+
     if (CheckCollisionPointRec(mpos, bounds)) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            float disp = (mpos.x - rect.x) / rect.width;
-            disp = Clamp(disp, 0.0f, 1.0f);
-            *value = min + disp * (max - min);
+            float percent = (mpos.x - rect.x) / rect.width;
+            *value = min + (int)ceilf(percent * (max - min));
+        }
+
+        float wheel = GetMouseWheelMove();
+        if (wheel != 0) {
+            *value += wheel;
         }
     }
 
-    *value = Clamp(*value, min, max);
+    *value = ClampInt(*value, min, max);
 
-    float fontW = GetFontDefault().recs->height;
-    float fontH = GetFontDefault().baseSize;
-    float textWidth = TextLength(TextFormat("%0.0fpx", *value));
+    Font font = GetFontDefault();
+    float fontW = font.recs->width;
+    float fontH = font.baseSize;
+    float textWidth = TextLength(TextFormat("%d%s", *value, unit));
     float textX = ((rect.width + rect.x) / 2.0f) - (textWidth / 2.0f);
     float textY = rect.y;
-
     Color textColor = ((thumbRect.x + thumbRect.width) >= textX + textWidth)
                           ? textPost
                           : textPre;
 
-    DrawRectangleRounded(bounds, 0.1, 10, sliderBg);
-    DrawRectangleRounded(thumbRect, 0.3, 0, sliderFg);
-    DrawRectangleRoundedLinesEx(bounds, 0.1, 0, 2, sliderBorder);
-    DrawText(TextFormat("%0.0fpx", *value), textX, textY, fontH, textColor);
+    DrawRectangleRounded(bounds, 0.1, 0, sliderBg);
+    DrawRectangleRounded(thumbRect, 0.1, 0, sliderFg);
+
+    DrawText(TextFormat("%d%s", *value, unit), textX, textY, fontH, textColor);
 
     return oldValue != *value;
 }
-bool BpSliderInt(Rectangle bounds, int *value, int min, int max) {
-    return false;
-}
 
-// BUG: There is +1 delay from slider to inputbox
-
-bool BpInputSlider(
-    Rectangle bounds, float *value, float min, float max, char *strValue,
+bool BpInputSliderInt(
+    Rectangle bounds, int *value, int min, int max, const char *unit,
     bool *clicked
 ) {
     Color inputBg = GetColor(OptThemeGet(T_ISLIDER_BG));
@@ -74,8 +75,6 @@ bool BpInputSlider(
     Color inputFg = GetColor(textClrInt);
     float oldValue = *value;
     Vector2 mpos = GetMousePosition();
-
-    TextCopy(strValue, TextFormat("%d", (int)*value));
 
     int ogBoxBorderW = GuiGetStyle(VALUEBOX, BORDER_WIDTH);
     int ogBoxBorderN = GuiGetStyle(VALUEBOX, BORDER_COLOR_PRESSED);
@@ -119,20 +118,28 @@ bool BpInputSlider(
     DrawRectangleRounded(bounds, 0.2, 0, Fade(inputBg, 0.8));
     DrawRectangleRoundedLinesEx(bounds, 0.2, 0, 0, ColorGrayLightest);
 
+    GuiValueBox(boxRect, NULL, value, min, max, *clicked);
+
     if (*clicked) {
-        BpSlider(sliderRect, value, min, max);
-        TextCopy(strValue, TextFormat("%d", (int)*value));
+        if (IsKeyPressed(KEY_UP)) {
+            *value += 1;
+        }
+
+        if (IsKeyPressed(KEY_DOWN)) {
+            *value -= 1;
+        }
     }
 
-    GuiValueBoxFloat(boxRect, NULL, strValue, value, *clicked);
-    // DrawRectangleLinesEx(boxRect, 2, inputBg);
-    *value = (float)TextToInteger(strValue);
-    *value = Clamp(*value, min, max);
+    *value = ClampInt(*value, min, max);
+
+    if (*clicked) {
+        BpSliderInt(sliderRect, value, min, max, unit);
+    }
 
     float fontH = GetFontDefault().baseSize;
 
     DrawText(
-        "px", boxRect.x + boxRect.width, boxRect.y + fontH / 2.0f,
+        unit, boxRect.x + boxRect.width, boxRect.y + fontH / 2.0f,
         GetFontDefault().baseSize, inputFg
     );
 

@@ -4,11 +4,12 @@
 #include "../external/raylib.h"
 #include <stdbool.h>
 
-bool BpInputSlider(
-    Rectangle bounds, float *value, float min, float max, char *strValue,
+bool BpInputSliderInt(
+    Rectangle bounds, int *value, int min, int max, const char *unit,
     bool *clicked
 );
-bool BpSlider(Rectangle bounds, float *value, float min, float max);
-bool BpSliderInt(Rectangle bounds, int *value, int min, int max);
+bool BpSliderInt(
+    Rectangle bounds, int *value, int min, int max, const char *unit
+);
 
 #endif

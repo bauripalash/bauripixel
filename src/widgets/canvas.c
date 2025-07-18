@@ -5,6 +5,7 @@
 #include "../include/colors.h"
 #include "../include/drawtools.h"
 #include "../include/options.h"
+#include "../include/utils.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -88,6 +89,8 @@ CanvasState NewCanvas() {
 
     // --
     c.brushSize = 1;
+    c.lineStart = (Vector2){-1, -1};
+    c.lineDragging = false;
     // --
 
     return c;
@@ -358,9 +361,6 @@ bool PointIsAtCanvas(CanvasState *state, Rectangle rect, Vector2 point) {
     return false;
 }
 
-static Vector2 lineStart = {-1, -1};
-static bool lineDragging = false;
-
 // BUG: atCanvas should be `true` until the bottom-right corner of the brush is
 // out of canvas (when brushSize > 1)
 // for Left side -> BOTTOM-RIGHT is inside
@@ -402,21 +402,21 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         }
     } else if (state->curTool == DT_LINE) {
         if (pxAtCanvas && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            lineStart.x = pl;
-            lineStart.y = pt;
+            state->lineStart.x = pl;
+            state->lineStart.y = pt;
 
-            lineDragging = true;
+            state->lineDragging = true;
         }
 
         if (pxAtCanvas && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if (pl == lineStart.x && pt == lineStart.y) {
+            if (pl == state->lineStart.x && pt == state->lineStart.y) {
                 ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
 
             } else {
                 canvasPos = getCanvasPos(state, canvasRect);
                 ImageDrawLineEx(
-                    &state->canvasImg, lineStart,
+                    &state->canvasImg, state->lineStart,
                     (Vector2){canvasPos.x, canvasPos.y}, state->brushSize, dClr
                 );
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
@@ -425,15 +425,15 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
                 ImageClearBackground(&state->previewImg, BLANK);
             }
 
-            lineStart.x = -1;
-            lineStart.y = -1;
-            lineDragging = false;
+            state->lineStart.x = -1;
+            state->lineStart.y = -1;
+            state->lineDragging = false;
         }
     }
 
     ImageClearBackground(&state->previewImg, BLANK);
 
-    if (atCanvas && !state->enablePanning) {
+    if (atCanvas && !state->enablePanning && state->curTool != DT_NOTOOL) {
         if (state->brushSize >= 1) {
             if (state->brushSize == 1) {
                 ImageDrawPixel(&state->previewImg, pl, pt, dClr);
@@ -446,11 +446,16 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         }
     }
 
-    if (lineDragging) {
+    Vector2 cPos = {canvasPos.x, canvasPos.y};
+    if (state->lineDragging) {
         ImageDrawLineEx(
-            &state->previewImg, lineStart, (Vector2){canvasPos.x, canvasPos.y},
-            state->brushSize * 2, dClr
+            &state->previewImg, state->lineStart,
+            (Vector2){canvasPos.x, canvasPos.y}, state->brushSize, dClr
         );
+
+        // float radAngle = GetRadAngleAtoB(state->lineStart, cPos);
+        // float degAngle = GetDegAngleAtoB(state->lineStart, cPos);
+        // TraceLog(LOG_ERROR, "Line Angle D[%f] | R[%f]", degAngle, radAngle);
     }
 
     DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
