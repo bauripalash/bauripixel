@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 static Rectangle trect = {0};
 
@@ -361,6 +362,46 @@ bool PointIsAtCanvas(CanvasState *state, Rectangle rect, Vector2 point) {
     return false;
 }
 
+// Bresenham's line algorithm (modified) (prototype)
+static void
+BPDrawLine(CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr) {
+    int x0 = (int)a.x;
+    int y0 = (int)a.y;
+
+    int x1 = (int)b.x;
+    int y1 = (int)b.y;
+
+    int bs = state->brushSize;
+
+    int dx = abs(x1 - x0);
+    int sx = x0 < x1 ? 1 : -1;
+    int dy = -abs(y1 - y0);
+    int sy = y0 < y1 ? 1 : -1;
+    int err = dx + dy;
+
+    while (true) {
+        // ImageDrawPixel(img, x0, y0, clr);
+        ImageDrawRectangle(img, x0, y0, bs, bs, clr);
+        int e2 = 2 * err;
+
+        if (e2 >= dy) {
+            if (x0 == x1) {
+                break;
+            }
+
+            err += dy;
+            x0 += sx;
+        }
+
+        if (e2 <= dx) {
+            if (y0 == y1)
+                break;
+            err += dx;
+            y0 += sy;
+        }
+    }
+}
+
 // BUG: atCanvas should be `true` until the bottom-right corner of the brush is
 // out of canvas (when brushSize > 1)
 // for Left side -> BOTTOM-RIGHT is inside
@@ -381,6 +422,8 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     int pr = pl + state->brushSize;
     int pb = pt + state->brushSize;
     bool atCanvas = MouseIsAtCanvas(state, canvasRect);
+
+    Vector2 cPos = {canvasPos.x, canvasPos.y};
 
     Color dClr = state->curTool == DT_ERASER ? WHITE : state->current;
 
@@ -415,9 +458,14 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
             } else {
                 canvasPos = getCanvasPos(state, canvasRect);
-                ImageDrawLineEx(
-                    &state->canvasImg, state->lineStart,
-                    (Vector2){canvasPos.x, canvasPos.y}, state->brushSize, dClr
+                // ImageDrawLineEx(
+                //     &state->canvasImg, state->lineStart,
+                //     (Vector2){canvasPos.x, canvasPos.y}, state->brushSize,
+                //     dClr
+                //);
+                BPDrawLine(
+                    state, &state->canvasImg, state->lineStart,
+                    (Vector2){pl, pt}, dClr
                 );
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
                 ImageClearBackground(&state->previewImg, BLANK);
@@ -446,11 +494,15 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         }
     }
 
-    Vector2 cPos = {canvasPos.x, canvasPos.y};
     if (state->lineDragging) {
-        ImageDrawLineEx(
+        /*ImageDrawLineEx(
             &state->previewImg, state->lineStart,
             (Vector2){canvasPos.x, canvasPos.y}, state->brushSize, dClr
+        );
+                */
+
+        BPDrawLine(
+            state, &state->previewImg, state->lineStart, (Vector2){pl, pt}, dClr
         );
 
         // float radAngle = GetRadAngleAtoB(state->lineStart, cPos);
