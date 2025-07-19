@@ -1,10 +1,16 @@
 #ifndef THEME_H
 #define THEME_H
 
+// clang-format off
+#include <stdlib.h>
+#include <string.h>
+#include "../external/raylib.h"
 #include "../external/raygui.h"
+#include "../include/exported/pixeloperator.h"
 #include "colors.h"
 #include "options.h"
 #include "utils.h"
+// clang-format on
 
 // ============== OPT THEME START ============
 static const OptThemeProp darkThemeOpts[] = {
@@ -30,7 +36,9 @@ static const OptThemeProp lightThemeOpts[] = {
 
 // ============== RAGUI THEME START ============
 static const GuiStyleProp RgDarkThemeProps[] = {
-    {DEFAULT, TEXT_LINE_SPACING, (int)24},
+    {DEFAULT, TEXT_LINE_SPACING, 1},
+    {DEFAULT, TEXT_SIZE, 16},
+    {DEFAULT, TEXT_SPACING, 0},
 
     {VALUEBOX, TEXT_COLOR_NORMAL, HexColorWhite},
     {TEXTBOX, TEXT_COLOR_NORMAL, HexColorWhite},
@@ -40,7 +48,19 @@ static const GuiStyleProp RgDarkThemeProps[] = {
 
 // ============== RAGUI THEME END ==============
 
+const char dogicaLocation[] =
+    "/home/palash/work/mcu/cc/bauripixel/src/resources/PixelOperatorMono.ttf";
+void LoadAppFont() {
+    // GuiLoadStyleDogicaFont();
+    // Font font = LoadFontEx(dogicaLocation, 16, 0, 0);
+    // GenTextureMipmaps(&font.texture);
+    // SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
+    // GuiSetFont(font);
+    GuiLoadPixelOperatorFont();
+}
+
 void LoadAppDarkTheme() {
+
     for (int i = 0; i < ArrCount(darkThemeOpts); i++) {
         OptThemeSet(darkThemeOpts[i].key, darkThemeOpts[i].value);
     }
@@ -53,10 +73,5 @@ void LoadAppDarkTheme() {
         );
     }
 }
-/*void LoadAppLightTheme() {
-    for (int i = 0; i < ArrCount(lightThemeOpts); i++) {
-        OptThemeSet(lightThemeOpts[i].key, lightThemeOpts[i].value);
-    }
-}*/
 
 #endif

@@ -44,6 +44,7 @@ int RunApp() {
     SetTargetFPS(60);
     // LoadAppLightTheme();
     LoadAppDarkTheme();
+    LoadAppFont();
 
     cb = NewColorBar();
     for (int i = 0; i < 8; i++) {
@@ -88,7 +89,7 @@ int RunApp() {
         EndDrawing();
     }
 
-    ExportImage(canvas.canvasImg, "_temp.png");
+    // ExportImage(canvas.canvasImg, "_temp.png");
     ClearColorBar(&cb);
     CloseWindow();
 
@@ -99,7 +100,8 @@ void Layout() {
     DrawRectangleLinesEx(
         (Rectangle){-2, 0, GetScreenWidth() + 4, 22}, 2, ColorGrayLightest
     );
-    DrawText("File", 10, 5, 10, ColorWhite);
+    Font fnt = GuiGetFont();
+    DrawTextEx(fnt, "File", (Vector2){10, 0}, 16, 0, ColorWhite);
     DrawText("Edit", 40, 5, 10, ColorWhite);
     DrawText("View", 70, 5, 10, ColorWhite);
     DrawText("Help", 100, 5, 10, ColorWhite);
@@ -129,6 +131,8 @@ void Layout() {
     }
 
     DrawToolbar(&dtb);
+
+    // DrawTextEx(GuiGetFont(), "BauriPixel", (Vector2){100,50}, 72, 0, WHITE);
 
     i++;
 }

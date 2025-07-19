@@ -48,7 +48,7 @@ bool BpSliderInt(
 
     *value = ClampInt(*value, min, max);
 
-    Font font = GetFontDefault();
+    Font font = GuiGetFont();
     float fontW = font.recs->width;
     float fontH = font.baseSize;
     float textWidth = TextLength(TextFormat("%d%s", *value, unit));
@@ -61,7 +61,12 @@ bool BpSliderInt(
     DrawRectangleRounded(bounds, 0.1, 0, sliderBg);
     DrawRectangleRounded(thumbRect, 0.1, 0, sliderFg);
 
-    DrawText(TextFormat("%d%s", *value, unit), textX, textY, fontH, textColor);
+    // DrawText(TextFormat("%d%s", *value, unit), textX, textY, fontH,
+    // textColor);
+    DrawTextEx(
+        font, TextFormat("%d%s", *value, unit), (Vector2){textX, textY}, 16, 0,
+        textColor
+    );
 
     return oldValue != *value;
 }
@@ -136,11 +141,16 @@ bool BpInputSliderInt(
         BpSliderInt(sliderRect, value, min, max, unit);
     }
 
-    float fontH = GetFontDefault().baseSize;
+    float fontH = GuiGetFont().baseSize;
 
-    DrawText(
-        unit, boxRect.x + boxRect.width, boxRect.y + fontH / 2.0f,
-        GetFontDefault().baseSize, inputFg
+    // DrawText(
+    //     unit, boxRect.x + boxRect.width, boxRect.y + fontH / 2.0f,
+    //     GetFontDefault().baseSize, inputFg
+    //);
+
+    DrawTextEx(
+        GuiGetFont(), unit, (Vector2){boxRect.x + boxRect.width, boxRect.y}, 16,
+        0, inputFg
     );
 
     GuiSetStyle(VALUEBOX, BORDER_WIDTH, ogBoxBorderW);
