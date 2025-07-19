@@ -4,6 +4,7 @@
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
+#include "../include/utils.h"
 #include <math.h>
 #include <stdbool.h>
 
@@ -147,6 +148,9 @@ static int DrawOptToolbar(DrawToolBarState *state) {
     return -1;
 }
 
+static bool other = false;
+static bool otherB = false;
+static bool otherC = false;
 int DrawToolbar(DrawToolBarState *state) {
     updateBounds(state);
     handleShortcuts(state);
@@ -163,31 +167,50 @@ int DrawToolbar(DrawToolBarState *state) {
         0.125, 0, ColorFDGrayLighter
     );
 
-    for (int btnI = 0; btnI < VISIBLE_BTN_COUNT; btnI++) {
-        Rectangle btnRect = {
-            (state->prop.bounds.x + state->prop.bounds.width / 2.0f) -
-                (DEFAULT_DT_BTN_SIZE / 2.0f),
-            state->prop.bounds.y + state->toolbarPadding.y +
-                ((DEFAULT_DT_BTN_SIZE + state->toolBtnMargin.y) * btnI),
-            DEFAULT_DT_BTN_SIZE,
-            DEFAULT_DT_BTN_SIZE,
-        };
-        if (DtButton(
-                btnRect, "", getIconName(btnI), btnI == (int)state->currentTool
-            )) {
-            if ((int)state->currentTool == btnI) {
-                state->currentTool = DT_NOTOOL;
-            } else {
-                state->currentTool = (DrawTool)btnI;
-            }
-        }
-    }
-
     DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
     DrawRectangleRoundedLinesEx(
         (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
                     bounds.height - 4},
         0.125, 0, 2, ColorGrayLightest
+    );
+
+    ToolInfo penTool[] = {
+        {ICON_PENCIL, DT_PENCIL},
+        {ICON_RUBBER, DT_ERASER},
+    };
+
+    ToolInfo lineTool[] = {
+        ICON_WAVE_TRIANGULAR,
+        DT_LINE,
+    };
+
+    ToolInfo moveTool[] = {
+        {ICON_HAND_POINTER, DT_PAN},
+    };
+
+    float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
+    Rectangle btnRect = {
+        (state->prop.bounds.x + state->prop.bounds.width / 2.0f) -
+            (DEFAULT_DT_BTN_SIZE / 2.0f),
+        state->prop.bounds.y + state->toolbarPadding.y,
+        DEFAULT_DT_BTN_SIZE,
+        DEFAULT_DT_BTN_SIZE,
+    };
+
+    state->currentTool = BpToolButton(
+        btnRect, state->currentTool, &other, ArrCount(penTool), penTool
+    );
+
+    btnRect.y += yInc;
+
+    state->currentTool = BpToolButton(
+        btnRect, state->currentTool, &otherB, ArrCount(lineTool), lineTool
+    );
+
+    btnRect.y += yInc;
+
+    state->currentTool = BpToolButton(
+        btnRect, state->currentTool, &otherC, ArrCount(moveTool), moveTool
     );
 
     DrawOptToolbar(state);
