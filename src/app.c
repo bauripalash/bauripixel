@@ -38,24 +38,36 @@ void ApplyStyle();
 int RunApp() {
 
     SetTraceLogLevel(LOG_WARNING);
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED);
+    SetConfigFlags(
+        FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED | FLAG_MSAA_4X_HINT
+    );
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    SetTargetFPS(60);
+    SetTargetFPS(240);
     // LoadAppLightTheme();
     LoadAppDarkTheme();
     LoadAppFont();
 
     cb = NewColorBar();
-    for (int i = 0; i < 8; i++) {
-        AddToColorBar(&cb, ColorRedDark);
-        AddToColorBar(&cb, ColorGreenDarkest);
-        AddToColorBar(&cb, ColorGreenLighter);
-        AddToColorBar(&cb, ColorGreenLightest);
-        AddToColorBar(&cb, ColorBlueDarkest);
-        AddToColorBar(&cb, ColorBlueLighter);
-        AddToColorBar(&cb, ColorBlueLightest);
-    }
+    AddToColorBar(&cb, ColorBlack);
+    AddToColorBar(&cb, ColorPurple);
+    AddToColorBar(&cb, ColorRedDark);
+    AddToColorBar(&cb, ColorOrange);
+    AddToColorBar(&cb, ColorYellow);
+    AddToColorBar(&cb, ColorGreenLightest);
+    AddToColorBar(&cb, ColorGreenLighter);
+    AddToColorBar(&cb, ColorGreenDarkest);
+
+    AddToColorBar(&cb, ColorBlueDarkest);
+    AddToColorBar(&cb, ColorBlueLighter);
+    AddToColorBar(&cb, ColorBlueLightest);
+    AddToColorBar(&cb, ColorCyan);
+
+    AddToColorBar(&cb, ColorWhite);
+    AddToColorBar(&cb, ColorGrayLightest);
+    AddToColorBar(&cb, ColorGrayLighter);
+    AddToColorBar(&cb, ColorGrayDarkest);
+    AddToColorBar(&cb, RAYWHITE);
 
     dtb = NewDrawToolBar();
     cb.prop.active = true;
@@ -101,7 +113,7 @@ void Layout() {
         (Rectangle){-2, 0, GetScreenWidth() + 4, 22}, 2, ColorGrayLightest
     );
     Font fnt = GuiGetFont();
-    DrawTextEx(fnt, "File", (Vector2){10, 0}, 16, 0, ColorWhite);
+    DrawText("File", 10, 5, 10, ColorWhite);
     DrawText("Edit", 40, 5, 10, ColorWhite);
     DrawText("View", 70, 5, 10, ColorWhite);
     DrawText("Help", 100, 5, 10, ColorWhite);
@@ -131,8 +143,9 @@ void Layout() {
     }
 
     DrawToolbar(&dtb);
+    // DrawFPS(200, 0);
 
-    // DrawTextEx(GuiGetFont(), "BauriPixel", (Vector2){100,50}, 72, 0, WHITE);
+    // DrawTextEx(GuiGetFont(), "BauriPixel", (Vector2){100, 50}, 72, 0, WHITE);
 
     i++;
 }

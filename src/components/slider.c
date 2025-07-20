@@ -49,8 +49,7 @@ bool BpSliderInt(
     *value = ClampInt(*value, min, max);
 
     Font font = GuiGetFont();
-    float fontW = font.recs->width;
-    float fontH = font.baseSize;
+    int fontSize = 16;
     float textWidth = TextLength(TextFormat("%d%s", *value, unit));
     float textX = ((rect.width + rect.x) / 2.0f) - (textWidth / 2.0f);
     float textY = rect.y;
@@ -64,8 +63,8 @@ bool BpSliderInt(
     // DrawText(TextFormat("%d%s", *value, unit), textX, textY, fontH,
     // textColor);
     DrawTextEx(
-        font, TextFormat("%d%s", *value, unit), (Vector2){textX, textY}, 16, 0,
-        textColor
+        font, TextFormat("%d%s", *value, unit), (Vector2){textX, textY},
+        fontSize, 0, textColor
     );
 
     return oldValue != *value;
@@ -105,7 +104,7 @@ bool BpInputSliderInt(
     Rectangle boxRect = {
         bounds.x + 5,
         bounds.y + 5,
-        bounds.width - 20,
+        bounds.width - 35,
         bounds.height - 10,
     };
 

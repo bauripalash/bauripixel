@@ -62,21 +62,23 @@ DrawTool BpToolButton(
 
     int activeToolIndex = getActiveTool(active, num, tools);
     Rectangle btnRect = {rect.x, rect.y, rect.width, rect.height};
+    Vector2 iconPos = {btnRect.x + 4, btnRect.y + 5};
 
     if (activeToolIndex >= 0) {
         ToolInfo tool = tools[activeToolIndex];
         if (BpDummyToogleButton(btnRect, true)) {
             *showOther = false;
         }
-        GuiDrawIcon(tool.icon, btnRect.x, btnRect.y, 2, ColorWhite);
+        GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
         btnRect.y += 3;
+        iconPos.y = btnRect.y + 3 + 5;
     } else {
         ToolInfo tool = tools[0];
         if (BpDummyToogleButton(btnRect, tool.tool == active)) {
             clicked = tool.tool;
             *showOther = false;
         }
-        GuiDrawIcon(tool.icon, btnRect.x, btnRect.y, 2, ColorWhite);
+        GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
     }
 
     if (CheckCollisionPointRec(GetMousePosition(), btnRect) &&
@@ -105,12 +107,14 @@ DrawTool BpToolButton(
 
                 btnRect.x += (i * btnRect.width) + 10 * i;
                 ToolInfo tool = tools[list[i]];
+                iconPos.x = btnRect.x + 4;
+                iconPos.y = btnRect.y + 4;
 
                 if (BpDummyToogleButton(btnRect, false)) {
                     clicked = tool.tool;
                     *showOther = false;
                 }
-                GuiDrawIcon(tool.icon, btnRect.x, btnRect.y, 2, ColorWhite);
+                GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
             }
         }
     }

@@ -115,7 +115,7 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
         float px = bounds.x;
         float py = bounds.y;
 
-        Rectangle rect = {px, py, 50, bounds.height};
+        Rectangle rect = {px, py, 60, bounds.height};
 
         BpInputSliderInt(
             rect, &state->brushSize, 0, 32, "px", &state->brushSizeEdit

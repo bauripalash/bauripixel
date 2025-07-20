@@ -6,7 +6,7 @@
 #include <string.h>
 #include "../external/raylib.h"
 #include "../external/raygui.h"
-#include "../include/exported/pixeloperator.h"
+#include "../include/exported/biosfontii.h"
 #include "colors.h"
 #include "options.h"
 #include "utils.h"
@@ -48,16 +48,7 @@ static const GuiStyleProp RgDarkThemeProps[] = {
 
 // ============== RAGUI THEME END ==============
 
-const char dogicaLocation[] =
-    "/home/palash/work/mcu/cc/bauripixel/src/resources/PixelOperatorMono.ttf";
-void LoadAppFont() {
-    // GuiLoadStyleDogicaFont();
-    // Font font = LoadFontEx(dogicaLocation, 16, 0, 0);
-    // GenTextureMipmaps(&font.texture);
-    // SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
-    // GuiSetFont(font);
-    GuiLoadPixelOperatorFont();
-}
+void LoadAppFont() { GuiLoadStyleBIOSfontII(); }
 
 void LoadAppDarkTheme() {
 
