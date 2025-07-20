@@ -9,6 +9,11 @@ typedef enum DrawTool {
     // Draw Line
     DT_LINE,
 
+    DT_CIRCLE,
+    DT_CIRCLE_FILL,
+    DT_RECT,
+    DT_RECT_FILL,
+
     DT_PAN
 
 } DrawTool;

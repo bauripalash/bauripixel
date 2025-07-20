@@ -4,11 +4,10 @@
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
+#include "../include/toolinfos.h"
 #include "../include/utils.h"
 #include <math.h>
 #include <stdbool.h>
-
-#define VISIBLE_BTN_COUNT 4
 
 DrawToolBarState NewDrawToolBar() {
     DrawToolBarState dtb = {0};
@@ -98,6 +97,8 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
         tool = DT_PENCIL;
     } else if (IsKeyPressed(KEY_E)) {
         tool = DT_ERASER;
+    } else if (IsKeyPressed(KEY_L)) {
+        tool = DT_LINE;
     } else if (IsKeyPressed(KEY_M)) {
         tool = DT_PAN;
     }
@@ -110,8 +111,10 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
 }
 
 static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
-    if (state->currentTool == DT_PENCIL || state->currentTool == DT_ERASER ||
-        state->currentTool == DT_LINE) {
+    DrawTool current = state->currentTool;
+    if (current == DT_PENCIL || current == DT_ERASER || current == DT_LINE ||
+        current == DT_CIRCLE || current == DT_CIRCLE_FILL ||
+        current == DT_RECT || current == DT_RECT_FILL) {
         float px = bounds.x;
         float py = bounds.y;
 
@@ -120,6 +123,15 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
         BpInputSliderInt(
             rect, &state->brushSize, 0, 32, "px", &state->brushSizeEdit
         );
+
+        if (IsKeyDown(KEY_LEFT_CONTROL)) {
+            float wheel = GetMouseWheelMove();
+            state->brushSize += wheel;
+
+            if (state->brushSize <= 0) {
+                state->brushSize = 1;
+            }
+        }
     }
 }
 
@@ -148,14 +160,36 @@ static int DrawOptToolbar(DrawToolBarState *state) {
     return -1;
 }
 
-static bool other = false;
-static bool otherB = false;
-static bool otherC = false;
+static bool otherPen = false;
+static bool otherEraser = false;
+static bool otherLine = false;
+static bool otherCircle = false;
+static bool otherRect = false;
+static bool otherPan = false;
+
+static void turnOffOthers() {
+    otherPen = false;
+    otherEraser = false;
+    otherLine = false;
+    otherCircle = false;
+    otherRect = false;
+    otherPan = false;
+}
+
+static void checkAndTurnOff(Vector2 mpos, Rectangle btnRect) {
+    return;
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+        !CheckCollisionPointRec(mpos, btnRect)) {
+        turnOffOthers();
+    }
+}
+
 int DrawToolbar(DrawToolBarState *state) {
     updateBounds(state);
     handleShortcuts(state);
 
     Rectangle bounds = state->prop.bounds;
+    Vector2 mpos = GetMousePosition();
 
     if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
@@ -174,20 +208,6 @@ int DrawToolbar(DrawToolBarState *state) {
         0.125, 0, 2, ColorGrayLightest
     );
 
-    ToolInfo penTool[] = {
-        {ICON_PENCIL, DT_PENCIL},
-        {ICON_RUBBER, DT_ERASER},
-    };
-
-    ToolInfo lineTool[] = {
-        ICON_WAVE_TRIANGULAR,
-        DT_LINE,
-    };
-
-    ToolInfo moveTool[] = {
-        {ICON_HAND_POINTER, DT_PAN},
-    };
-
     float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
     Rectangle btnRect = {
         (state->prop.bounds.x + state->prop.bounds.width / 2.0f) -
@@ -198,19 +218,43 @@ int DrawToolbar(DrawToolBarState *state) {
     };
 
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &other, ArrCount(penTool), penTool
+        btnRect, state->currentTool, &otherPen, ArrCount(PenToolInfo),
+        PenToolInfo
     );
 
     btnRect.y += yInc;
 
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherB, ArrCount(lineTool), lineTool
+        btnRect, state->currentTool, &otherEraser, ArrCount(EraserToolInfo),
+        EraserToolInfo
     );
 
     btnRect.y += yInc;
 
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherC, ArrCount(moveTool), moveTool
+        btnRect, state->currentTool, &otherLine, ArrCount(LineToolInfo),
+        LineToolInfo
+    );
+
+    btnRect.y += yInc;
+
+    state->currentTool = BpToolButton(
+        btnRect, state->currentTool, &otherCircle, ArrCount(CircleToolInfo),
+        CircleToolInfo
+    );
+
+    btnRect.y += yInc;
+
+    state->currentTool = BpToolButton(
+        btnRect, state->currentTool, &otherRect, ArrCount(RectToolInfo),
+        RectToolInfo
+    );
+
+    btnRect.y += yInc;
+
+    state->currentTool = BpToolButton(
+        btnRect, state->currentTool, &otherPan, ArrCount(PanToolInfo),
+        PanToolInfo
     );
 
     DrawOptToolbar(state);

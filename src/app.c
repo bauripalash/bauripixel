@@ -1,7 +1,9 @@
 // #define DEBUG
 
-#include "external/raylib.h"
-#include "external/raymath.h"
+#include <math.h>
+
+#include <stdbool.h>
+
 #include "include/colors.h"
 #include "include/theme.h"
 #include "include/widgets/canvas.h"
@@ -9,14 +11,13 @@
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/widget.h"
 
-#include <math.h>
-#include <stdbool.h>
-
-// #define RAYGUI_GRID_ALPHA 1.0f
-#define RAYGUI_IMPLEMENTATION
-#include "external/raygui.h"
 #define STB_DS_IMPLEMENTATION
 #include "external/stb/stb_ds.h"
+
+#include "external/raylib.h"
+#include "external/raymath.h"
+#define RAYGUI_IMPLEMENTATION
+#include "external/raygui.h"
 
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 700
@@ -42,6 +43,7 @@ int RunApp() {
         FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED | FLAG_MSAA_4X_HINT
     );
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
+
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     SetTargetFPS(240);
     // LoadAppLightTheme();

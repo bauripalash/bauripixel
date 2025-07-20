@@ -44,7 +44,7 @@ bool BpDummyToogleButton(Rectangle bounds, bool active) {
     return clicked;
 }
 
-static int getActiveTool(DrawTool active, int num, ToolInfo *tools) {
+static int getActiveTool(DrawTool active, int num, const ToolInfo *tools) {
     for (int i = 0; i < num; i++) {
         if (tools[i].tool == active) {
             return i;
@@ -54,7 +54,8 @@ static int getActiveTool(DrawTool active, int num, ToolInfo *tools) {
 }
 
 DrawTool BpToolButton(
-    Rectangle bounds, DrawTool active, bool *showOther, int num, ToolInfo *tools
+    Rectangle bounds, DrawTool active, bool *showOther, int num,
+    const ToolInfo *tools
 ) {
 
     Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height};
@@ -117,6 +118,12 @@ DrawTool BpToolButton(
                 GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
             }
         }
+    }
+
+    if ((IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||
+         IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) &&
+        !CheckCollisionPointRec(GetMousePosition(), bounds)) {
+        *showOther = false;
     }
 
     return clicked;

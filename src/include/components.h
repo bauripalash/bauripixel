@@ -21,7 +21,8 @@ typedef struct ToolInfo {
 
 bool BpDummyToogleButton(Rectangle bounds, bool active);
 DrawTool BpToolButton(
-    Rectangle bounds, DrawTool active, bool *showOther, int num, ToolInfo *tools
+    Rectangle bounds, DrawTool active, bool *showOther, int num,
+    const ToolInfo *tools
 );
 
 #endif
