@@ -83,7 +83,7 @@ BPDrawLine(CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr) {
 }
 
 static void BPDrawRectangle(
-    CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr
+    CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr, bool fill
 ) {
     float xMin = fminf(a.x, b.x);
     float yMin = fminf(a.y, b.y);
@@ -100,6 +100,10 @@ static void BPDrawRectangle(
     BPDrawLine(state, img, topRight, bottomRight, clr);
     BPDrawLine(state, img, bottomRight, bottomLeft, clr);
     BPDrawLine(state, img, bottomLeft, topLeft, clr);
+
+    if (fill) {
+        ImageDrawRectangle(img, xMin, yMin, xMax - xMin, yMax - yMin, clr);
+    }
 }
 
 static bool rectDragging = false;
@@ -186,7 +190,8 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
                 BPDrawRectangle(
                     state, &state->canvasImg, state->lineStart,
-                    (Vector2){canvasPos.x, canvasPos.y}, dClr
+                    (Vector2){canvasPos.x, canvasPos.y}, dClr,
+                    state->curTool == DT_RECT_FILL
                 );
 
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
@@ -231,7 +236,8 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         canvasPos = getCanvasPos(state, canvasRect);
         BPDrawRectangle(
             state, &state->previewImg, state->lineStart,
-            (Vector2){canvasPos.x, canvasPos.y}, dClr
+            (Vector2){canvasPos.x, canvasPos.y}, dClr,
+            state->curTool == DT_RECT_FILL
         );
     }
 

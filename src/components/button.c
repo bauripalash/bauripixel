@@ -5,6 +5,8 @@
 #include "../include/drawtools.h"
 #include <stdbool.h>
 
+#define ICON_WIDTH 32
+
 bool BpDummyToogleButton(Rectangle bounds, bool active) {
     Color bg = ColorGrayDarkest;
     Color activeBg = Fade(ColorGrayLighter, 0.5);
@@ -63,17 +65,22 @@ DrawTool BpToolButton(
 
     int activeToolIndex = getActiveTool(active, num, tools);
     Rectangle btnRect = {rect.x, rect.y, rect.width, rect.height};
-    Vector2 iconPos = {btnRect.x + 4, btnRect.y + 5};
+    Vector2 iconCenter = {
+        ((btnRect.width - ICON_WIDTH) / 2.0f),
+        ((btnRect.height - ICON_WIDTH) / 2.0f)
+    };
 
     if (activeToolIndex >= 0) {
         DToolInfo tool = tools[activeToolIndex];
         if (BpDummyToogleButton(btnRect, true)) {
             *showOther = false;
         }
-        DrawTexture(tool.txt, iconPos.x, iconPos.y, WHITE);
-        // GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
         btnRect.y += 3;
-        iconPos.y = btnRect.y + 3 + 5;
+
+        DrawTexture(
+            tool.txt, btnRect.x + iconCenter.x, btnRect.y + iconCenter.y, WHITE
+        );
+
     } else {
         DToolInfo tool = tools[0];
         if (BpDummyToogleButton(btnRect, tool.tool == active)) {
@@ -81,8 +88,9 @@ DrawTool BpToolButton(
             *showOther = false;
         }
 
-        DrawTexture(tool.txt, iconPos.x, iconPos.y, WHITE);
-        // GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
+        DrawTexture(
+            tool.txt, btnRect.x + iconCenter.x, btnRect.y + iconCenter.y, WHITE
+        );
     }
 
     if (CheckCollisionPointRec(GetMousePosition(), btnRect) &&
@@ -111,16 +119,16 @@ DrawTool BpToolButton(
 
                 btnRect.x += (i * btnRect.width) + 10 * i;
                 DToolInfo tool = tools[list[i]];
-                iconPos.x = btnRect.x + 4;
-                iconPos.y = btnRect.y + 4;
 
                 if (BpDummyToogleButton(btnRect, false)) {
                     clicked = tool.tool;
                     *showOther = false;
                 }
 
-                DrawTexture(tool.txt, iconPos.x, iconPos.y, WHITE);
-                // GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
+                DrawTexture(
+                    tool.txt, btnRect.x + iconCenter.x,
+                    btnRect.y + iconCenter.y, WHITE
+                );
             }
         }
     }
