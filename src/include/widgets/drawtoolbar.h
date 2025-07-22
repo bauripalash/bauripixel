@@ -2,6 +2,7 @@
 #define DRAWTOOLBAR_H
 
 #include "../../external/raylib.h"
+#include "../components.h"
 #include "../drawtools.h"
 #include "widget.h"
 #include <stdbool.h>
@@ -11,6 +12,19 @@
 #define DTBAR_MARGIN_L      10
 #define DTBAR_MARGIN_R      DTBAR_MARGIN_L
 #define DTBAR_MARGIN_TB     10
+
+typedef struct ToolBtnInfo {
+
+    DToolInfo pencilTool;
+    DToolInfo eraserTool;
+    DToolInfo lineTool;
+    DToolInfo circleTool;
+    DToolInfo circleFillTool;
+    DToolInfo rectTool;
+    DToolInfo rectFillTool;
+    DToolInfo panTool;
+
+} ToolBtnInfo;
 
 typedef struct {
     WidgetProp prop;
@@ -24,6 +38,9 @@ typedef struct {
 
     int brushSize;
     bool brushSizeEdit;
+
+    ToolBtnInfo tools;
+
 } DrawToolBarState;
 
 DrawToolBarState NewDrawToolBar();

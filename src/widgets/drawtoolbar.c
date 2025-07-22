@@ -4,10 +4,40 @@
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
-#include "../include/toolinfos.h"
+#include "../include/exported/drawtoolicons.h"
 #include "../include/utils.h"
 #include <math.h>
 #include <stdbool.h>
+
+static DToolInfo NewTool(DrawTool tool, const unsigned char *img, int size) {
+
+    DToolInfo t = {.tool = tool, .img = LoadImageFromMemory(".png", img, size)};
+    t.txt = LoadTextureFromImage(t.img);
+    return t;
+}
+
+ToolBtnInfo NewToolBtnInfo() {
+    ToolBtnInfo tb = {0};
+    tb.pencilTool = NewTool(DT_PENCIL, PENCIL_PNG_DATA, PENCIL_PNG_SIZE);
+
+    tb.eraserTool = NewTool(DT_ERASER, ERASER_PNG_DATA, ERASER_PNG_SIZE);
+
+    tb.lineTool = NewTool(DT_LINE, LINE_PNG_DATA, LINE_PNG_SIZE);
+
+    tb.circleTool = NewTool(DT_CIRCLE, CIRCLE_PNG_DATA, CIRCLE_PNG_SIZE);
+
+    tb.circleFillTool =
+        NewTool(DT_CIRCLE_FILL, CIRCLE_FILL_PNG_DATA, CIRCLE_FILL_PNG_SIZE);
+
+    tb.rectTool = NewTool(DT_RECT, RECT_PNG_DATA, RECT_PNG_SIZE);
+
+    tb.rectFillTool =
+        NewTool(DT_RECT_FILL, RECT_FILL_PNG_DATA, RECT_FILL_PNG_SIZE);
+
+    tb.panTool = NewTool(DT_PAN, PAN_PNG_DATA, PAN_PNG_SIZE);
+
+    return tb;
+}
 
 DrawToolBarState NewDrawToolBar() {
     DrawToolBarState dtb = {0};
@@ -22,6 +52,9 @@ DrawToolBarState NewDrawToolBar() {
 
     dtb.brushSize = 1.0;
     dtb.brushSizeEdit = false;
+
+    dtb.tools = NewToolBtnInfo();
+
     return dtb;
 }
 void FreeDrawToolBar(DrawToolBarState *state) { return; }
@@ -167,23 +200,6 @@ static bool otherCircle = false;
 static bool otherRect = false;
 static bool otherPan = false;
 
-static void turnOffOthers() {
-    otherPen = false;
-    otherEraser = false;
-    otherLine = false;
-    otherCircle = false;
-    otherRect = false;
-    otherPan = false;
-}
-
-static void checkAndTurnOff(Vector2 mpos, Rectangle btnRect) {
-    return;
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-        !CheckCollisionPointRec(mpos, btnRect)) {
-        turnOffOthers();
-    }
-}
-
 int DrawToolbar(DrawToolBarState *state) {
     updateBounds(state);
     handleShortcuts(state);
@@ -217,44 +233,51 @@ int DrawToolbar(DrawToolBarState *state) {
         DEFAULT_DT_BTN_SIZE,
     };
 
+    DToolInfo penTools[] = {state->tools.pencilTool};
+    DToolInfo eraserTools[] = {state->tools.eraserTool};
+    DToolInfo lineTools[] = {state->tools.lineTool};
+    DToolInfo rectTools[] = {state->tools.rectTool, state->tools.rectFillTool};
+    DToolInfo circleTools[] = {
+        state->tools.circleTool, state->tools.circleFillTool
+    };
+
+    DToolInfo panTools[] = {state->tools.panTool};
+
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherPen, ArrCount(PenToolInfo),
-        PenToolInfo
+        btnRect, state->currentTool, &otherPen, ArrCount(penTools), penTools
     );
 
     btnRect.y += yInc;
 
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherEraser, ArrCount(EraserToolInfo),
-        EraserToolInfo
+        btnRect, state->currentTool, &otherEraser, ArrCount(eraserTools),
+        eraserTools
     );
 
     btnRect.y += yInc;
 
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherLine, ArrCount(LineToolInfo),
-        LineToolInfo
+        btnRect, state->currentTool, &otherLine, ArrCount(lineTools), lineTools
     );
 
     btnRect.y += yInc;
 
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherCircle, ArrCount(CircleToolInfo),
-        CircleToolInfo
+        btnRect, state->currentTool, &otherCircle, ArrCount(rectTools),
+        rectTools
     );
 
     btnRect.y += yInc;
 
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherRect, ArrCount(RectToolInfo),
-        RectToolInfo
+        btnRect, state->currentTool, &otherRect, ArrCount(circleTools),
+        circleTools
     );
 
     btnRect.y += yInc;
 
     state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherPan, ArrCount(PanToolInfo),
-        PanToolInfo
+        btnRect, state->currentTool, &otherPan, ArrCount(panTools), panTools
     );
 
     DrawOptToolbar(state);

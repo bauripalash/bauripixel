@@ -44,7 +44,7 @@ bool BpDummyToogleButton(Rectangle bounds, bool active) {
     return clicked;
 }
 
-static int getActiveTool(DrawTool active, int num, const ToolInfo *tools) {
+static int getActiveTool(DrawTool active, int num, const DToolInfo *tools) {
     for (int i = 0; i < num; i++) {
         if (tools[i].tool == active) {
             return i;
@@ -55,7 +55,7 @@ static int getActiveTool(DrawTool active, int num, const ToolInfo *tools) {
 
 DrawTool BpToolButton(
     Rectangle bounds, DrawTool active, bool *showOther, int num,
-    const ToolInfo *tools
+    const DToolInfo *tools
 ) {
 
     Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height};
@@ -66,20 +66,23 @@ DrawTool BpToolButton(
     Vector2 iconPos = {btnRect.x + 4, btnRect.y + 5};
 
     if (activeToolIndex >= 0) {
-        ToolInfo tool = tools[activeToolIndex];
+        DToolInfo tool = tools[activeToolIndex];
         if (BpDummyToogleButton(btnRect, true)) {
             *showOther = false;
         }
-        GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
+        DrawTexture(tool.txt, iconPos.x, iconPos.y, WHITE);
+        // GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
         btnRect.y += 3;
         iconPos.y = btnRect.y + 3 + 5;
     } else {
-        ToolInfo tool = tools[0];
+        DToolInfo tool = tools[0];
         if (BpDummyToogleButton(btnRect, tool.tool == active)) {
             clicked = tool.tool;
             *showOther = false;
         }
-        GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
+
+        DrawTexture(tool.txt, iconPos.x, iconPos.y, WHITE);
+        // GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
     }
 
     if (CheckCollisionPointRec(GetMousePosition(), btnRect) &&
@@ -107,7 +110,7 @@ DrawTool BpToolButton(
             for (int i = 0; i < numOtherTools; i++) {
 
                 btnRect.x += (i * btnRect.width) + 10 * i;
-                ToolInfo tool = tools[list[i]];
+                DToolInfo tool = tools[list[i]];
                 iconPos.x = btnRect.x + 4;
                 iconPos.y = btnRect.y + 4;
 
@@ -115,7 +118,9 @@ DrawTool BpToolButton(
                     clicked = tool.tool;
                     *showOther = false;
                 }
-                GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
+
+                DrawTexture(tool.txt, iconPos.x, iconPos.y, WHITE);
+                // GuiDrawIcon(tool.icon, iconPos.x, iconPos.y, 2, ColorWhite);
             }
         }
     }

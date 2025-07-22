@@ -14,15 +14,16 @@ bool BpSliderInt(
     Rectangle bounds, int *value, int min, int max, const char *unit
 );
 
-typedef struct ToolInfo {
-    GuiIconName icon;
+typedef struct DToolInfo {
     DrawTool tool;
-} ToolInfo;
+    Image img;
+    Texture txt;
+} DToolInfo;
 
 bool BpDummyToogleButton(Rectangle bounds, bool active);
 DrawTool BpToolButton(
     Rectangle bounds, DrawTool active, bool *showOther, int num,
-    const ToolInfo *tools
+    const DToolInfo *tools
 );
 
 #endif
