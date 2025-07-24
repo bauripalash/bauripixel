@@ -87,11 +87,25 @@ BPDrawLine(CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr) {
 static void BPDrawRectangle(
     CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr, bool fill
 ) {
-    float xMin = fminf(a.x, b.x);
-    float yMin = fminf(a.y, b.y);
+    Vector2 start = a;
+    Vector2 end = b;
 
-    float xMax = fmaxf(a.x, b.x);
-    float yMax = fmaxf(a.y, b.y);
+    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
+        float dx = end.x - start.x;
+        float dy = end.y - start.y;
+        float len = fabsf(dx);
+        float signX = dx >= 0 ? 1.0f : -1.0f;
+        float signY = (dy >= 0) ? 1.0f : -1.0f;
+
+        end.x = start.x + signX * len;
+        end.y = start.y + signY * len;
+    }
+
+    float xMin = fminf(start.x, end.x);
+    float yMin = fminf(start.y, end.y);
+
+    float xMax = fmaxf(start.x, end.x);
+    float yMax = fmaxf(start.y, end.y);
 
     Vector2 topLeft = {xMin, yMin};
     Vector2 topRight = {xMax, yMin};
@@ -122,6 +136,17 @@ static void ellipseInRect(
 
     int x1 = (int)b.x;
     int y1 = (int)b.y;
+
+    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
+        int dx = x1 - x0;
+        int dy = y1 - y0;
+        int len = abs(dx);
+        int signX = dx >= 0 ? 1 : -1;
+        int signY = dy >= 0 ? 1 : -1;
+
+        x1 = x0 + signX * len;
+        y1 = y0 + signY * len;
+    }
 
     int _a = abs(x1 - x0);
     int _b = abs(y1 - y0);
@@ -173,14 +198,17 @@ static void ellipseInRect(
 
     while (y0 - y1 < _b) {
         ImageDrawRectangle(img, x0 - 1, y0, brushSize, brushSize, clr);
-        ImageDrawRectangle(img, x1 + 1, y0++, brushSize, brushSize, clr);
+        ImageDrawRectangle(img, x1 + 1, y0, brushSize, brushSize, clr);
         ImageDrawRectangle(img, x0 - 1, y1, brushSize, brushSize, clr);
-        ImageDrawRectangle(img, x1 + 1, y1--, brushSize, brushSize, clr);
+        ImageDrawRectangle(img, x1 + 1, y1, brushSize, brushSize, clr);
 
         if (fill) {
             drawHLine(img, x0 - 1, x1 + 1, y0, clr);
             drawHLine(img, x0 - 1, x1 + 1, y1, clr);
         }
+
+        y0++;
+        y1--;
     }
 }
 
@@ -195,6 +223,11 @@ static void ellipseInCenter(
 
     int rx = abs(xd - xc);
     int ry = abs(yd - yc);
+
+    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
+        int r = rx > ry ? rx : ry;
+        rx = ry = r;
+    }
 
     Vector2 xy0 = {xc - rx, yc - ry};
 
