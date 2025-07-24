@@ -1,3 +1,4 @@
+#include <float.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -44,7 +45,8 @@ bool PointIsAtCanvas(CanvasState *state, Rectangle rect, Vector2 point) {
     return false;
 }
 
-// Bresenham's line algorithm (modified) (prototype)
+// Bresenham's line algorithm
+// based on https://zingl.github.io/bresenham.html
 static void
 BPDrawLine(CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr) {
     int x0 = (int)a.x;
@@ -60,24 +62,23 @@ BPDrawLine(CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr) {
     int dy = -abs(y1 - y0);
     int sy = y0 < y1 ? 1 : -1;
     int err = dx + dy;
+    int e2 = 0;
 
     while (true) {
-        // ImageDrawPixel(img, x0, y0, clr);
-        ImageDrawRectangle(img, x0, y0, bs, bs, clr);
-        int e2 = 2 * err;
+        ImageDrawPixel(img, x0, y0, clr);
+        // ImageDrawRectangle(img, x0, y0, bs, bs, clr);
+        e2 = 2 * err;
+
+        if (x0 == x1 && y0 == y1) {
+            break;
+        }
 
         if (e2 >= dy) {
-            if (x0 == x1) {
-                break;
-            }
-
             err += dy;
             x0 += sx;
         }
 
         if (e2 <= dx) {
-            if (y0 == y1)
-                break;
             err += dx;
             y0 += sy;
         }
