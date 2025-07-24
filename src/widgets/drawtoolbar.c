@@ -134,6 +134,18 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
         tool = DT_LINE;
     } else if (IsKeyPressed(KEY_M)) {
         tool = DT_PAN;
+    } else if (IsKeyPressed(KEY_C)) {
+        if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+            tool = DT_CIRCLE_FILL;
+        } else {
+            tool = DT_CIRCLE;
+        }
+    } else if (IsKeyPressed(KEY_R)) {
+        if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+            tool = DT_RECT_FILL;
+        } else {
+            tool = DT_RECT;
+        }
     }
 
     if (tool != state->currentTool) {

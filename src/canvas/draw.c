@@ -14,12 +14,12 @@ Vector4 getCanvasPos(CanvasState *state, Rectangle canvasRect) {
     Vector2 wMpos = GetScreenToWorld2D(mpos, state->camera);
 
     if (CheckCollisionPointRec(mpos, state->drawArea)) {
-        if (CheckCollisionPointRec(wMpos, canvasRect)) {
-            float px = floorf(wMpos.x - canvasRect.x);
-            float py = floorf(wMpos.y - canvasRect.y);
+        // if (CheckCollisionPointRec(wMpos, canvasRect)) {
+        float px = floorf(wMpos.x - canvasRect.x);
+        float py = floorf(wMpos.y - canvasRect.y);
 
-            return (Vector4){px, py, wMpos.x, wMpos.y};
-        }
+        return (Vector4){px, py, wMpos.x, wMpos.y};
+        //}
     }
     return (Vector4){-1, -1, wMpos.x, wMpos.y};
 }
@@ -108,27 +108,110 @@ static void BPDrawRectangle(
     }
 }
 
+static void drawHLine(Image *img, int x0, int x1, int y, Color clr) {
+    ImageDrawLine(img, x0, y, x1, y, clr);
+}
+
+// Based on https://zingl.github.io/bresenham.html
+static void ellipseInRect(
+    CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr, bool fill
+) {
+    int brushSize = state->brushSize;
+    int x0 = (int)a.x;
+    int y0 = (int)a.y;
+
+    int x1 = (int)b.x;
+    int y1 = (int)b.y;
+
+    int _a = abs(x1 - x0);
+    int _b = abs(y1 - y0);
+    int _b1 = _b & 1;
+    long dx = 4 * (1 - _a) * _b * _b;
+    long dy = 4 * (_b1 + 1) * _a * _a;
+    long err = dx + dy + _b1 * _a * _a;
+    long e2 = 0;
+
+    if (x0 > x1) {
+        x0 = x1;
+        x1 += _a;
+    }
+
+    if (y0 > y1) {
+        y0 = y1;
+    }
+
+    y0 += (_b + 1) / 2;
+    y1 = y0 - _b1;
+    _a = 8 * _a * _a;
+    _b1 = 8 * _b * _b;
+
+    do {
+        ImageDrawRectangle(img, x1, y0, brushSize, brushSize, clr);
+        ImageDrawRectangle(img, x0, y0, brushSize, brushSize, clr);
+        ImageDrawRectangle(img, x0, y1, brushSize, brushSize, clr);
+        ImageDrawRectangle(img, x1, y1, brushSize, brushSize, clr);
+
+        if (fill) {
+            drawHLine(img, x0, x1, y0, clr);
+            drawHLine(img, x0, x1, y1, clr);
+        }
+
+        e2 = 2 * err;
+        if (e2 <= dy) {
+            y0++;
+            y1--;
+            err += dy += _a;
+        }
+
+        if (e2 >= dx || 2 * err > dy) {
+            x0++;
+            x1--;
+
+            err += dx += _b1;
+        }
+    } while (x0 <= x1);
+
+    while (y0 - y1 < _b) {
+        ImageDrawRectangle(img, x0 - 1, y0, brushSize, brushSize, clr);
+        ImageDrawRectangle(img, x1 + 1, y0++, brushSize, brushSize, clr);
+        ImageDrawRectangle(img, x0 - 1, y1, brushSize, brushSize, clr);
+        ImageDrawRectangle(img, x1 + 1, y1--, brushSize, brushSize, clr);
+
+        if (fill) {
+            drawHLine(img, x0 - 1, x1 + 1, y0, clr);
+            drawHLine(img, x0 - 1, x1 + 1, y1, clr);
+        }
+    }
+}
+
+static void ellipseInCenter(
+    CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr, bool fill
+) {
+    int xc = (int)a.x; // center x
+    int yc = (int)a.y; // center y
+
+    int xd = (int)b.x;
+    int yd = (int)b.y;
+
+    int rx = abs(xd - xc);
+    int ry = abs(yd - yc);
+
+    Vector2 xy0 = {xc - rx, yc - ry};
+
+    Vector2 xy1 = {xc + rx, yc + ry};
+
+    ellipseInRect(state, img, xy0, xy1, clr, fill);
+}
+
 static void BPDrawCircle(
     CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr, bool fill,
     bool center
 ) {
-    if (center) {
-        float radius = Vector2Distance(b, a);
-        if (fill) {
-            ImageDrawCircleV(img, a, radius, clr);
-        } else {
-            ImageDrawCircleLinesV(img, a, radius, clr);
-        }
-    } else {
-        Vector2 center = Vector2Add(a, b);
-        center = (Vector2){center.x / 2.0f, center.y / 2.0f};
-        float radius = Vector2Distance(center, b);
 
-        if (fill) {
-            ImageDrawCircleV(img, center, radius, clr);
-        } else {
-            ImageDrawCircleLinesV(img, center, radius, clr);
-        }
+    if (center) {
+        ellipseInCenter(state, img, a, b, clr, fill);
+    } else {
+        ellipseInRect(state, img, a, b, clr, fill);
     }
 }
 
@@ -160,8 +243,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
     if (state->curTool == DT_PENCIL || state->curTool == DT_ERASER) {
 
-        if (pxAtCanvas && IsMouseButtonDown(MOUSE_BUTTON_LEFT) &&
-            !state->enablePanning) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !state->enablePanning) {
             if (state->brushSize >= 1) {
                 if (state->brushSize == 1) {
                     ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
@@ -175,14 +257,14 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
             }
         }
     } else if (state->curTool == DT_LINE) {
-        if (pxAtCanvas && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             state->lineStart.x = pl;
             state->lineStart.y = pt;
 
             state->lineDragging = true;
         }
 
-        if (pxAtCanvas && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
             if (pl == state->lineStart.x && pt == state->lineStart.y) {
                 ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
@@ -195,23 +277,23 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
                 );
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
                 ImageClearBackground(&state->previewImg, BLANK);
-
-                ImageClearBackground(&state->previewImg, BLANK);
             }
 
-            state->lineStart.x = -1;
-            state->lineStart.y = -1;
+            // state->lineStart.x = -1;
+            // state->lineStart.y = -1;
+            state->lineStart.x = 0;
+            state->lineStart.y = 0;
             state->lineDragging = false;
         }
     } else if (state->curTool == DT_RECT || state->curTool == DT_RECT_FILL) {
-        if (pxAtCanvas && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             state->lineStart.x = pl;
             state->lineStart.y = pt;
 
             rectDragging = true;
         }
 
-        if (pxAtCanvas && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
             if (pl == state->lineStart.x && pt == state->lineStart.y) {
                 ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
@@ -226,16 +308,17 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
                 UpdateTexture(state->canvasTxt, state->canvasImg.data);
                 ImageClearBackground(&state->previewImg, BLANK);
-
-                ImageClearBackground(&state->previewImg, BLANK);
             }
 
-            state->lineStart.x = -1;
-            state->lineStart.y = -1;
+            // state->lineStart.x = -1;
+            // state->lineStart.y = -1;
+            state->lineStart.x = 0;
+            state->lineStart.y = 0;
             rectDragging = false;
         }
-    } else if (curtool == DT_CIRCLE || curtool == DT_CIRCLE_FILL) {
-        if (pxAtCanvas && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    } else if (state->curTool == DT_CIRCLE ||
+               state->curTool == DT_CIRCLE_FILL) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             state->lineStart.x = pl;
             state->lineStart.y = pt;
 
@@ -243,6 +326,21 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         }
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            if (pl == state->lineStart.x && pt == state->lineStart.y) {
+                ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
+                UpdateTexture(state->canvasTxt, state->canvasImg.data);
+            } else {
+                canvasPos = getCanvasPos(state, canvasRect);
+                BPDrawCircle(
+                    state, &state->canvasImg, state->lineStart,
+                    (Vector2){canvasPos.x, canvasPos.y}, dClr,
+                    curtool == DT_CIRCLE_FILL, IsKeyDown(KEY_LEFT_SHIFT)
+                );
+                UpdateTexture(state->canvasTxt, state->canvasImg.data);
+                ImageClearBackground(&state->previewImg, BLANK);
+            }
+            state->lineStart.x = 0;
+            state->lineStart.y = 0;
             circleDragging = false;
         }
     }
@@ -279,7 +377,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         }
     }
 
-    if (state->lineDragging) {
+    if (curtool == DT_LINE && state->lineDragging) {
         BPDrawLine(
             state, &state->previewImg, state->lineStart, (Vector2){pl, pt}, dClr
         );
@@ -289,8 +387,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         // TraceLog(LOG_ERROR, "Line Angle D[%f] | R[%f]", degAngle, radAngle);
     }
 
-    if (rectDragging) {
-
+    if ((curtool == DT_RECT || curtool == DT_RECT_FILL) && rectDragging) {
         canvasPos = getCanvasPos(state, canvasRect);
         BPDrawRectangle(
             state, &state->previewImg, state->lineStart,
@@ -299,7 +396,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         );
     }
 
-    if (circleDragging) {
+    if ((curtool == DT_CIRCLE_FILL || curtool == DT_CIRCLE) && circleDragging) {
         canvasPos = getCanvasPos(state, canvasRect);
         BPDrawCircle(
             state, &state->previewImg, state->lineStart,
