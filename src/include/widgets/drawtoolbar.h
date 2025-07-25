@@ -37,6 +37,8 @@ typedef struct {
     DrawTool currentTool;
 
     int brushSize;
+    BrushShape brushShape;
+
     bool brushSizeEdit;
 
     ToolBtnInfo tools;

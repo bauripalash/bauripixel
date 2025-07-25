@@ -90,8 +90,16 @@ CanvasState NewCanvas() {
 
     // --
     c.brushSize = 1;
-    c.lineStart = (Vector2){-1, -1};
+    c.brushShape = BSP_SQAURE;
+    c.lineStart = (Vector2){0, 0};
     c.lineDragging = false;
+
+    c.circleStart = (Vector2){0, 0};
+    c.circleDragging = false;
+
+    c.rectStart = (Vector2){0, 0};
+    c.rectDragging = false;
+
     // --
 
     return c;

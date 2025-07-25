@@ -18,4 +18,12 @@ typedef enum DrawTool {
 
 } DrawTool;
 
+typedef enum BrushShape {
+    BSP_SQAURE,
+    BSP_CIRCLE,
+
+    // Custom Brush {NOT YET}
+    BSP_CUSTOM,
+} BrushShape;
+
 #endif

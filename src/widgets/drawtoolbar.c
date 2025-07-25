@@ -51,6 +51,7 @@ DrawToolBarState NewDrawToolBar() {
     dtb.prop.bounds.height = 0;
 
     dtb.brushSize = 1.0;
+    dtb.brushShape = BSP_SQAURE;
     dtb.brushSizeEdit = false;
 
     dtb.tools = NewToolBtnInfo();
@@ -163,7 +164,15 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
         float px = bounds.x;
         float py = bounds.y;
 
-        Rectangle rect = {px, py, 60, bounds.height};
+        Rectangle rect = {px, py, bounds.height, bounds.height};
+
+        DToolInfo shapes[] = {
+            state->tools.rectFillTool, state->tools.circleFillTool
+        };
+        BpBrushShapeButton(rect, &state->brushShape, shapes);
+
+        rect.x += rect.width + 10;
+        rect.width = 60;
 
         BpInputSliderInt(
             rect, &state->brushSize, 0, 32, "px", &state->brushSizeEdit

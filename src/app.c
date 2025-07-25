@@ -131,6 +131,7 @@ void Layout() {
     //);
     canvas.curTool = dtb.currentTool;
     canvas.brushSize = (int)floorf(dtb.brushSize);
+    canvas.brushShape = dtb.brushShape;
     // canvas.current = cb.currentColor;
     Canvas(&canvas);
     UpdateCanvasAnchor(

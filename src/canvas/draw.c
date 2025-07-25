@@ -4,33 +4,36 @@
 #include <stdlib.h>
 
 #include "../external/raylib.h"
-#include "../external/raymath.h"
-#include "../include/colors.h"
+#include "../include/utils.h"
 #include "../include/widgets/canvas.h"
 
-// Returns position of mouse if inside a canvas.
-// x,y => canvas cord || w,z => worldMousePos
-Vector4 getCanvasPos(CanvasState *state, Rectangle canvasRect) {
+static void
+DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr);
+
+// Returns position of mouse if inside a drawArea
+// x,y => canvas cord
+Vector2 getCanvasPos(CanvasState *state, Rectangle canvasRect) {
     Vector2 mpos = GetMousePosition();
     Vector2 wMpos = GetScreenToWorld2D(mpos, state->camera);
 
     if (CheckCollisionPointRec(mpos, state->drawArea)) {
-        // if (CheckCollisionPointRec(wMpos, canvasRect)) {
         float px = floorf(wMpos.x - canvasRect.x);
         float py = floorf(wMpos.y - canvasRect.y);
-
-        return (Vector4){px, py, wMpos.x, wMpos.y};
-        //}
+        return (Vector2){px, py};
     }
-    return (Vector4){-1, -1, wMpos.x, wMpos.y};
+    return (Vector2){-1, -1};
 }
 
-bool validCanvasPos(Vector2 gridSize, Vector4 pos) {
+bool validCanvasPos(Vector2 gridSize, Vector2 pos) {
     if ((pos.x < 0 || pos.x >= gridSize.x) ||
         (pos.y < 0 || pos.y >= gridSize.y)) {
         return false;
     }
     return true;
+}
+
+bool MouseIsAtRect(Rectangle rect) {
+    return (CheckCollisionPointRec(GetMousePosition(), rect));
 }
 
 bool MouseIsAtCanvas(CanvasState *state, Rectangle rect) {
@@ -41,10 +44,9 @@ bool MouseIsAtCanvas(CanvasState *state, Rectangle rect) {
     );
 }
 
-bool PointIsAtCanvas(CanvasState *state, Rectangle rect, Vector2 point) {
-    return false;
+static inline void drawHLine(Image *img, int x0, int x1, int y, Color clr) {
+    ImageDrawLine(img, x0, y, x1, y, clr);
 }
-
 // Bresenham's line algorithm
 // based on https://zingl.github.io/bresenham.html
 static void
@@ -65,8 +67,7 @@ BPDrawLine(CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr) {
     int e2 = 0;
 
     while (true) {
-        ImageDrawPixel(img, x0, y0, clr);
-        // ImageDrawRectangle(img, x0, y0, bs, bs, clr);
+        DrawBrush(state, img, x0, y0, clr);
         e2 = 2 * err;
 
         if (x0 == x1 && y0 == y1) {
@@ -121,10 +122,6 @@ static void BPDrawRectangle(
     if (fill) {
         ImageDrawRectangle(img, xMin, yMin, xMax - xMin, yMax - yMin, clr);
     }
-}
-
-static void drawHLine(Image *img, int x0, int x1, int y, Color clr) {
-    ImageDrawLine(img, x0, y, x1, y, clr);
 }
 
 // Based on https://zingl.github.io/bresenham.html
@@ -237,7 +234,7 @@ static void ellipseInCenter(
     ellipseInRect(state, img, xy0, xy1, clr, fill);
 }
 
-static void BPDrawCircle(
+static void BPDrawEllipse(
     CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr, bool fill,
     bool center
 ) {
@@ -249,194 +246,223 @@ static void BPDrawCircle(
     }
 }
 
-static bool rectDragging = false;
-static bool circleDragging = false;
+static void
+BPDrawCircle(Image *img, int posX, int posY, int r, Color clr, bool fill) {
+    int x = -r;
+    int y = 0;
+    int err = 2 - 2 * r;
+
+    do {
+        ImageDrawPixel(img, posX - x, posY + y, clr);
+        ImageDrawPixel(img, posX - y, posY - x, clr);
+        ImageDrawPixel(img, posX + x, posY - y, clr);
+        ImageDrawPixel(img, posX + y, posY + x, clr);
+
+        int lx = posX + x;
+        int rx = posX - x;
+
+        int ty = posY + y;
+        int by = posY - y;
+        if (fill) {
+            drawHLine(img, lx, rx, ty, clr);
+            drawHLine(img, lx, rx, by, clr);
+        }
+
+        r = err;
+        if (r <= y) {
+            err += ++y * 2 + 1;
+        }
+        if (r > x || err > y) {
+            err += ++x * 2 + 1;
+        }
+    } while (x < 0);
+}
+
+static void
+DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr) {
+    int size = state->brushSize;
+    if (state->brushShape == BSP_SQAURE) {
+        ImageDrawRectangle(img, posX, posY, size, size, clr);
+    } else {
+        BPDrawCircle(img, posX, posY, size / 2, clr, true);
+    }
+}
 
 void DrawingCanvas(CanvasState *state, Rectangle bounds) {
+
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
                                        state->gridSize.x, state->gridSize.y};
-    Vector4 canvasPos = getCanvasPos(state, canvasRect);
 
-    bool pxAtCanvas = validCanvasPos(state->gridSize, canvasPos);
-    Vector2 mpos = GetMousePosition();
+    // should not be used directly in drawing
+    Vector2 rawCanvasPos = getCanvasPos(state, canvasRect);
 
-    int canPx = (int)canvasPos.x;
-    int canPy = (int)canvasPos.y;
+    bool pxIsValid = validCanvasPos(state->gridSize, rawCanvasPos);
+    bool atDrawArea = MouseIsAtRect(state->drawArea);
+    bool atCanvas = atDrawArea && pxIsValid;
 
-    int pl = (int)ceilf(canvasPos.x - state->brushSize * 0.5f);
-    int pt = (int)ceilf(canvasPos.y - state->brushSize * 0.5f);
-    int pr = pl + state->brushSize;
-    int pb = pt + state->brushSize;
-    bool atCanvas = MouseIsAtCanvas(state, canvasRect);
+    int posLeft = (int)ceilf(rawCanvasPos.x - state->brushSize * 0.5f);
+    int posTop = (int)ceilf(rawCanvasPos.y - state->brushSize * 0.5f);
+    int posRight = posLeft + state->brushSize;
+    int posBottom = posTop + state->brushSize;
 
-    Vector2 cPos = {canvasPos.x, canvasPos.y};
+    BrushShape shape = state->brushShape;
+
+    int curPx = shape == BSP_SQAURE ? posLeft : (rawCanvasPos.x);
+    int curPy = shape == BSP_SQAURE ? posTop : (rawCanvasPos.y);
+
+    // This is the actual current position accordingto brush size;
+    Vector2 curPos = {curPx, curPy};
 
     Color dClr = state->curTool == DT_ERASER ? WHITE : state->current;
+    Color dColor = state->curTool == DT_ERASER ? WHITE : state->current;
 
     DrawTool curtool = state->curTool;
 
-    if (state->curTool == DT_PENCIL || state->curTool == DT_ERASER) {
-
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !state->enablePanning) {
-            if (state->brushSize >= 1) {
-                if (state->brushSize == 1) {
-                    ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
-                } else if (state->brushSize > 1) {
-                    ImageDrawRectangle(
-                        &state->canvasImg, pl, pt, state->brushSize,
-                        state->brushSize, dClr
-                    );
-                }
-                UpdateTexture(state->canvasTxt, state->canvasImg.data);
+    int brushSize = state->brushSize;
+    bool leftDown = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+    bool leftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    bool leftReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
+    bool keepRatio = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+    Image *canvas = &state->canvasImg;
+    Image *preview = &state->previewImg;
+    if (atDrawArea) {
+        switch (curtool) {
+        case DT_PENCIL: {
+            if (leftDown) {
+                DrawBrush(state, canvas, curPx, curPy, dClr);
+                UpdateTexture(state->canvasTxt, canvas->data);
             }
-        }
-    } else if (state->curTool == DT_LINE) {
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            state->lineStart.x = pl;
-            state->lineStart.y = pt;
-
-            state->lineDragging = true;
+            break;
         }
 
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if (pl == state->lineStart.x && pt == state->lineStart.y) {
-                ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
-                UpdateTexture(state->canvasTxt, state->canvasImg.data);
-
-            } else {
-                canvasPos = getCanvasPos(state, canvasRect);
-                BPDrawLine(
-                    state, &state->canvasImg, state->lineStart,
-                    (Vector2){pl, pt}, dClr
-                );
-                UpdateTexture(state->canvasTxt, state->canvasImg.data);
-                ImageClearBackground(&state->previewImg, BLANK);
+        case DT_ERASER: {
+            if (leftDown) {
+                DrawBrush(state, canvas, curPx, curPy, dClr);
+                UpdateTexture(state->canvasTxt, canvas->data);
+            }
+            break;
+        }
+        case DT_LINE: {
+            if (leftPressed) {
+                state->lineStart.x = curPx;
+                state->lineStart.y = curPy;
+                state->lineDragging = true;
             }
 
-            // state->lineStart.x = -1;
-            // state->lineStart.y = -1;
-            state->lineStart.x = 0;
-            state->lineStart.y = 0;
-            state->lineDragging = false;
+            if (leftReleased) {
+                BPDrawLine(state, canvas, state->lineStart, curPos, dClr);
+                UpdateTexture(state->canvasTxt, canvas->data);
+                MakeVecZero(&state->lineStart);
+                state->lineDragging = false;
+            }
+            break;
         }
-    } else if (state->curTool == DT_RECT || state->curTool == DT_RECT_FILL) {
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            state->lineStart.x = pl;
-            state->lineStart.y = pt;
+        case DT_RECT:
+        case DT_RECT_FILL: {
+            if (leftPressed) {
+                state->rectStart.x = curPx;
+                state->rectStart.y = curPy;
+                state->rectDragging = true;
+            }
 
-            rectDragging = true;
-        }
-
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if (pl == state->lineStart.x && pt == state->lineStart.y) {
-                ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
-                UpdateTexture(state->canvasTxt, state->canvasImg.data);
-            } else {
-                canvasPos = getCanvasPos(state, canvasRect);
-
+            if (leftReleased) {
                 BPDrawRectangle(
-                    state, &state->canvasImg, state->lineStart,
-                    (Vector2){canvasPos.x, canvasPos.y}, dClr,
-                    state->curTool == DT_RECT_FILL
+                    state, canvas, state->rectStart, curPos, dClr,
+                    curtool == DT_RECT_FILL
                 );
-
-                UpdateTexture(state->canvasTxt, state->canvasImg.data);
-                ImageClearBackground(&state->previewImg, BLANK);
+                UpdateTexture(state->canvasTxt, canvas->data);
+                MakeVecZero(&state->rectStart);
+                state->rectDragging = false;
             }
 
-            // state->lineStart.x = -1;
-            // state->lineStart.y = -1;
-            state->lineStart.x = 0;
-            state->lineStart.y = 0;
-            rectDragging = false;
+            break;
         }
-    } else if (state->curTool == DT_CIRCLE ||
-               state->curTool == DT_CIRCLE_FILL) {
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            state->lineStart.x = pl;
-            state->lineStart.y = pt;
-
-            circleDragging = true;
-        }
-
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if (pl == state->lineStart.x && pt == state->lineStart.y) {
-                ImageDrawPixel(&state->canvasImg, pl, pt, dClr);
-                UpdateTexture(state->canvasTxt, state->canvasImg.data);
-            } else {
-                canvasPos = getCanvasPos(state, canvasRect);
-                BPDrawCircle(
-                    state, &state->canvasImg, state->lineStart,
-                    (Vector2){canvasPos.x, canvasPos.y}, dClr,
-                    curtool == DT_CIRCLE_FILL, IsKeyDown(KEY_LEFT_SHIFT)
-                );
-                UpdateTexture(state->canvasTxt, state->canvasImg.data);
-                ImageClearBackground(&state->previewImg, BLANK);
+        case DT_CIRCLE:
+        case DT_CIRCLE_FILL: {
+            if (leftPressed) {
+                state->circleStart.x = curPx;
+                state->circleStart.y = curPy;
+                state->circleDragging = true;
             }
-            state->lineStart.x = 0;
-            state->lineStart.y = 0;
-            circleDragging = false;
+
+            if (leftReleased) {
+                BPDrawEllipse(
+                    state, canvas, state->circleStart, curPos, dClr,
+                    curtool == DT_CIRCLE_FILL, keepRatio
+                );
+                UpdateTexture(state->canvasTxt, canvas->data);
+                MakeVecZero(&state->circleStart);
+                state->circleDragging = false;
+            }
+
+            break;
+        }
+
+        default:
+            break;
         }
     }
 
     ImageClearBackground(&state->previewImg, BLANK);
 
-    // NOTE: what should eraser draw?
-    if (atCanvas && !state->enablePanning && curtool != DT_NOTOOL) {
-        if (state->brushSize >= 1) {
-            if (state->brushSize == 1) {
-                if (curtool == DT_ERASER) {
-                    ImageDrawPixel(
-                        &state->previewImg, pl, pt,
-                        Fade(ColorGreenLightest, 0.3)
-                    );
-                } else {
-                    ImageDrawPixel(&state->previewImg, pl, pt, dClr);
-                }
-            } else if (state->brushSize > 1) {
-                if (curtool == DT_ERASER) {
+    if (atCanvas) {
 
-                    ImageDrawRectangleLines(
-                        &state->previewImg,
-                        (Rectangle){pl, pt, state->brushSize, state->brushSize},
-                        1, Fade(ColorGreenLightest, 0.3)
-                    );
-                } else {
-                    ImageDrawRectangle(
-                        &state->previewImg, pl, pt, state->brushSize,
-                        state->brushSize, dClr
-                    );
-                }
-            }
+        switch (curtool) {
+        case DT_PENCIL: {
+            DrawBrush(state, &state->previewImg, curPx, curPy, dClr);
+            break;
         }
-    }
+        case DT_ERASER: {
+            DrawBrush(state, &state->previewImg, curPx, curPy, WHITE);
+            break;
+        }
+        case DT_LINE: {
+            if (!state->lineDragging) {
+                DrawBrush(state, &state->previewImg, curPx, curPy, dClr);
 
-    if (curtool == DT_LINE && state->lineDragging) {
-        BPDrawLine(
-            state, &state->previewImg, state->lineStart, (Vector2){pl, pt}, dClr
-        );
+            } else {
+                BPDrawLine(
+                    state, &state->previewImg, state->lineStart,
+                    (Vector2){curPx, curPy}, dClr
+                );
+            }
+            break;
+        }
 
-        // float radAngle = GetRadAngleAtoB(state->lineStart, cPos);
-        // float degAngle = GetDegAngleAtoB(state->lineStart, cPos);
-        // TraceLog(LOG_ERROR, "Line Angle D[%f] | R[%f]", degAngle, radAngle);
-    }
+        case DT_RECT:
+        case DT_RECT_FILL: {
+            if (!state->rectDragging) {
+                DrawBrush(state, &state->previewImg, curPx, curPy, dClr);
+            } else {
+                bool fill = curtool == DT_RECT_FILL;
+                BPDrawRectangle(
+                    state, &state->previewImg, state->rectStart, curPos, dClr,
+                    fill
+                );
+            }
+            break;
+        }
 
-    if ((curtool == DT_RECT || curtool == DT_RECT_FILL) && rectDragging) {
-        canvasPos = getCanvasPos(state, canvasRect);
-        BPDrawRectangle(
-            state, &state->previewImg, state->lineStart,
-            (Vector2){canvasPos.x, canvasPos.y}, dClr,
-            state->curTool == DT_RECT_FILL
-        );
-    }
+        case DT_CIRCLE:
+        case DT_CIRCLE_FILL: {
+            if (!state->circleDragging) {
+                DrawBrush(state, &state->previewImg, curPx, curPy, dClr);
+            } else {
+                bool keepRatio =
+                    IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+                bool fill = curtool == DT_CIRCLE_FILL;
+                BPDrawEllipse(
+                    state, &state->previewImg, state->circleStart, curPos, dClr,
+                    fill, keepRatio
+                );
+            }
 
-    if ((curtool == DT_CIRCLE_FILL || curtool == DT_CIRCLE) && circleDragging) {
-        canvasPos = getCanvasPos(state, canvasRect);
-        BPDrawCircle(
-            state, &state->previewImg, state->lineStart,
-            (Vector2){canvasPos.x, canvasPos.y}, dClr,
-            curtool == DT_CIRCLE_FILL, IsKeyDown(KEY_LEFT_SHIFT)
-        );
+            break;
+        }
+
+        default:
+            break;
+        }
     }
 
     DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);

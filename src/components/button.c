@@ -1,5 +1,6 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
+#include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
@@ -44,6 +45,38 @@ bool BpDummyToogleButton(Rectangle bounds, bool active) {
     );
 
     return clicked;
+}
+
+void BpBrushShapeButton(
+    Rectangle bounds, BrushShape *shape, const DToolInfo *tools
+) {
+    bool clicked = BpDummyToogleButton(bounds, false);
+    int shapeWidth = bounds.height - 4;
+
+    if (*shape == BSP_SQAURE) {
+        if (clicked)
+            *shape = BSP_CIRCLE;
+    } else {
+        if (clicked)
+            *shape = BSP_SQAURE;
+    }
+
+    Vector2 iconCenter = {
+        ((bounds.width - shapeWidth) / 2.0f),
+        ((bounds.height - shapeWidth) / 2.0f),
+    };
+
+    Rectangle iconRect = {
+        bounds.x + iconCenter.x, bounds.y + iconCenter.y,
+
+        shapeWidth, shapeWidth
+    };
+
+    Rectangle txtSrc = {0, 0, ICON_WIDTH, ICON_WIDTH};
+
+    Vector2 origin = Vector2Zero();
+
+    DrawTexturePro(tools[(int)*shape].txt, txtSrc, iconRect, origin, 0, WHITE);
 }
 
 static int getActiveTool(DrawTool active, int num, const DToolInfo *tools) {

@@ -50,8 +50,16 @@ typedef struct {
     // NOTE: must be changed :
 
     int brushSize;
+    BrushShape brushShape;
+
     Vector2 lineStart;
     bool lineDragging;
+
+    Vector2 circleStart;
+    bool circleDragging;
+
+    Vector2 rectStart;
+    bool rectDragging;
 
 } CanvasState;
 

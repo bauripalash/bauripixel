@@ -29,3 +29,8 @@ float GetDegAngleAtoB(Vector2 a, Vector2 b) {
 
     return deg;
 }
+
+void MakeVecZero(Vector2 *vec) {
+    vec->x = 0;
+    vec->y = 0;
+}
