@@ -69,7 +69,13 @@ CanvasState NewCanvas() {
 
     c.camera.zoom = zm;
 
-    c.canvasImg = GenImageColor(c.gridSize.x, c.gridSize.y, WHITE);
+    c.bgColor = BLANK;
+    c.bgImg = GenImageChecked(
+        c.gridSize.x, c.gridSize.y, 8, 8, ColorCheckerLight, ColorCheckerDark
+    );
+    c.bgTxt = LoadTextureFromImage(c.bgImg);
+
+    c.canvasImg = GenImageColor(c.gridSize.x, c.gridSize.y, BLANK);
     c.canvasTxt = LoadTextureFromImage(c.canvasImg);
     c.previewImg = GenImageColor(c.gridSize.x, c.gridSize.y, BLANK);
     c.previewTxt = LoadTextureFromImage(c.previewImg);

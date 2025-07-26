@@ -103,7 +103,7 @@ int RunApp() {
         EndDrawing();
     }
 
-    // ExportImage(canvas.canvasImg, "_temp.png");
+    ExportImage(canvas.canvasImg, "_temp.png");
     ClearColorBar(&cb);
     CloseWindow();
 

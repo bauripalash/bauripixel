@@ -9,7 +9,8 @@
 
 static void
 DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr);
-
+static void
+BPDrawCircle(Image *img, int posX, int posY, int r, Color clr, bool fill);
 // Returns position of mouse if inside a drawArea
 // x,y => canvas cord
 Vector2 getCanvasPos(CanvasState *state, Rectangle canvasRect) {
@@ -238,7 +239,6 @@ static void BPDrawEllipse(
     CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr, bool fill,
     bool center
 ) {
-
     if (center) {
         ellipseInCenter(state, img, a, b, clr, fill);
     } else {
@@ -313,8 +313,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     // This is the actual current position accordingto brush size;
     Vector2 curPos = {curPx, curPy};
 
-    Color dClr = state->curTool == DT_ERASER ? WHITE : state->current;
-    Color dColor = state->curTool == DT_ERASER ? WHITE : state->current;
+    Color dClr = state->curTool == DT_ERASER ? state->bgColor : state->current;
 
     DrawTool curtool = state->curTool;
 
@@ -465,6 +464,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
         }
     }
 
+    DrawTexture(state->bgTxt, state->drawArea.x, state->drawArea.y, WHITE);
     DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
     UpdateTexture(state->previewTxt, state->previewImg.data);
     DrawTexture(state->previewTxt, state->drawArea.x, state->drawArea.y, WHITE);

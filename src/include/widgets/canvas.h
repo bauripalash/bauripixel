@@ -40,6 +40,10 @@ typedef struct {
     Vector2 point;
     Rectangle drawArea;
 
+    Image bgImg;
+    Texture bgTxt;
+    Color bgColor;
+
     Image canvasImg;
     Texture canvasTxt;
     Texture previewTxt;

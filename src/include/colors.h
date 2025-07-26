@@ -49,4 +49,7 @@
 #define ColorTransparent    (Color){0, 0, 0, 0}
 
 #define ColorFDGrayLighter  (Fade(ColorGrayLighter, 0.4))
+
+#define ColorCheckerDark    (Color){0xA8, 0xA8, 0xA8, 0xFF}
+#define ColorCheckerLight   (Color){0xD8, 0xD8, 0xD8, 0xFF}
 #endif
