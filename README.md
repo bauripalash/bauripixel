@@ -1,4 +1,4 @@
-![](assets/extras/bauripixel_cover.svg)
+![](assets/extras/bauripixel_cover.png)
 
 ### BauriPixel
 **Simple and Lightweight Pixel Art and Sprite Editor**
