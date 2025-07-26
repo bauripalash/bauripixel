@@ -53,6 +53,8 @@ typedef struct {
 
     // NOTE: must be changed :
 
+    bool hoverCanvas;
+
     int brushSize;
     BrushShape brushShape;
 

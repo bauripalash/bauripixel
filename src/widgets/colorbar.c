@@ -31,6 +31,10 @@ ColorBarState NewColorBar() {
     cb.widthDragging = false;
     cb.heightDragging = false;
 
+    cb.hoverColorList = false;
+    cb.hoverIndex = -1;
+    cb.hoverColor = BLACK;
+
     return cb;
 }
 
@@ -151,6 +155,8 @@ int ColorBar(ColorBarState *state) {
             usedRows * boxSize,
         };
 
+        state->hoverColorList = CheckCollisionPointRec(mpos, usableRect);
+
         state->prevIndex = state->currentIndex;
         BeginScissorMode(
             usableRect.x, usableRect.y, usableRect.width, usableRect.height
@@ -176,10 +182,14 @@ int ColorBar(ColorBarState *state) {
 
                 DrawRectangleLinesEx(boxRect, 2, borderClr);
 
-                if (CheckCollisionPointRec(mpos, boxRect) &&
-                    IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                    state->currentIndex = b;
-                    state->currentColor = clr;
+                if (CheckCollisionPointRec(mpos, boxRect)) {
+                    state->hoverColor = clr;
+                    state->hoverIndex = b;
+
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        state->currentIndex = b;
+                        state->currentColor = clr;
+                    }
                 }
             }
         }

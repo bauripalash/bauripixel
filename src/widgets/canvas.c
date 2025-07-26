@@ -383,6 +383,7 @@ bool Canvas(CanvasState *state) {
     );
     Vector2 mpos = GetMousePosition();
     bool isHovering = CheckCollisionPointRec(mpos, state->drawArea);
+    state->hoverCanvas = isHovering;
 
     Vector2 drawVector = (Vector2){state->drawArea.x, state->drawArea.y};
     Rectangle canvasRect = {

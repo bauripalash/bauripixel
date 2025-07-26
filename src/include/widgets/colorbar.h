@@ -38,6 +38,10 @@ typedef struct {
     int boxSize;
     int boxSpacing;
 
+    bool hoverColorList;
+    int hoverIndex;
+    Color hoverColor;
+
     bool widthDragging;
     bool heightDragging;
 

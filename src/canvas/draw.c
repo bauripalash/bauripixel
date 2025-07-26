@@ -9,8 +9,10 @@
 
 static void
 DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr);
+
 static void
 BPDrawCircle(Image *img, int posX, int posY, int r, Color clr, bool fill);
+
 // Returns position of mouse if inside a drawArea
 // x,y => canvas cord
 Vector2 getCanvasPos(CanvasState *state, Rectangle canvasRect) {
@@ -310,6 +312,11 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     int curPx = shape == BSP_SQAURE ? posLeft : (rawCanvasPos.x);
     int curPy = shape == BSP_SQAURE ? posTop : (rawCanvasPos.y);
 
+    if (atDrawArea) {
+        state->hoverX = curPx;
+        state->hoverY = curPy;
+    }
+
     // This is the actual current position accordingto brush size;
     Vector2 curPos = {curPx, curPy};
 
@@ -318,12 +325,15 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
     DrawTool curtool = state->curTool;
 
     int brushSize = state->brushSize;
+
     bool leftDown = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
     bool leftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
     bool leftReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
     bool keepRatio = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+
     Image *canvas = &state->canvasImg;
     Image *preview = &state->previewImg;
+
     if (atDrawArea) {
         switch (curtool) {
         case DT_PENCIL: {

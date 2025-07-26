@@ -9,6 +9,7 @@
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
 #include "include/widgets/drawtoolbar.h"
+#include "include/widgets/statusbar.h"
 #include "include/widgets/widget.h"
 
 #define STB_DS_IMPLEMENTATION
@@ -29,6 +30,7 @@ static int oldVCb = 0;
 ColorBarState cb;
 CanvasState canvas;
 DrawToolBarState dtb;
+StatusBarState sb;
 
 void Layout();
 void ApplyStyle();
@@ -49,6 +51,10 @@ int RunApp() {
     // LoadAppLightTheme();
     LoadAppDarkTheme();
     LoadAppFont();
+
+    float sbarHeight = 30;
+    sb = NewStatusBar();
+    SetStatusBarPosition(&sb, 0, sbarHeight);
 
     cb = NewColorBar();
     AddToColorBar(&cb, ColorBlack);
@@ -81,7 +87,7 @@ int RunApp() {
 
     SetCanvasAnchor(
         &canvas, (Vector2){dtb.prop.bounds.width, TOP_SPACE},
-        (Vector2){cb.prop.bounds.width, 50}
+        (Vector2){cb.prop.bounds.width, 30}
     );
 
     dtb.anchor.x = 0;
@@ -90,6 +96,8 @@ int RunApp() {
     oldHCb = cb.prop.bounds.width;
     oldVCb = cb.prop.bounds.height;
 
+    sb.canvas = &canvas;
+    sb.colorbar = &cb;
     CenterAlignCanvas(&canvas);
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
@@ -150,5 +158,6 @@ void Layout() {
 
     // DrawTextEx(GuiGetFont(), "BauriPixel", (Vector2){100, 50}, 72, 0, WHITE);
 
+    StatusBar(&sb);
     i++;
 }
