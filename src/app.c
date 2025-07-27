@@ -9,6 +9,7 @@
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
 #include "include/widgets/drawtoolbar.h"
+#include "include/widgets/menubar.h"
 #include "include/widgets/statusbar.h"
 #include "include/widgets/widget.h"
 
@@ -31,6 +32,7 @@ ColorBarState cb;
 CanvasState canvas;
 DrawToolBarState dtb;
 StatusBarState sb;
+MenuBarState mb;
 
 void Layout();
 void ApplyStyle();
@@ -47,12 +49,13 @@ int RunApp() {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
 
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    SetTargetFPS(240);
+    SetTargetFPS(60);
     // LoadAppLightTheme();
     LoadAppDarkTheme();
     LoadAppFont();
 
     float sbarHeight = 30;
+    mb = NewMenuBar();
     sb = NewStatusBar();
     SetStatusBarPosition(&sb, 0, sbarHeight);
 
@@ -119,14 +122,6 @@ int RunApp() {
 }
 
 void Layout() {
-    DrawRectangleLinesEx(
-        (Rectangle){-2, 0, GetScreenWidth() + 4, 22}, 2, ColorGrayLightest
-    );
-    Font fnt = GuiGetFont();
-    DrawText("File", 10, 5, 10, ColorWhite);
-    DrawText("Edit", 40, 5, 10, ColorWhite);
-    DrawText("View", 70, 5, 10, ColorWhite);
-    DrawText("Help", 100, 5, 10, ColorWhite);
     Color clr = cb.currentColor;
     Color txtClr = clr;
     if (ColorIsEqual(txtClr, ColorGrayDarkest)) {
@@ -159,5 +154,7 @@ void Layout() {
     // DrawTextEx(GuiGetFont(), "BauriPixel", (Vector2){100, 50}, 72, 0, WHITE);
 
     StatusBar(&sb);
+
+    MenuBar(&mb);
     i++;
 }
