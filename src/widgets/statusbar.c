@@ -50,6 +50,8 @@ bool StatusBar(StatusBarState *state) {
     if (state->prop.active) {
 
         updateBounds(state);
+
+        BpRoundedPanel(state->prop.bounds, 0.125);
         Font font = GuiGetFont();
         float fontSize = font.baseSize;
         Color textClr = ColorGrayLightest;
@@ -92,7 +94,7 @@ bool StatusBar(StatusBarState *state) {
             textPos.x += 5 + MeasureTextEx(font, colorText, fontSize, 0).x;
         }
 
-        drawBounds(state->prop.bounds);
+        // drawBounds(state->prop.bounds);
     }
     return false;
 }

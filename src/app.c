@@ -108,7 +108,7 @@ int RunApp() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         {
-            ClearBackground(ColorGrayDarkest);
+            ClearBackground(ColorXDarkGray1);
             Layout();
         }
         EndDrawing();

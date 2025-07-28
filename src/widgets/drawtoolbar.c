@@ -6,6 +6,7 @@
 #include "../include/drawtools.h"
 #include "../include/exported/drawtoolicons.h"
 #include "../include/utils.h"
+
 #include <math.h>
 #include <stdbool.h>
 
@@ -201,15 +202,7 @@ static int DrawOptToolbar(DrawToolBarState *state) {
         bounds.height - DTBAR_MARGIN_TB * 2
     };
 
-    DrawRectangleRounded(bounds, 0.125, 0, ColorFDGrayLighter);
-
-    DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
-    DrawRectangleRoundedLinesEx(
-        (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
-                    bounds.height - 4},
-        0.125, 0, 2, ColorGrayLightest
-    );
-
+    BpRoundedPanel(bounds, 0.125);
     OptToolsPencil(state, drawBounds);
     return -1;
 }
@@ -220,6 +213,8 @@ static bool otherLine = false;
 static bool otherCircle = false;
 static bool otherRect = false;
 static bool otherPan = false;
+
+#define rd (float)0.125
 
 int DrawToolbar(DrawToolBarState *state) {
     updateBounds(state);
@@ -232,18 +227,7 @@ int DrawToolbar(DrawToolBarState *state) {
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 
-    DrawRectangleRounded(
-        (Rectangle){state->prop.bounds.x, state->prop.bounds.y,
-                    state->prop.bounds.width, state->prop.bounds.height},
-        0.125, 0, ColorFDGrayLighter
-    );
-
-    DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
-    DrawRectangleRoundedLinesEx(
-        (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
-                    bounds.height - 4},
-        0.125, 0, 2, ColorGrayLightest
-    );
+    BpRoundedPanel(bounds, 0.125);
 
     float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
     Rectangle btnRect = {

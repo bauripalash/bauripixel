@@ -4,6 +4,7 @@
 #include "../external/raymath.h"
 #include "../external/stb/stb_ds.h"
 #include "../include/colors.h"
+#include "../include/components.h"
 #include "../include/options.h"
 #include <math.h>
 #include <stdbool.h>
@@ -125,8 +126,8 @@ int ColorBar(ColorBarState *state) {
             state->widthDragging = false;
         }
 
-        DrawRectangleRounded(bounds, 0.125f, 0, ColorFDGrayLighter);
-
+        // DrawRectangleRounded(bounds, 0.125f, 0, ColorFDGrayLighter);
+        BpRoundedPanel(state->prop.bounds, 0.125);
         float boxSize = state->boxSize;
         float halfBox = boxSize / 2.0f;
         int colorCount = state->colorCount;
@@ -223,12 +224,12 @@ int ColorBar(ColorBarState *state) {
         GuiSetStyle(SLIDER, BORDER_COLOR_FOCUSED, ogSliderBorderF);
         GuiSetStyle(SLIDER, BORDER_COLOR_PRESSED, ogSliderBorderP);
 
-        DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
+        /*DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
         DrawRectangleRoundedLinesEx(
             (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
                         bounds.height - 4},
             0.125, 0, 2, ColorGrayLightest
-        );
+        );*/
     }
 
     return CB_STATUS_NONE;

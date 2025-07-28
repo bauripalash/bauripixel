@@ -31,4 +31,8 @@ void BpBrushShapeButton(
     Rectangle bounds, BrushShape *shape, const DToolInfo *tools
 );
 
+void BpRoundedPanel(Rectangle bounds, float roundness);
+void BpRoundedFlatPanel(Rectangle bounds, float roundness);
+void BpMenuBarPanel(Vector2 position, float width, int items, float roundness);
+
 #endif

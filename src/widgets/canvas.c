@@ -4,6 +4,7 @@
 #include "../external/raymath.h"
 #include "../include/canvas/draw.h"
 #include "../include/colors.h"
+#include "../include/components.h"
 #include "../include/drawtools.h"
 #include "../include/options.h"
 #include <math.h>
@@ -378,9 +379,11 @@ bool Canvas(CanvasState *state) {
     updateBounds(state);
     handleTools(state);
 
-    DrawRectangleRounded(
-        state->prop.bounds, DA_ROUNDNESS, 0, ColorFDGrayLighter
-    );
+    BpRoundedPanel(state->prop.bounds, DA_ROUNDNESS);
+
+    // DrawRectangleRounded(
+    //     state->prop.bounds, DA_ROUNDNESS, 0, ColorFDGrayLighter
+    //);
     Vector2 mpos = GetMousePosition();
     bool isHovering = CheckCollisionPointRec(mpos, state->drawArea);
     state->hoverCanvas = isHovering;
@@ -529,6 +532,8 @@ if (IsKeyDown(KEY_DOWN))
         },
         DA_ROUNDNESS, 0, 2, ColorGrayLightest
     );
+
+    // BpRoundedPanel(state->prop.bounds, 0.125);
 
     state->camera.target.x = state->point.x;
     state->camera.target.y = state->point.y;

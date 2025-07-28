@@ -2,6 +2,7 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../include/colors.h"
+#include "../include/components.h"
 #include "../include/utils.h"
 #include <stdbool.h>
 
@@ -29,30 +30,68 @@ static void updateBounds(MenuBarState *state) {
     state->prop.bounds.width = GetScreenWidth();
     state->prop.bounds.height = state->height;
 }
-static void drawBounds(Rectangle bounds, Color bg) {
-    DrawRectangleRounded(bounds, 0.125, 0, bg);
-    DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 2, ColorBlack);
 
-    DrawRectangleRoundedLinesEx(
-        (Rectangle){
-            bounds.x + 2,
-            bounds.y + 2,
-            bounds.width - 4,
-            bounds.height - 4,
-        },
-        0.125, 0, 2, ColorGrayLightest
-    );
+Rectangle drawFileMenu(MenuBarState *state, Vector2 position) {
+
+    Vector2 panelPos = {
+        position.x,
+        position.y + state->height + 5,
+    };
+
+    Rectangle panelBounds = {panelPos.x, panelPos.y, 100, 5 * 16};
+
+    BpMenuBarPanel(panelPos, panelBounds.width, 5, 0.125);
+
+    Rectangle rect = {panelPos.x + 5, panelPos.y + 5, panelBounds.width, 16};
+    GuiLabelButton(rect, GuiIconText(ICON_FILE_NEW, "New"));
+
+	rect.y += rect.height + 5;
+	GuiLabelButton(rect, GuiIconText(ICON_FILE_OPEN, "Open"));
+
+    return panelBounds;
 }
 
-#define M_FILE_TXT "File"
+Rectangle drawHelpMenu(MenuBarState *state, Vector2 position) {
+    Vector2 panelPos = {
+        position.x,
+        position.y + state->height + 5,
+    };
 
-static char *MenuTexts[] = {"File", "Edit", "Help"};
+    Rectangle panelBounds = {panelPos.x, panelPos.y, 200, 5 * 16};
 
-static bool MenuClicks[] = {false, false, false};
+    BpMenuBarPanel(panelPos, 200, 5, 0.125);
+
+    return panelBounds;
+}
 
 #define MENU_ITEM_MARGIN 10
+static bool showFileMenu = false;
+
+typedef enum MenuEnum {
+    MENU_FILE = 0,
+    MENU_HELP = 1,
+} MenuEnum;
+
+static struct {
+    const char *n;
+    int items;
+    bool clicked;
+    MenuEnum e;
+} MenuInfo[] = {{"File", 4, false, MENU_FILE}, {"Help", 3, false, MENU_HELP}};
+
+Rectangle openMenuPanel(MenuBarState *state, MenuEnum m, Vector2 pos) {
+    if (m == MENU_FILE) {
+        return drawFileMenu(state, pos);
+    } else if (m == MENU_HELP) {
+        return drawHelpMenu(state, pos);
+    }
+
+    return (Rectangle){0};
+}
+
 void MenuBar(MenuBarState *state) {
     updateBounds(state);
+
     int ogLabelN = GuiGetStyle(LABEL, TEXT_COLOR_NORMAL);
     int ogLabelF = GuiGetStyle(LABEL, TEXT_COLOR_FOCUSED);
     int ogLabelP = GuiGetStyle(LABEL, TEXT_COLOR_PRESSED);
@@ -67,49 +106,45 @@ void MenuBar(MenuBarState *state) {
     GuiSetStyle(LABEL, TEXT_COLOR_DISABLED, ColorToInt(ColorGrayLightest));
 
     Rectangle bounds = state->prop.bounds;
+
+    BpRoundedPanel(bounds, 0.125);
     Font font = state->font;
     int fontSize = font.baseSize;
     Rectangle rect = {
         bounds.x + MENUBAR_PADDING, bounds.y, bounds.width, bounds.height
     };
-    bool fclk = GuiLabelButton(rect, M_FILE_TXT) != 0;
-    int menuItemCount = ArrCount(MenuTexts);
 
-    for (int mi = 0; mi < menuItemCount; mi++) {
-        const char *itemText = MenuTexts[mi];
-        Vector2 textSize = MeasureTextEx(font, itemText, fontSize, 0);
-        float msize = textSize.x;
+    float posX = rect.x;
+
+    int menuCount = 2;
+    for (int mi = 0; mi < menuCount; mi++) {
+        const char *menuT = MenuInfo[mi].n;
         Rectangle btnRect = {
-            rect.x + (msize + MENU_ITEM_MARGIN) * mi, rect.y,
-            (msize + MENUBAR_PADDING), rect.height
+            posX, rect.y, MeasureTextEx(font, menuT, fontSize, 0).x, rect.height
         };
 
-        bool btnClicked = GuiLabelButton(btnRect, itemText) != 0;
-
-        if (btnClicked) {
-            for (int b = 0; b < menuItemCount; b++) {
-                MenuClicks[b] = false;
+        bool clkd = GuiLabelButton(btnRect, menuT) != 0;
+        if (clkd) {
+            for (int i = 0; i < menuCount; i++) {
+                MenuInfo[i].clicked = false;
             }
-
-            MenuClicks[mi] = !MenuClicks[mi];
+            MenuInfo[mi].clicked = !MenuInfo[mi].clicked;
         }
+        Rectangle panelRect = (Rectangle){-1};
 
-        Rectangle menuPanelRect = {
-            btnRect.x, btnRect.y + btnRect.height, 200, 300
-        };
-
-        if (MenuClicks[mi]) {
-            drawBounds(menuPanelRect, ColorGrayLighter);
+        if (MenuInfo[mi].clicked) {
+            panelRect =
+                openMenuPanel(state, MenuInfo[mi].e, (Vector2){posX, rect.y});
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
             !CheckCollisionPointRec(mpos, btnRect) &&
-            !CheckCollisionPointRec(mpos, menuPanelRect)) {
-            MenuClicks[mi] = false;
+            !CheckCollisionPointRec(mpos, panelRect)) {
+            MenuInfo[mi].clicked = false;
         }
-    }
 
-    drawBounds(bounds, ColorFDGrayLighter);
+        posX += btnRect.width + MENUBAR_PADDING * 2;
+    }
 
     GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ogLabelN);
     GuiSetStyle(LABEL, TEXT_COLOR_FOCUSED, ogLabelF);
