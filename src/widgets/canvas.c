@@ -14,12 +14,13 @@
 
 static Rectangle trect = {0};
 
+
 CanvasState NewCanvas() {
     CanvasState c = {0};
     c.prop = NewWidgetProp();
     c.hoverX = 0;
     c.hoverY = 0;
-    c.gridSize = (Vector2){1080, 1080};
+    c.gridSize = (Vector2){DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE};
     c.anchor = (Vector2){0, 0};
     c.bottomAnchor = (Vector2){0, 0};
     c.curTool = DT_PENCIL;

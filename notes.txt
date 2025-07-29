@@ -1,0 +1,16 @@
+Canvas Size : Maximum
+===========
+
+10,000px x 10,000px seems to be max usable size with drawing and zooming working
+with some frame drops, making the brush tool skip some mouse clicks. The FPS 
+drops to 3-4 FPS.
+
+I tried 20,000px x 20,000px, But Checked Background canvas is not drawing 
+properly. It was taking around 30% of my 16GB RAM and hovering in the range of
+80%-90% of my CPU Usage. 2 of the CPU cores were spiked at 100%
+
+Device : Asus Laptop
+OS : Manjaro Linux (Kernel v6.15.6 | Wayland)
+CPU : AMD Ryzen 5 5600H 
+GPU : Integrated AMD Radeon
+RAM : 2x8GB DDR4

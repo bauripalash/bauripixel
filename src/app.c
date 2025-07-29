@@ -44,13 +44,12 @@ int RunApp() {
 
     SetTraceLogLevel(LOG_WARNING);
     SetConfigFlags(
-        FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_MAXIMIZED | FLAG_MSAA_4X_HINT
+        FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE
     );
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
 
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     SetTargetFPS(60);
-    // LoadAppLightTheme();
     LoadAppDarkTheme();
     LoadAppFont();
 
@@ -154,7 +153,6 @@ void Layout() {
     if (dtb.sliderHover) {
         GuiLock();
     }
-    // DrawFPS(200, 0);
     StatusBar(&sb);
 
     if (mb.menuOpen) {
@@ -164,4 +162,7 @@ void Layout() {
     if (mAction != MACTION_COUNT) {
         TraceLog(LOG_ERROR, "Menu Clicked -> %d", mAction);
     }
+
+
+    //DrawFPS(200, 0);
 }

@@ -5,7 +5,7 @@ include(FetchContent)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(RAYLIB_VERSION 5.0)
-set(RAYLIB_COMMIT 1abac023bdc433370b8db00d770eaf152a6cdeae)
+set(RAYLIB_COMMIT 138010c1ebabe184097f3945534dfed1ca19e929)
 
 FetchContent_Declare(
 	raylib
