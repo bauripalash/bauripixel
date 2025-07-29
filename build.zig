@@ -44,7 +44,21 @@ pub fn build(b: *std.Build) void {
     //exe.addIncludePath(b.path("src/external/tinyfiledialogs/"));
 
     exe.addCSourceFiles(.{
-        .files = &.{"src/app.c"},
+        .files = &.{
+            "src/widgets/statusbar.c",
+            "src/widgets/colorbar.c",
+            "src/widgets/canvas.c",
+            "src/widgets/menubar.c",
+            "src/widgets/widget.c",
+            "src/widgets/drawtoolbar.c",
+            "src/components/slider.c",
+            "src/components/panels.c",
+            "src/components/button.c",
+            "src/canvas/draw.c",
+            "src/options/opttheme.c",
+            "src/utils.c",
+            "src/app.c",
+        },
         .flags = &.{"-g3"},
     });
 
