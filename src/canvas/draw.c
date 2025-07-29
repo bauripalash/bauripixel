@@ -362,7 +362,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
                 state->lineDragging = true;
             }
 
-            if (leftReleased) {
+            if (leftReleased && state->lineDragging) {
                 BPDrawLine(state, canvas, state->lineStart, curPos, dClr);
                 UpdateTexture(state->canvasTxt, canvas->data);
                 MakeVecZero(&state->lineStart);
@@ -378,7 +378,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
                 state->rectDragging = true;
             }
 
-            if (leftReleased) {
+            if (leftReleased && state->rectDragging) {
                 BPDrawRectangle(
                     state, canvas, state->rectStart, curPos, dClr,
                     curtool == DT_RECT_FILL
@@ -398,7 +398,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
                 state->circleDragging = true;
             }
 
-            if (leftReleased) {
+            if (leftReleased && state->circleDragging) {
                 BPDrawEllipse(
                     state, canvas, state->circleStart, curPos, dClr,
                     curtool == DT_CIRCLE_FILL, keepRatio
