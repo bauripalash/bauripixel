@@ -156,8 +156,4 @@ void Layout() {
     if (mAction != MACTION_COUNT) {
         TraceLog(LOG_ERROR, "Menu Clicked -> %d", mAction);
     }
-
-    if (mb.menuOpen) {
-        GuiLock();
-    }
 }

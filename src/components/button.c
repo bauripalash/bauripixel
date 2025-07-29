@@ -23,7 +23,7 @@ bool BpDummyToogleButton(Rectangle bounds, bool active) {
     Rectangle brect = {bx, by, bw, bh};
 
     bool clicked = CheckCollisionPointRec(mpos, bounds) &&
-                   IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+                   IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !GuiIsLocked();
 
     if (clicked || active) {
         brect.y += 3;
@@ -127,7 +127,7 @@ DrawTool BpToolButton(
     }
 
     if (CheckCollisionPointRec(GetMousePosition(), btnRect) &&
-        IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !GuiIsLocked()) {
         *showOther = !*showOther;
     }
 
@@ -166,7 +166,8 @@ DrawTool BpToolButton(
         }
     }
 
-    if ((IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||
+    if (!GuiIsLocked() &&
+        (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||
          IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) &&
         !CheckCollisionPointRec(GetMousePosition(), bounds)) {
         *showOther = false;

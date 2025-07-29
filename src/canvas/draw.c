@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../include/utils.h"
 #include "../include/widgets/canvas.h"
@@ -292,6 +293,8 @@ DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr) {
 
 void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
+    bool locked = GuiIsLocked();
+    TraceLog(LOG_ERROR, "locked - %s", locked ? "yes" : "no");
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
                                        state->gridSize.x, state->gridSize.y};
 
@@ -326,15 +329,16 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
     int brushSize = state->brushSize;
 
-    bool leftDown = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
-    bool leftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
-    bool leftReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
-    bool keepRatio = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+    bool leftDown = IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !locked;
+    bool leftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked;
+    bool leftReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !locked;
+    bool keepRatio =
+        IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT) && !locked;
 
     Image *canvas = &state->canvasImg;
     Image *preview = &state->previewImg;
 
-    if (atDrawArea) {
+    if (!locked && atDrawArea) {
         switch (curtool) {
         case DT_PENCIL: {
             if (leftDown) {
@@ -414,7 +418,7 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
     ImageClearBackground(&state->previewImg, BLANK);
 
-    if (atCanvas) {
+    if (atCanvas && !locked) {
 
         switch (curtool) {
         case DT_PENCIL: {

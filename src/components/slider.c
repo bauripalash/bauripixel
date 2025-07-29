@@ -35,7 +35,7 @@ bool BpSliderInt(
     Vector2 mpos = GetMousePosition();
 
     if (CheckCollisionPointRec(mpos, bounds)) {
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !GuiIsLocked()) {
             float percent = (mpos.x - rect.x) / rect.width;
             *value = min + (int)ceilf(percent * (max - min));
         }
@@ -74,6 +74,7 @@ bool BpInputSliderInt(
     Rectangle bounds, int *value, int min, int max, const char *unit,
     bool *clicked
 ) {
+    bool locked = GuiIsLocked();
     Color inputBg = GetColor(OptThemeGet(T_ISLIDER_BG));
     int textClrInt = OptThemeGet(T_ISLIDER_FG);
     Color inputFg = GetColor(textClrInt);
@@ -111,11 +112,12 @@ bool BpInputSliderInt(
     bool atBounds = CheckCollisionPointRec(mpos, bounds);
     bool atSlider = CheckCollisionPointRec(mpos, sliderRect);
 
-    if (atBounds && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (atBounds && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked) {
         *clicked = true;
     }
 
-    if (!atBounds && !atSlider && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (!atBounds && !atSlider && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+        !locked) {
         *clicked = false;
     }
 
@@ -141,11 +143,6 @@ bool BpInputSliderInt(
     }
 
     float fontH = GuiGetFont().baseSize;
-
-    // DrawText(
-    //     unit, boxRect.x + boxRect.width, boxRect.y + fontH / 2.0f,
-    //     GetFontDefault().baseSize, inputFg
-    //);
 
     DrawTextEx(
         GuiGetFont(), unit, (Vector2){boxRect.x + boxRect.width, boxRect.y}, 16,

@@ -83,50 +83,12 @@ GuiIconName getIconName(int b) {
     return ICON_BOX;
 }
 
-#define XBTN_SZ 50
-
-static bool
-DtButton(Rectangle bounds, const char *text, GuiIconName icon, bool isActive) {
-    float bx = bounds.x;
-    float by = bounds.y;
-    float bw = bounds.width;
-    float bh = bounds.height;
-    Color fg = ColorGrayDarkest;
-    int iconScale = (int)floorf((float)DEFAULT_DT_BTN_SIZE / 16.0f);
-    int iconSize = iconScale * 16;
-    bool clicked = CheckCollisionPointRec(GetMousePosition(), bounds) &&
-                   IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
-    if (clicked || isActive) {
-        by += 3;
-        fg = Fade(ColorGrayLighter, 0.5);
-    } else {
-        DrawRectangleRounded(
-            (Rectangle){bx, by, bw, bh + 3}, 0.2, 0, ColorBlack
-        );
-    }
-
-    Rectangle bRect = {bx, by, bw, bh};
-    DrawRectangleRounded(bRect, 0.2, 0, fg);
-    DrawRectangleRoundedLinesEx(bRect, 0.2, 0, 2, ColorBlack);
-    DrawRectangleRoundedLinesEx(
-        (Rectangle){
-            bx + 2,
-            by + 2,
-            bw - 4,
-            bh - 4,
-        },
-        0.2, 0, 2, ColorGrayLightest
-    );
-    GuiDrawIcon(
-        icon, (bx) + (bw / 2.0f) - (iconSize / 2.0f),
-        (by) + (bh / 2.0f) - (iconSize / 2.0f), iconScale, ColorWhite
-    );
-
-    return clicked;
-}
-
 static DrawTool handleShortcuts(DrawToolBarState *state) {
     DrawTool tool = state->currentTool;
+
+    if (GuiIsLocked()) {
+        return tool;
+    }
 
     if (IsKeyPressed(KEY_B)) {
         tool = DT_PENCIL;
@@ -179,7 +141,7 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
             rect, &state->brushSize, 0, 32, "px", &state->brushSizeEdit
         );
 
-        if (IsKeyDown(KEY_LEFT_CONTROL)) {
+        if (IsKeyDown(KEY_LEFT_CONTROL) && !GuiIsLocked()) {
             float wheel = GetMouseWheelMove();
             state->brushSize += wheel;
 

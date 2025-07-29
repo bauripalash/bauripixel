@@ -99,7 +99,6 @@ MenuAction MenuBar(MenuBarState *state) {
     int ogLabelP = GuiGetStyle(LABEL, TEXT_COLOR_PRESSED);
     int ogLabelD = GuiGetStyle(LABEL, TEXT_COLOR_DISABLED);
     Vector2 mpos = GetMousePosition();
-    state->menuOpen = isMenuOpen(state);
 
     Color tClr = ColorWhite;
 
@@ -167,6 +166,8 @@ MenuAction MenuBar(MenuBarState *state) {
     GuiSetStyle(LABEL, TEXT_COLOR_FOCUSED, ogLabelF);
     GuiSetStyle(LABEL, TEXT_COLOR_PRESSED, ogLabelP);
     GuiSetStyle(LABEL, TEXT_COLOR_DISABLED, ogLabelD);
+
+    state->menuOpen = isMenuOpen(state);
 
     return resultAction;
 }

@@ -80,6 +80,7 @@ Rectangle view = {0};
 int ColorBar(ColorBarState *state) {
     if (state->prop.active) {
         updateBounds(state);
+        bool locked = GuiIsLocked();
 
         Rectangle bounds = state->prop.bounds;
         Vector2 mpos = GetMousePosition();
@@ -95,7 +96,7 @@ int ColorBar(ColorBarState *state) {
         if (atBounds) {
             SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 
-            if (IsKeyDown(KEY_LEFT_CONTROL)) {
+            if (IsKeyDown(KEY_LEFT_CONTROL) && !locked) {
                 float wheel = GetMouseWheelMove();
                 if (wheel != 0) {
                     float scale = 0.2f * wheel;
@@ -107,7 +108,7 @@ int ColorBar(ColorBarState *state) {
             }
         }
 
-        if (atHandle && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (atHandle && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked) {
             state->widthDragging = true;
         }
 
@@ -122,7 +123,7 @@ int ColorBar(ColorBarState *state) {
 
         bounds = state->prop.bounds;
 
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !locked) {
             state->widthDragging = false;
         }
 
@@ -187,7 +188,7 @@ int ColorBar(ColorBarState *state) {
                     state->hoverColor = clr;
                     state->hoverIndex = b;
 
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked) {
                         state->currentIndex = b;
                         state->currentColor = clr;
                     }
@@ -223,13 +224,6 @@ int ColorBar(ColorBarState *state) {
         GuiSetStyle(SLIDER, BORDER_COLOR_NORMAL, ogSliderBorderN);
         GuiSetStyle(SLIDER, BORDER_COLOR_FOCUSED, ogSliderBorderF);
         GuiSetStyle(SLIDER, BORDER_COLOR_PRESSED, ogSliderBorderP);
-
-        /*DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 3, ColorBlack);
-        DrawRectangleRoundedLinesEx(
-            (Rectangle){bounds.x + 2, bounds.y + 2, bounds.width - 4,
-                        bounds.height - 4},
-            0.125, 0, 2, ColorGrayLightest
-        );*/
     }
 
     return CB_STATUS_NONE;

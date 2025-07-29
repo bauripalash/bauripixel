@@ -199,6 +199,8 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
     Rectangle vBounds = state->vScrollRect;
     Rectangle hBounds = state->hScrollRect;
 
+    bool locked = GuiIsLocked();
+
     Color scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_BG));
     Color scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_BG));
     Color scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_FG));
@@ -252,7 +254,7 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
 
     Rectangle vThumbRect = {vBounds.x, vThumbY, vBounds.width, vThumbHeight};
 
-    if (CheckCollisionPointRec(GetMousePosition(), hBounds)) {
+    if (CheckCollisionPointRec(GetMousePosition(), hBounds) && !locked) {
         scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_HVR_BG));
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             state->hScrollDragging = true;
@@ -266,7 +268,7 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
         }
     }
 
-    if (CheckCollisionPointRec(GetMousePosition(), vBounds)) {
+    if (CheckCollisionPointRec(GetMousePosition(), vBounds) && !locked) {
 
         scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_HVR_BG));
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
@@ -281,7 +283,7 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
         }
     }
 
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !locked) {
         state->vScrollDragging = false;
         state->hScrollDragging = false;
     }
@@ -300,7 +302,7 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
         state->scroll.x += delta.x;
     }
     Vector2 mpos = GetMousePosition();
-    if (CheckCollisionPointRec(mpos, hThumbRect)) {
+    if (CheckCollisionPointRec(mpos, hThumbRect) && !locked) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
         } else {
@@ -308,7 +310,7 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
         }
     }
 
-    if (CheckCollisionPointRec(mpos, vThumbRect)) {
+    if (CheckCollisionPointRec(mpos, vThumbRect) && !locked) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
         } else {
@@ -379,13 +381,14 @@ bool Canvas(CanvasState *state) {
     updateBounds(state);
     handleTools(state);
 
+    bool locked = GuiIsLocked();
     BpRoundedPanel(state->prop.bounds, DA_ROUNDNESS);
 
     // DrawRectangleRounded(
     //     state->prop.bounds, DA_ROUNDNESS, 0, ColorFDGrayLighter
     //);
     Vector2 mpos = GetMousePosition();
-    bool isHovering = CheckCollisionPointRec(mpos, state->drawArea);
+    bool isHovering = CheckCollisionPointRec(mpos, state->drawArea) && !locked;
     state->hoverCanvas = isHovering;
 
     Vector2 drawVector = (Vector2){state->drawArea.x, state->drawArea.y};
@@ -396,7 +399,7 @@ bool Canvas(CanvasState *state) {
 
     Vector2 canvasVector = {canvasRect.x, canvasRect.y};
 
-    if (isHovering) {
+    if (isHovering && !locked) {
         float wheel = GetMouseWheelMove();
 
         if (wheel != 0 && !IsKeyDown(KEY_LEFT_CONTROL)) {
@@ -423,28 +426,8 @@ bool Canvas(CanvasState *state) {
     }
 
     if (IsKeyReleased(KEY_LEFT_SHIFT) ||
-        IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !locked) {
         state->panning = false;
-    }
-
-    Vector2 dir = {0, 0};
-    /*
-
-if (IsKeyDown(KEY_LEFT))
-    dir.x++;
-if (IsKeyDown(KEY_RIGHT))
-    dir.x--;
-if (IsKeyDown(KEY_UP))
-    dir.y++;
-if (IsKeyDown(KEY_DOWN))
-    dir.y--;
-    */
-    bool movingKb = false;
-    if (Vector2Length(dir) != 0.0f) {
-        movingKb = true;
-
-        dir = Vector2Scale(Vector2Normalize(dir), 200.0f * GetFrameTime());
-        state->point = Vector2Add(state->point, dir);
     }
 
     Vector2 dTl = GetScreenToWorld2D(drawVector, state->camera);
@@ -481,7 +464,7 @@ if (IsKeyDown(KEY_DOWN))
 
     CanvasScrollBars(state, drw, cvs);
 
-    if (state->panning || movingKb) {
+    if (state->panning && !locked) {
         float leftOutside = (canvasRect.x + canvasRect.width) - dTl.x;
         float rightOutside = canvasRect.x - dBr.x;
         float topOutside = (canvasRect.y + canvasRect.height) - dTl.y;
