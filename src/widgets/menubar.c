@@ -19,7 +19,16 @@ MenuBarState NewMenuBar() {
     state.prop.bounds.height = state.height;
     state.font = GuiGetFont();
 
-    state.mFileClicked = false;
+    state.menuOpen = false;
+
+    TopMenuEntry menus[] = {
+        {"File", TMENU_FILE, 2, 200, false},
+        {"Help", TMENU_HELP, 1, 100, false},
+    };
+
+    for (int i = 0; i < ArrCount(menus); i++) {
+        state.menus[i] = menus[i];
+    }
 
     return state;
 }
@@ -31,65 +40,58 @@ static void updateBounds(MenuBarState *state) {
     state->prop.bounds.height = state->height;
 }
 
-Rectangle drawFileMenu(MenuBarState *state, Vector2 position) {
+#define ENTRY_MARGIN 5
 
-    Vector2 panelPos = {
-        position.x,
-        position.y + state->height + 5,
+MenuAction drawFileMenu(MenuBarState *state, Rectangle bounds) {
+
+    BpRoundedFlatPanel(bounds, 0.125);
+
+    Rectangle rect = {
+        bounds.x + ENTRY_MARGIN, bounds.y + ENTRY_MARGIN, bounds.width, 16
     };
+    if (GuiLabelButton(rect, GuiIconText(ICON_FILE_NEW, "New")) != 0) {
+        return MACTION_NEW_FILE;
+    }
 
-    Rectangle panelBounds = {panelPos.x, panelPos.y, 100, 5 * 16};
+    rect.y += rect.height + ENTRY_MARGIN;
+    if (GuiLabelButton(rect, GuiIconText(ICON_FILE_OPEN, "Open")) != 0) {
+        return MACTION_OPEN_FILE;
+    }
 
-    BpMenuBarPanel(panelPos, panelBounds.width, 5, 0.125);
-
-    Rectangle rect = {panelPos.x + 5, panelPos.y + 5, panelBounds.width, 16};
-    GuiLabelButton(rect, GuiIconText(ICON_FILE_NEW, "New"));
-
-	rect.y += rect.height + 5;
-	GuiLabelButton(rect, GuiIconText(ICON_FILE_OPEN, "Open"));
-
-    return panelBounds;
+    return MACTION_COUNT;
 }
 
-Rectangle drawHelpMenu(MenuBarState *state, Vector2 position) {
-    Vector2 panelPos = {
-        position.x,
-        position.y + state->height + 5,
-    };
+MenuAction drawHelpMenu(MenuBarState *state, Rectangle bounds) {
 
-    Rectangle panelBounds = {panelPos.x, panelPos.y, 200, 5 * 16};
+    BpRoundedFlatPanel(bounds, 0.125);
 
-    BpMenuBarPanel(panelPos, 200, 5, 0.125);
-
-    return panelBounds;
+    return MACTION_COUNT;
 }
 
 #define MENU_ITEM_MARGIN 10
 static bool showFileMenu = false;
 
-typedef enum MenuEnum {
-    MENU_FILE = 0,
-    MENU_HELP = 1,
-} MenuEnum;
-
-static struct {
-    const char *n;
-    int items;
-    bool clicked;
-    MenuEnum e;
-} MenuInfo[] = {{"File", 4, false, MENU_FILE}, {"Help", 3, false, MENU_HELP}};
-
-Rectangle openMenuPanel(MenuBarState *state, MenuEnum m, Vector2 pos) {
-    if (m == MENU_FILE) {
-        return drawFileMenu(state, pos);
-    } else if (m == MENU_HELP) {
-        return drawHelpMenu(state, pos);
+MenuAction openMenuPanel(MenuBarState *state, TopMenuInfo m, Rectangle bounds) {
+    if (m == TMENU_FILE) {
+        return drawFileMenu(state, bounds);
+    } else if (m == TMENU_HELP) {
+        return drawHelpMenu(state, bounds);
     }
 
-    return (Rectangle){0};
+    return MACTION_COUNT;
 }
 
-void MenuBar(MenuBarState *state) {
+bool isMenuOpen(MenuBarState *state) {
+    for (int i = 0; i < ArrCount(state->menus); i++) {
+        if (state->menus[i].active) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+MenuAction MenuBar(MenuBarState *state) {
     updateBounds(state);
 
     int ogLabelN = GuiGetStyle(LABEL, TEXT_COLOR_NORMAL);
@@ -97,6 +99,7 @@ void MenuBar(MenuBarState *state) {
     int ogLabelP = GuiGetStyle(LABEL, TEXT_COLOR_PRESSED);
     int ogLabelD = GuiGetStyle(LABEL, TEXT_COLOR_DISABLED);
     Vector2 mpos = GetMousePosition();
+    state->menuOpen = isMenuOpen(state);
 
     Color tClr = ColorWhite;
 
@@ -106,6 +109,11 @@ void MenuBar(MenuBarState *state) {
     GuiSetStyle(LABEL, TEXT_COLOR_DISABLED, ColorToInt(ColorGrayLightest));
 
     Rectangle bounds = state->prop.bounds;
+    if (CheckCollisionPointRec(mpos, bounds)) {
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    }
+
+    MenuAction resultAction = MACTION_COUNT;
 
     BpRoundedPanel(bounds, 0.125);
     Font font = state->font;
@@ -116,9 +124,10 @@ void MenuBar(MenuBarState *state) {
 
     float posX = rect.x;
 
-    int menuCount = 2;
+    int menuCount = ArrCount(state->menus);
     for (int mi = 0; mi < menuCount; mi++) {
-        const char *menuT = MenuInfo[mi].n;
+
+        const char *menuT = state->menus[mi].name;
         Rectangle btnRect = {
             posX, rect.y, MeasureTextEx(font, menuT, fontSize, 0).x, rect.height
         };
@@ -126,21 +135,29 @@ void MenuBar(MenuBarState *state) {
         bool clkd = GuiLabelButton(btnRect, menuT) != 0;
         if (clkd) {
             for (int i = 0; i < menuCount; i++) {
-                MenuInfo[i].clicked = false;
+                state->menus[i].active = false;
             }
-            MenuInfo[mi].clicked = !MenuInfo[mi].clicked;
+            state->menus[mi].active = !state->menus[mi].active;
         }
-        Rectangle panelRect = (Rectangle){-1};
+        Rectangle panelRect =
+            (Rectangle){btnRect.x, btnRect.y + rect.height,
+                        state->menus[mi].width,
+                        state->menus[mi].itemCount * fontSize +
+                            ((state->menus[mi].itemCount + 1) * ENTRY_MARGIN)};
 
-        if (MenuInfo[mi].clicked) {
-            panelRect =
-                openMenuPanel(state, MenuInfo[mi].e, (Vector2){posX, rect.y});
+        if (state->menus[mi].active) {
+            resultAction =
+                openMenuPanel(state, state->menus[mi].info, panelRect);
+        }
+
+        if (resultAction != MACTION_COUNT) {
+            state->menus[mi].active = false;
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
             !CheckCollisionPointRec(mpos, btnRect) &&
             !CheckCollisionPointRec(mpos, panelRect)) {
-            MenuInfo[mi].clicked = false;
+            state->menus[mi].active = false;
         }
 
         posX += btnRect.width + MENUBAR_PADDING * 2;
@@ -150,4 +167,6 @@ void MenuBar(MenuBarState *state) {
     GuiSetStyle(LABEL, TEXT_COLOR_FOCUSED, ogLabelF);
     GuiSetStyle(LABEL, TEXT_COLOR_PRESSED, ogLabelP);
     GuiSetStyle(LABEL, TEXT_COLOR_DISABLED, ogLabelD);
+
+    return resultAction;
 }

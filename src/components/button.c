@@ -174,5 +174,3 @@ DrawTool BpToolButton(
 
     return clicked;
 }
-
-

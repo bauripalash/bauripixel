@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "include/colors.h"
+#include "include/menuinfo.h"
 #include "include/theme.h"
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
@@ -24,7 +25,6 @@
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 700
 
-static int i = 0;
 static int oldHCb = 0;
 static int oldVCb = 0;
 
@@ -122,26 +122,23 @@ int RunApp() {
 }
 
 void Layout() {
-    Color clr = cb.currentColor;
-    Color txtClr = clr;
-    if (ColorIsEqual(txtClr, ColorGrayDarkest)) {
-        txtClr = WHITE;
+    if (mb.menuOpen) {
+        GuiLock();
     }
-    // DrawTextEx(
-    //     GetFontDefault(),
-    //     TextFormat("C [%d, %d, %d, %d]", clr.r, clr.g, clr.b, clr.a),
-    //     (Vector2){10, 10}, 20, 1, txtClr
-    //);
+
+    TraceLog(
+        LOG_ERROR, "Menu Open -> %s | Gui Locked -> %s",
+        mb.menuOpen ? "true" : "false", GuiIsLocked() ? "true" : "false"
+    );
     canvas.curTool = dtb.currentTool;
     canvas.brushSize = (int)floorf(dtb.brushSize);
     canvas.brushShape = dtb.brushShape;
-    // canvas.current = cb.currentColor;
+
     Canvas(&canvas);
     UpdateCanvasAnchor(
         &canvas, (Vector2){-1, -1},
         (Vector2){cb.prop.bounds.width + CBAR_MARGIN_LEFT, -1}
     );
-    // cBar();
     ColorBar(&cb);
 
     if (CurrentColorChanged(&cb)) {
@@ -150,11 +147,17 @@ void Layout() {
 
     DrawToolbar(&dtb);
     // DrawFPS(200, 0);
-
-    // DrawTextEx(GuiGetFont(), "BauriPixel", (Vector2){100, 50}, 72, 0, WHITE);
-
     StatusBar(&sb);
 
-    MenuBar(&mb);
-    i++;
+    if (mb.menuOpen) {
+        GuiUnlock();
+    }
+    MenuAction mAction = MenuBar(&mb);
+    if (mAction != MACTION_COUNT) {
+        TraceLog(LOG_ERROR, "Menu Clicked -> %d", mAction);
+    }
+
+    if (mb.menuOpen) {
+        GuiLock();
+    }
 }
