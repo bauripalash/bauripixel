@@ -52,10 +52,13 @@ DrawToolBarState NewDrawToolBar() {
     dtb.prop.bounds.height = 0;
 
     dtb.brushSize = 1.0;
+    dtb.maxBrushSize = 1;
     dtb.brushShape = BSP_SQAURE;
     dtb.brushSizeEdit = false;
+    dtb.font = GuiGetFont();
 
     dtb.tools = NewToolBtnInfo();
+    dtb.sliderHover = false;
 
     return dtb;
 }
@@ -135,10 +138,12 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
         BpBrushShapeButton(rect, &state->brushShape, shapes);
 
         rect.x += rect.width + 10;
-        rect.width = 60;
-
+        int brushTextSize = TextLength(TextFormat("%dpx", state->brushSize)) *
+                            state->font.baseSize;
+        rect.width = brushTextSize;
         BpInputSliderInt(
-            rect, &state->brushSize, 0, 32, "px", &state->brushSizeEdit
+            rect, &state->brushSize, 0, state->maxBrushSize, "px",
+            &state->brushSizeEdit, &state->sliderHover
         );
 
         if (IsKeyDown(KEY_LEFT_CONTROL) && !GuiIsLocked()) {

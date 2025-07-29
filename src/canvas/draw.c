@@ -150,13 +150,13 @@ static void ellipseInRect(
         y1 = y0 + signY * len;
     }
 
-    int _a = abs(x1 - x0);
-    int _b = abs(y1 - y0);
-    int _b1 = _b & 1;
-    long dx = 4 * (1 - _a) * _b * _b;
-    long dy = 4 * (_b1 + 1) * _a * _a;
-    long err = dx + dy + _b1 * _a * _a;
-    long e2 = 0;
+    long _a = abs(x1 - x0);
+    long _b = abs(y1 - y0);
+    long _b1 = _b & 1;
+    double dx = 4 * (1 - _a) * _b * _b;
+    double dy = 4 * (_b1 + 1) * _a * _a;
+    double err = dx + dy + _b1 * _a * _a;
+    double e2 = 0;
 
     if (x0 > x1) {
         x0 = x1;
@@ -169,7 +169,7 @@ static void ellipseInRect(
 
     y0 += (_b + 1) / 2;
     y1 = y0 - _b1;
-    _a = 8 * _a * _a;
+    _a *= 8 * _a;
     _b1 = 8 * _b * _b;
 
     do {
@@ -196,6 +196,12 @@ static void ellipseInRect(
 
             err += dx += _b1;
         }
+        TraceLog(
+            LOG_ERROR, "[X0 %d] [Y0 %d] | [X1 %d] [Y1 %d]", x0, y0, x1, y1
+        );
+        TraceLog(LOG_ERROR, "[_A %ld] [_B %ld] [_B1 %ld]", _a, _b, _b1);
+        TraceLog(LOG_ERROR, "[DX %lf] [DY %lf]", dx, dy);
+        TraceLog(LOG_ERROR, "[ERR %lf] [E2 %lf]", err, e2);
     } while (x0 <= x1);
 
     while (y0 - y1 < _b) {
@@ -294,7 +300,6 @@ DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr) {
 void DrawingCanvas(CanvasState *state, Rectangle bounds) {
 
     bool locked = GuiIsLocked();
-    TraceLog(LOG_ERROR, "locked - %s", locked ? "yes" : "no");
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
                                        state->gridSize.x, state->gridSize.y};
 

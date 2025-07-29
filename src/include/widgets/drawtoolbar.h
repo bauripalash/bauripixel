@@ -37,6 +37,9 @@ typedef struct {
     DrawTool currentTool;
 
     int brushSize;
+    int maxBrushSize;
+    Font font;
+    bool sliderHover;
     BrushShape brushShape;
 
     bool brushSizeEdit;

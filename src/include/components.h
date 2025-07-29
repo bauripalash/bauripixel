@@ -8,10 +8,11 @@
 
 bool BpInputSliderInt(
     Rectangle bounds, int *value, int min, int max, const char *unit,
-    bool *clicked
+    bool *clicked, bool *hover
 );
 bool BpSliderInt(
-    Rectangle bounds, int *value, int min, int max, const char *unit
+    Rectangle bounds, int *value, int min, int max, const char *unit,
+    bool *sliderHover
 );
 
 typedef struct DToolInfo {

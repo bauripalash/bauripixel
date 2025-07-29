@@ -98,6 +98,7 @@ int RunApp() {
     dtb.optAnchor.y = 20;
     oldHCb = cb.prop.bounds.width;
     oldVCb = cb.prop.bounds.height;
+    dtb.maxBrushSize = (int)fmaxf(canvas.gridSize.x, canvas.gridSize.y);
 
     sb.canvas = &canvas;
     sb.colorbar = &cb;
@@ -114,7 +115,7 @@ int RunApp() {
         EndDrawing();
     }
 
-    ExportImage(canvas.canvasImg, "_temp.png");
+    // ExportImage(canvas.canvasImg, "_temp.png");
     ClearColorBar(&cb);
     CloseWindow();
 
@@ -126,10 +127,10 @@ void Layout() {
         GuiLock();
     }
 
-    TraceLog(
-        LOG_ERROR, "Menu Open -> %s | Gui Locked -> %s",
-        mb.menuOpen ? "true" : "false", GuiIsLocked() ? "true" : "false"
-    );
+    if (dtb.sliderHover) {
+        GuiLock();
+    }
+
     canvas.curTool = dtb.currentTool;
     canvas.brushSize = (int)floorf(dtb.brushSize);
     canvas.brushShape = dtb.brushShape;
@@ -145,7 +146,14 @@ void Layout() {
         canvas.current = cb.currentColor;
     }
 
+    if (dtb.sliderHover) {
+        GuiUnlock();
+    }
     DrawToolbar(&dtb);
+
+    if (dtb.sliderHover) {
+        GuiLock();
+    }
     // DrawFPS(200, 0);
     StatusBar(&sb);
 

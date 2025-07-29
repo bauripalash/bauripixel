@@ -12,7 +12,8 @@
 #define SLIDER_PADDING_LR 5.0f
 
 bool BpSliderInt(
-    Rectangle bounds, int *value, int min, int max, const char *unit
+    Rectangle bounds, int *value, int min, int max, const char *unit,
+    bool *hover
 ) {
     Color sliderBg = GetColor(OptThemeGet(T_SLIDER_BG));
     Color sliderBorder = GetColor(OptThemeGet(T_SLIDER_BORDER));
@@ -35,6 +36,7 @@ bool BpSliderInt(
     Vector2 mpos = GetMousePosition();
 
     if (CheckCollisionPointRec(mpos, bounds)) {
+        *hover = true;
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !GuiIsLocked()) {
             float percent = (mpos.x - rect.x) / rect.width;
             *value = min + (int)ceilf(percent * (max - min));
@@ -44,12 +46,14 @@ bool BpSliderInt(
         if (wheel != 0) {
             *value += wheel;
         }
+    } else {
+        *hover = false;
     }
 
     *value = ClampInt(*value, min, max);
 
     Font font = GuiGetFont();
-    int fontSize = 16;
+    int fontSize = font.baseSize;
     float textWidth = TextLength(TextFormat("%d%s", *value, unit));
     float textX = ((rect.width + rect.x) / 2.0f) - (textWidth / 2.0f);
     float textY = rect.y;
@@ -72,7 +76,7 @@ bool BpSliderInt(
 
 bool BpInputSliderInt(
     Rectangle bounds, int *value, int min, int max, const char *unit,
-    bool *clicked
+    bool *clicked, bool *sliderHover
 ) {
     bool locked = GuiIsLocked();
     Color inputBg = GetColor(OptThemeGet(T_ISLIDER_BG));
@@ -139,7 +143,7 @@ bool BpInputSliderInt(
     *value = ClampInt(*value, min, max);
 
     if (*clicked) {
-        BpSliderInt(sliderRect, value, min, max, unit);
+        BpSliderInt(sliderRect, value, min, max, unit, sliderHover);
     }
 
     float fontH = GuiGetFont().baseSize;

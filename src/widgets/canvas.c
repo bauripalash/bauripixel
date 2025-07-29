@@ -19,7 +19,7 @@ CanvasState NewCanvas() {
     c.prop = NewWidgetProp();
     c.hoverX = 0;
     c.hoverY = 0;
-    c.gridSize = (Vector2){DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE};
+    c.gridSize = (Vector2){1080, 1080};
     c.anchor = (Vector2){0, 0};
     c.bottomAnchor = (Vector2){0, 0};
     c.curTool = DT_PENCIL;
@@ -28,11 +28,6 @@ CanvasState NewCanvas() {
     c.zoomMin = 0.2f;
     c.zoomMax = INIT_CELL_SIZE;
 
-    for (int i = 0; i < (int)c.gridSize.y; i++) {
-        for (int j = 0; j < (int)c.gridSize.x; j++) {
-            c.colors[i][j] = ColorWhite;
-        }
-    }
     c.scrollThickness = 10.0f;
 
     c.current = ColorBlack;

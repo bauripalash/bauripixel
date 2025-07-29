@@ -21,7 +21,6 @@ typedef struct {
     Vector2 anchor;
     Vector2 bottomAnchor;
 
-    Color colors[DEFAULT_GRID_SIZE][DEFAULT_GRID_SIZE];
     Color current;
     float pxSize;
     float zoomMin;
