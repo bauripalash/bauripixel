@@ -1,5 +1,6 @@
+=====================
 Canvas Size : Maximum
-===========
+=====================
 
 10,000px x 10,000px seems to be max usable size with drawing and zooming working
 with some frame drops, making the brush tool skip some mouse clicks. The FPS 
@@ -14,3 +15,21 @@ OS : Manjaro Linux (Kernel v6.15.6 | Wayland)
 CPU : AMD Ryzen 5 5600H 
 GPU : Integrated AMD Radeon
 RAM : 2x8GB DDR4
+
+~ Palash Bauri
+Tuesday, July 29, 2025 7:55 PM IST
+
+==================
+Draw & Logic Split
+==================
+
+Canvas, Colorbar handling has been split into two parts, Drawing and Logic 
+(Input handling, major computations). Statusbar has not Logic yet. DrawToolBar
+is a complicated one, most of the input handling is dependent on drawing, apart
+from that, only mouse left and right clicks inputs are used, so I kept it in 
+Drawing part, though shortcut handling will be handled by Logic section. In the
+case of Menubar, it has the same situtation, but the clicking on menu items are
+returned from Drawing section, and handled in Logic section.
+
+~ Palash Bauri
+Wednesday, July 30, 2025 5:43 PM IST
