@@ -126,9 +126,16 @@ int RunApp() {
     return 0;
 }
 
-void LayoutLogic() { ColorBarLogic(&cb); }
+void LayoutLogic() {
+    ColorBarLogic(&cb);
+    HandleDToolsShortcuts(&dtb);
+}
 
-void LayoutDraw() { ColorBarDraw(&cb); }
+void LayoutDraw() {
+    ColorBarDraw(&cb);
+    StatusBar(&sb);
+    DrawToolbar(&dtb);
+}
 
 void Layout() {
     if (mb.menuOpen) {

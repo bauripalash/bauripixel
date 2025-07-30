@@ -154,6 +154,8 @@ int ColorBarLogic(ColorBarState *state) {
             usedRows * colorBoxSize
         };
 
+        state->hoverColorList = CheckCollisionPointRec(mpos, usableRect);
+
         state->prevIndex = state->currentIndex;
         for (int c = 0; c < colorCount; c++) {
             int col = c % maxColumns;

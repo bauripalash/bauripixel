@@ -48,6 +48,7 @@ typedef struct {
 
 } DrawToolBarState;
 
+DrawTool HandleDToolsShortcuts(DrawToolBarState *state);
 DrawToolBarState NewDrawToolBar();
 void FreeDrawToolBar(DrawToolBarState *state);
 int DrawToolbar(DrawToolBarState *state);

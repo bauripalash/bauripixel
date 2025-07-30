@@ -1,13 +1,11 @@
 #include "../include/widgets/drawtoolbar.h"
 #include "../external/raygui.h"
 #include "../external/raylib.h"
-#include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
 #include "../include/exported/drawtoolicons.h"
 #include "../include/utils.h"
 
-#include <math.h>
 #include <stdbool.h>
 
 static DToolInfo NewTool(DrawTool tool, const unsigned char *img, int size) {
@@ -86,7 +84,7 @@ GuiIconName getIconName(int b) {
     return ICON_BOX;
 }
 
-static DrawTool handleShortcuts(DrawToolBarState *state) {
+DrawTool HandleDToolsShortcuts(DrawToolBarState *state) {
     DrawTool tool = state->currentTool;
 
     if (GuiIsLocked()) {
@@ -119,6 +117,15 @@ static DrawTool handleShortcuts(DrawToolBarState *state) {
         state->currentTool = tool;
     }
 
+    if (IsKeyDown(KEY_LEFT_CONTROL) && !GuiIsLocked()) {
+        float wheel = GetMouseWheelMove();
+        state->brushSize += wheel;
+
+        if (state->brushSize <= 0) {
+            state->brushSize = 1;
+        }
+    }
+
     return tool;
 }
 
@@ -145,15 +152,6 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
             rect, &state->brushSize, 0, state->maxBrushSize, "px",
             &state->brushSizeEdit, &state->sliderHover
         );
-
-        if (IsKeyDown(KEY_LEFT_CONTROL) && !GuiIsLocked()) {
-            float wheel = GetMouseWheelMove();
-            state->brushSize += wheel;
-
-            if (state->brushSize <= 0) {
-                state->brushSize = 1;
-            }
-        }
     }
 }
 
@@ -185,7 +183,6 @@ static bool otherPan = false;
 
 int DrawToolbar(DrawToolBarState *state) {
     updateBounds(state);
-    handleShortcuts(state);
 
     Rectangle bounds = state->prop.bounds;
     Vector2 mpos = GetMousePosition();
