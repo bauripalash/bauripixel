@@ -5,6 +5,7 @@
 typedef enum {
     MACTION_NEW_FILE,
     MACTION_OPEN_FILE,
+    MACTION_SAVE_FILE,
 
     MACTION_SHOW_ABOUT,
 

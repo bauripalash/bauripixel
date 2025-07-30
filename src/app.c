@@ -126,9 +126,37 @@ int RunApp() {
     return 0;
 }
 
+static MenuAction maction = MACTION_COUNT;
+
+void handleMenubar() {
+    if (maction != MACTION_COUNT) {
+        if (maction == MACTION_SAVE_FILE) {
+            ExportImage(canvas.canvasImg, "_temp.png");
+            TraceLog(LOG_WARNING, "[+] Saved file as `_temp.png`");
+        }
+    }
+}
+
 void LayoutLogic() {
+
+    if (GuiIsLocked())
+        GuiUnlock();
+
+    handleMenubar();
+
+    bool menuBarOpen = mb.menuOpen;
+    bool sliderHover = dtb.sliderHover;
+    if (menuBarOpen || sliderHover) {
+        GuiLock();
+    }
     ColorBarLogic(&cb);
+    if (sliderHover) {
+        GuiUnlock();
+    }
     HandleDToolsShortcuts(&dtb);
+    if (sliderHover) {
+        GuiLock();
+    }
     canvas.curTool = dtb.currentTool;
     canvas.brushSize = dtb.brushSize;
     canvas.brushShape = dtb.brushShape;
@@ -143,53 +171,28 @@ void LayoutLogic() {
 }
 
 void LayoutDraw() {
+    bool menuBarOpen = mb.menuOpen;
+    bool sliderHover = dtb.sliderHover;
+    if (menuBarOpen || sliderHover) {
+        GuiLock();
+    }
     CanvasDraw(&canvas);
     ColorBarDraw(&cb);
     StatusBar(&sb);
-    DrawToolbar(&dtb);
-}
 
-void Layout() {
-    if (mb.menuOpen) {
-        GuiLock();
-    }
-
-    if (dtb.sliderHover) {
-        GuiLock();
-    }
-
-    canvas.curTool = dtb.currentTool;
-    canvas.brushSize = (int)floorf(dtb.brushSize);
-    canvas.brushShape = dtb.brushShape;
-
-    // Canvas(&canvas);
-    UpdateCanvasAnchor(
-        &canvas, (Vector2){-1, -1},
-        (Vector2){cb.prop.bounds.width + CBAR_MARGIN_LEFT, -1}
-    );
-    // ColorBar(&cb);
-
-    if (CurrentColorChanged(&cb)) {
-        canvas.current = cb.currentColor;
-    }
-
-    if (dtb.sliderHover) {
+    if (sliderHover)
         GuiUnlock();
-    }
+
     DrawToolbar(&dtb);
 
-    if (dtb.sliderHover) {
+    if (sliderHover)
         GuiLock();
-    }
-    StatusBar(&sb);
 
-    if (mb.menuOpen) {
+    if (menuBarOpen)
         GuiUnlock();
-    }
-    MenuAction mAction = MenuBar(&mb);
-    if (mAction != MACTION_COUNT) {
-        TraceLog(LOG_ERROR, "Menu Clicked -> %d", mAction);
-    }
 
-    // DrawFPS(200, 0);
+    maction = MenuBar(&mb);
+
+    if (menuBarOpen)
+        GuiLock();
 }

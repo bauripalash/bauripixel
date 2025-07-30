@@ -173,10 +173,10 @@ static void ellipseInRect(
     _b1 = 8 * _b * _b;
 
     do {
-        ImageDrawRectangle(img, x1, y0, brushSize, brushSize, clr);
-        ImageDrawRectangle(img, x0, y0, brushSize, brushSize, clr);
-        ImageDrawRectangle(img, x0, y1, brushSize, brushSize, clr);
-        ImageDrawRectangle(img, x1, y1, brushSize, brushSize, clr);
+        DrawBrush(state, img, x1, y0, clr);
+        DrawBrush(state, img, x0, y0, clr);
+        DrawBrush(state, img, x0, y1, clr);
+        DrawBrush(state, img, x1, y1, clr);
 
         if (fill) {
             drawHLine(img, x0, x1, y0, clr);
@@ -196,19 +196,13 @@ static void ellipseInRect(
 
             err += dx += _b1;
         }
-        TraceLog(
-            LOG_ERROR, "[X0 %d] [Y0 %d] | [X1 %d] [Y1 %d]", x0, y0, x1, y1
-        );
-        TraceLog(LOG_ERROR, "[_A %ld] [_B %ld] [_B1 %ld]", _a, _b, _b1);
-        TraceLog(LOG_ERROR, "[DX %lf] [DY %lf]", dx, dy);
-        TraceLog(LOG_ERROR, "[ERR %lf] [E2 %lf]", err, e2);
     } while (x0 <= x1);
 
     while (y0 - y1 < _b) {
-        ImageDrawRectangle(img, x0 - 1, y0, brushSize, brushSize, clr);
-        ImageDrawRectangle(img, x1 + 1, y0, brushSize, brushSize, clr);
-        ImageDrawRectangle(img, x0 - 1, y1, brushSize, brushSize, clr);
-        ImageDrawRectangle(img, x1 + 1, y1, brushSize, brushSize, clr);
+        DrawBrush(state, img, x0 - 1, y0, clr);
+        DrawBrush(state, img, x1 + 1, y0, clr);
+        DrawBrush(state, img, x0 - 1, y1, clr);
+        DrawBrush(state, img, x1 + 1, y1, clr);
 
         if (fill) {
             drawHLine(img, x0 - 1, x1 + 1, y0, clr);
@@ -423,7 +417,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
     ImageClearBackground(&state->previewImg, BLANK);
 
-    if (atCanvas && !locked) {
+    if (atDrawArea && !locked) {
 
         switch (curtool) {
         case DT_PENCIL: {

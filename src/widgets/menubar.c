@@ -22,7 +22,7 @@ MenuBarState NewMenuBar() {
     state.menuOpen = false;
 
     TopMenuEntry menus[] = {
-        {"File", TMENU_FILE, 2, 200, false},
+        {"File", TMENU_FILE, 3, 200, false},
         {"Help", TMENU_HELP, 1, 100, false},
     };
 
@@ -46,16 +46,24 @@ MenuAction drawFileMenu(MenuBarState *state, Rectangle bounds) {
 
     BpRoundedFlatPanel(bounds, 0.125);
 
+    float yInc = state->font.baseSize + ENTRY_MARGIN;
+
     Rectangle rect = {
-        bounds.x + ENTRY_MARGIN, bounds.y + ENTRY_MARGIN, bounds.width, 16
+        bounds.x + ENTRY_MARGIN, bounds.y + ENTRY_MARGIN, bounds.width,
+        state->font.baseSize
     };
     if (GuiLabelButton(rect, GuiIconText(ICON_FILE_NEW, "New")) != 0) {
         return MACTION_NEW_FILE;
     }
 
-    rect.y += rect.height + ENTRY_MARGIN;
+    rect.y += yInc;
     if (GuiLabelButton(rect, GuiIconText(ICON_FILE_OPEN, "Open")) != 0) {
         return MACTION_OPEN_FILE;
+    }
+
+    rect.y += yInc;
+    if (GuiLabelButton(rect, GuiIconText(ICON_FILE_SAVE, "Save")) != 0) {
+        return MACTION_SAVE_FILE;
     }
 
     return MACTION_COUNT;
