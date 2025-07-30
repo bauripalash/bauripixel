@@ -12,8 +12,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-static Rectangle trect = {0};
-
 CanvasState NewCanvas() {
     CanvasState c = {0};
     c.prop = NewWidgetProp();
@@ -103,6 +101,14 @@ CanvasState NewCanvas() {
     c.rectDragging = false;
 
     // --
+    //
+    c.drawArea4 = (Vector4){0};
+    c.canvasArea4 = (Vector4){0};
+
+    c.sbHThumbRect = (Rectangle){0};
+    c.hoverHThumb = false;
+    c.sbVThumbRect = (Rectangle){0};
+    c.hoverVThumb = false;
 
     return c;
 }
@@ -190,19 +196,54 @@ void SetCurrentCanvasColor(CanvasState *state, Color color) {
 
 #define SCROLL_ROUNDNESS 0.9
 
-bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
-    Rectangle vBounds = state->vScrollRect;
-    Rectangle hBounds = state->hScrollRect;
-
-    bool locked = GuiIsLocked();
+bool CanvasScrollBarsDraw(CanvasState *state) {
+    Rectangle vScrollBounds = state->vScrollRect;
+    Rectangle hScrollBounds = state->hScrollRect;
+    Rectangle vThumbRect = state->sbVThumbRect;
+    Rectangle hThumbRect = state->sbHThumbRect;
 
     Color scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_BG));
     Color scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_BG));
     Color scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_FG));
     Color scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_FG));
 
+    if (state->vScrollDragging) {
+        scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_BG));
+        scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
+    }
+
+    if (state->hScrollDragging) {
+        scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_BG));
+        scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
+    }
+
+    if (state->hoverHThumb) {
+        scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_HVR_FG));
+    }
+
+    if (state->hoverVThumb) {
+        scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_HVR_FG));
+    }
+
+    DrawRectangleRounded(vScrollBounds, SCROLL_ROUNDNESS, 0, scrollBgV);
+    DrawRectangleRounded(hScrollBounds, SCROLL_ROUNDNESS, 0, scrollBgH);
+    DrawRectangleRounded(hThumbRect, SCROLL_ROUNDNESS, 0, scrollFgH);
+    DrawRectangleRounded(vThumbRect, SCROLL_ROUNDNESS, 0, scrollFgV);
+
+    return false;
+}
+
+bool CanvasScrollBarsLogic(CanvasState *state) {
+    Vector4 drawArea = state->drawArea4;
+    Vector4 canvas = state->canvasArea4;
+    Rectangle vBounds = state->vScrollRect;
+    Rectangle hBounds = state->hScrollRect;
+
+    bool locked = GuiIsLocked();
+
     Camera2D cam = state->camera;
     float zoom = state->camera.zoom;
+    Vector2 mpos = GetMousePosition();
 
     Vector2 dTl = {drawArea.x, drawArea.y};
     Vector2 dBr = {drawArea.z, drawArea.w};
@@ -249,8 +290,7 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
 
     Rectangle vThumbRect = {vBounds.x, vThumbY, vBounds.width, vThumbHeight};
 
-    if (CheckCollisionPointRec(GetMousePosition(), hBounds) && !locked) {
-        scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_HVR_BG));
+    if (CheckCollisionPointRec(mpos, hBounds) && !locked) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             state->hScrollDragging = true;
         }
@@ -263,9 +303,8 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
         }
     }
 
-    if (CheckCollisionPointRec(GetMousePosition(), vBounds) && !locked) {
+    if (CheckCollisionPointRec(mpos, vBounds) && !locked) {
 
-        scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_HVR_BG));
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             state->vScrollDragging = true;
         }
@@ -284,57 +323,26 @@ bool CanvasScrollBars(CanvasState *state, Vector4 drawArea, Vector4 canvas) {
     }
 
     if (state->vScrollDragging) {
-        scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_BG));
-        scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
         Vector2 delta = GetMouseDelta();
         state->scroll.y += delta.y;
     }
 
     if (state->hScrollDragging) {
-        scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_BG));
-        scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
         Vector2 delta = GetMouseDelta();
         state->scroll.x += delta.x;
     }
-    Vector2 mpos = GetMousePosition();
-    if (CheckCollisionPointRec(mpos, hThumbRect) && !locked) {
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
-        } else {
-            scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_HVR_FG));
-        }
-    }
-
-    if (CheckCollisionPointRec(mpos, vThumbRect) && !locked) {
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_CLK_FG));
-        } else {
-            scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_HVR_FG));
-        }
-    }
-
     state->scroll.x = Clamp(state->scroll.x, 0, hBounds.width - hThumbWidth);
     state->scroll.y = Clamp(state->scroll.y, 0, vBounds.height - vThumbHeight);
 
     state->point.x += (state->scroll.x - oldScrollX) * xScale;
     state->point.y += (state->scroll.y - oldScrollY) * yScale;
 
-    DrawRectangleRounded(vBounds, SCROLL_ROUNDNESS, 0, scrollBgV);
-    DrawRectangleRounded(hBounds, SCROLL_ROUNDNESS, 0, scrollBgH);
-    DrawRectangleRounded(hThumbRect, SCROLL_ROUNDNESS, 0, scrollFgH);
-    DrawRectangleRounded(vThumbRect, SCROLL_ROUNDNESS, 0, scrollFgV);
+    state->sbVThumbRect = vThumbRect;
+    state->sbHThumbRect = hThumbRect;
+    state->hoverHThumb = CheckCollisionPointRec(mpos, hThumbRect) && !locked;
+    state->hoverVThumb = CheckCollisionPointRec(mpos, vThumbRect) && !locked;
 
     return state->vScrollDragging || state->hScrollDragging;
-}
-
-bool cellHover(Rectangle rect, Camera2D cam) {
-    return CheckCollisionPointRec(
-        GetScreenToWorld2D(GetMousePosition(), cam), rect
-    );
-}
-
-bool cellClicked(Rectangle rect, Camera2D cam) {
-    return IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cellHover(rect, cam);
 }
 
 void handleTools(CanvasState *state) {
@@ -372,149 +380,149 @@ void handleTools(CanvasState *state) {
     }
 }
 
-bool Canvas(CanvasState *state) {
-    updateBounds(state);
-    handleTools(state);
+bool CanvasLogic(CanvasState *state) {
+    if (state->prop.active) {
+        updateBounds(state);
+        handleTools(state);
+        bool locked = GuiIsLocked();
+        Vector2 mpos = GetMousePosition();
 
-    bool locked = GuiIsLocked();
-    BpRoundedPanel(state->prop.bounds, DA_ROUNDNESS);
+        Rectangle drawArea = state->drawArea;
+        Rectangle canvasArea = {
+            drawArea.x, drawArea.y, state->gridSize.x, state->gridSize.y
+        };
 
-    // DrawRectangleRounded(
-    //     state->prop.bounds, DA_ROUNDNESS, 0, ColorFDGrayLighter
-    //);
-    Vector2 mpos = GetMousePosition();
-    bool isHovering = CheckCollisionPointRec(mpos, state->drawArea) && !locked;
-    state->hoverCanvas = isHovering;
+        bool isHovering = CheckCollisionPointRec(mpos, drawArea) && !locked;
+        state->hoverCanvas = isHovering;
 
-    Vector2 drawVector = (Vector2){state->drawArea.x, state->drawArea.y};
-    Rectangle canvasRect = {
-        state->drawArea.x, state->drawArea.y, state->gridSize.x,
-        state->gridSize.y
-    };
+        if (isHovering) {
+            float wheel = GetMouseWheelMove();
+            if (wheel != 0 && !IsKeyDown(KEY_LEFT_CONTROL)) {
+                // Mouse position in drawing area
+                Vector2 wMpos = GetScreenToWorld2D(mpos, state->camera);
+                state->camera.offset = mpos;
+                state->camera.target = wMpos;
+                state->point = wMpos;
 
-    Vector2 canvasVector = {canvasRect.x, canvasRect.y};
+                float scale = 0.2f * wheel;
+                state->camera.zoom = Clamp(
+                    expf(logf(state->camera.zoom) + scale), 0.125f, 64.0f
+                );
 
-    if (isHovering && !locked) {
-        float wheel = GetMouseWheelMove();
+            } // wheel != 0
 
-        if (wheel != 0 && !IsKeyDown(KEY_LEFT_CONTROL)) {
-            Vector2 mwPos =
-                GetScreenToWorld2D(GetMousePosition(), state->camera);
-            state->camera.offset = GetMousePosition();
-            state->camera.target = mwPos;
-            state->point = mwPos;
-            float scale = 0.2f * wheel;
-            state->camera.zoom =
-                Clamp(expf(logf(state->camera.zoom) + scale), 0.125f, 64.0f);
+            if (state->enablePanning && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+                Vector2 delta =
+                    Vector2Scale(GetMouseDelta(), -1.0 / state->camera.zoom);
+                state->point = Vector2Add(state->point, delta);
+                state->camera.target = state->point;
+                state->panning = true;
+
+            } else {
+                state->panning = false;
+            } // enablePanning
+
+        } // isHovering
+
+        Vector2 dTopLeft = GetScreenToWorld2D(
+            (Vector2){drawArea.x, drawArea.y}, state->camera
+        );
+
+        Vector2 dBottomRight = GetScreenToWorld2D(
+            (Vector2){drawArea.x + drawArea.width,
+                      drawArea.y + drawArea.height},
+            state->camera
+        );
+
+        Vector2 cTopLeft = {canvasArea.x, canvasArea.y};
+
+        Vector2 cBottomRight = {
+            canvasArea.x + canvasArea.width, canvasArea.y + canvasArea.height
+        };
+
+        float emptyLeft = cTopLeft.x - dTopLeft.x;
+        float emptyRight = dBottomRight.x - cBottomRight.x;
+        float emptyTop = cTopLeft.y - dTopLeft.y;
+        float emptyBottom = dBottomRight.y - cBottomRight.y;
+
+        state->drawArea4.x = dTopLeft.x;
+        state->drawArea4.y = dTopLeft.y;
+        state->drawArea4.z = dBottomRight.x;
+        state->drawArea4.w = dBottomRight.y;
+
+        state->canvasArea4.x = cTopLeft.x;
+        state->canvasArea4.y = cTopLeft.y;
+        state->canvasArea4.z = cBottomRight.x;
+        state->canvasArea4.w = cBottomRight.y;
+        CanvasScrollBarsLogic(state);
+
+        if (state->panning && !locked) {
+            float outsideLeft = (canvasArea.x + canvasArea.width) - dTopLeft.x;
+            float outsideRight = canvasArea.x - dBottomRight.x;
+            float outsideTop = (canvasArea.y + canvasArea.height) - dTopLeft.y;
+            float outsideBottom = canvasArea.y - dBottomRight.y;
+
+            if (outsideLeft < 0) {
+                state->point.x += outsideLeft;
+            }
+
+            if (outsideRight > 0) {
+                state->point.x += outsideRight;
+            }
+
+            if (outsideTop < 0) {
+                state->point.y += outsideTop;
+            }
+
+            if (outsideBottom > 0) {
+                state->point.y += outsideBottom;
+            }
+
+            state->vScrollDragging = false;
+            state->hScrollDragging = false;
         }
 
-        if (state->enablePanning && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        DrawingCanvasLogic(state, canvasArea);
 
-            Vector2 delta =
-                Vector2Scale(GetMouseDelta(), -1.0 / state->camera.zoom);
-
-            state->point = Vector2Add(state->point, delta);
-            state->camera.target = state->point;
-
-            state->panning = true;
-        }
+        state->camera.target.x = state->point.x;
+        state->camera.target.y = state->point.y;
     }
+    return false;
+}
 
-    if (IsKeyReleased(KEY_LEFT_SHIFT) ||
-        IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !locked) {
-        state->panning = false;
-    }
+bool CanvasDraw(CanvasState *state) {
+    if (state->prop.active) {
+        Rectangle drawArea = {
+            state->drawArea.x, state->drawArea.y, state->drawArea.width,
+            state->drawArea.height
+        };
+        Rectangle bounds = state->prop.bounds;
+        BpRoundedPanel(bounds, DA_ROUNDNESS);
+        CanvasScrollBarsDraw(state);
 
-    Vector2 dTl = GetScreenToWorld2D(drawVector, state->camera);
-    Vector2 dBr = GetScreenToWorld2D(
-        (Vector2){drawVector.x + state->drawArea.width,
-                  state->drawArea.y + state->drawArea.height},
-        state->camera
-    );
-
-    Vector2 cTl = canvasVector;
-    Vector2 cBr = {
-        canvasVector.x + canvasRect.width, canvasVector.y + canvasRect.height
-    };
-
-    float leftEmpty = cTl.x - dTl.x;
-    float rightEmpty = dBr.x - cBr.x;
-
-    float topEmpty = cTl.y - dTl.y;
-    float bottomEmpty = dBr.y - cBr.y;
-
-    float mv = 200.0f * GetFrameTime();
-    Vector4 drw = {
-        .x = dTl.x,
-        .y = dTl.y,
-        .z = dBr.x,
-        .w = dBr.y,
-    };
-    Vector4 cvs = {
-        .x = cTl.x,
-        .y = cTl.y,
-        .z = cBr.x,
-        .w = cBr.y,
-    };
-
-    CanvasScrollBars(state, drw, cvs);
-
-    if (state->panning && !locked) {
-        float leftOutside = (canvasRect.x + canvasRect.width) - dTl.x;
-        float rightOutside = canvasRect.x - dBr.x;
-        float topOutside = (canvasRect.y + canvasRect.height) - dTl.y;
-        float bottomOutside = canvasRect.y - dBr.y;
-        if (leftOutside < 0) {
-            state->point.x += leftOutside;
-        } else if (topOutside < 0) {
-            state->point.y += topOutside;
-        } else if (rightOutside > 0) {
-            state->point.x += rightOutside;
-        } else if (bottomOutside > 0) {
-            state->point.y += bottomOutside;
-        }
-
-        state->vScrollDragging = false;
-        state->hScrollDragging = false;
-    }
-
-    BeginScissorMode(
-        state->drawArea.x, state->drawArea.y, state->drawArea.width,
-        state->drawArea.height
-    );
-    {
-
-        // DrawRectangleRec(state->drawArea, ColorGrayLighter);
-        GuiGrid(state->drawArea, NULL, state->gridSize.x * 2.0f, 1, NULL);
+        BeginScissorMode(
+            drawArea.x, drawArea.y, drawArea.width, drawArea.height
+        );
+        GuiGrid(drawArea, NULL, state->gridSize.x * 2.0f, 1, NULL);
         BeginMode2D(state->camera);
         {
-            DrawingCanvas(state, canvasRect);
-            // DrawRectangleLinesEx(canvasRect, 0.1, BLACK);
-
-            // DrawRectangleLinesEx(state->drawArea, 2, MAROON);
-            // DrawCircleV(canvasVector, 10, ColorRedDark);
+            DrawingCanvasDraw(
+                state, (Rectangle){drawArea.x, drawArea.y, state->gridSize.x,
+                                   state->gridSize.y}
+            );
         }
         EndMode2D();
+
+        EndScissorMode();
+        DrawRectangleRoundedLinesEx(bounds, DA_ROUNDNESS, 0, 3, ColorBlack);
+
+        DrawRectangleRoundedLinesEx(
+            (Rectangle){
+                bounds.x + 2, bounds.y + 2, bounds.width - 4, bounds.height - 4
+
+            },
+            DA_ROUNDNESS, 0, 2, ColorGrayLightest
+        );
     }
-    EndScissorMode();
-
-    DrawRectangleRoundedLinesEx(
-        state->prop.bounds, DA_ROUNDNESS, 0, 3, ColorBlack
-    );
-
-    DrawRectangleRoundedLinesEx(
-        (Rectangle){
-            state->prop.bounds.x + 2, state->prop.bounds.y + 2,
-            state->prop.bounds.width - 4, state->prop.bounds.height - 4
-
-        },
-        DA_ROUNDNESS, 0, 2, ColorGrayLightest
-    );
-
-    // BpRoundedPanel(state->prop.bounds, 0.125);
-
-    state->camera.target.x = state->point.x;
-    state->camera.target.y = state->point.y;
-
     return false;
 }

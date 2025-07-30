@@ -8,6 +8,7 @@ void BPDrawLine(
     CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr
 );
 
-void DrawingCanvas(CanvasState *state, Rectangle bounds);
+void DrawingCanvasDraw(CanvasState *state, Rectangle bounds);
+void DrawingCanvasLogic(CanvasState *state, Rectangle bounds);
 
 #endif

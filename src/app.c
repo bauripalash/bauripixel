@@ -129,9 +129,21 @@ int RunApp() {
 void LayoutLogic() {
     ColorBarLogic(&cb);
     HandleDToolsShortcuts(&dtb);
+    canvas.curTool = dtb.currentTool;
+    canvas.brushSize = dtb.brushSize;
+    canvas.brushShape = dtb.brushShape;
+    UpdateCanvasAnchor(
+        &canvas, (Vector2){-1, -1},
+        (Vector2){cb.prop.bounds.width + CBAR_MARGIN_LEFT, -1}
+    );
+    if (CurrentColorChanged(&cb)) {
+        canvas.current = cb.currentColor;
+    }
+    CanvasLogic(&canvas);
 }
 
 void LayoutDraw() {
+    CanvasDraw(&canvas);
     ColorBarDraw(&cb);
     StatusBar(&sb);
     DrawToolbar(&dtb);
@@ -150,7 +162,7 @@ void Layout() {
     canvas.brushSize = (int)floorf(dtb.brushSize);
     canvas.brushShape = dtb.brushShape;
 
-    Canvas(&canvas);
+    // Canvas(&canvas);
     UpdateCanvasAnchor(
         &canvas, (Vector2){-1, -1},
         (Vector2){cb.prop.bounds.width + CBAR_MARGIN_LEFT, -1}

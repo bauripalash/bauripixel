@@ -66,6 +66,16 @@ typedef struct {
     Vector2 rectStart;
     bool rectDragging;
 
+    Vector4 drawArea4;
+    Vector4 canvasArea4;
+
+    // Scroll area horizontal thumb
+    Rectangle sbHThumbRect;
+    bool hoverHThumb;
+    // Scroll area vertical thumb
+    Rectangle sbVThumbRect;
+    bool hoverVThumb;
+
 } CanvasState;
 
 CanvasState NewCanvas();
@@ -73,6 +83,7 @@ void SetCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
 void UpdateCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
 void CenterAlignCanvas(CanvasState *state);
 void SetCurrentCanvasColor(CanvasState *state, Color color);
-bool Canvas(CanvasState *state);
+bool CanvasLogic(CanvasState *state);
+bool CanvasDraw(CanvasState *state);
 
 #endif

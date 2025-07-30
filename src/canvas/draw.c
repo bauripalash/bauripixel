@@ -297,7 +297,7 @@ DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr) {
     }
 }
 
-void DrawingCanvas(CanvasState *state, Rectangle bounds) {
+void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
     bool locked = GuiIsLocked();
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
@@ -482,7 +482,9 @@ void DrawingCanvas(CanvasState *state, Rectangle bounds) {
             break;
         }
     }
+}
 
+void DrawingCanvasDraw(CanvasState *state, Rectangle bounds) {
     DrawTexture(state->bgTxt, state->drawArea.x, state->drawArea.y, WHITE);
     DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
     UpdateTexture(state->previewTxt, state->previewImg.data);
