@@ -14,7 +14,6 @@
 
 static Rectangle trect = {0};
 
-
 CanvasState NewCanvas() {
     CanvasState c = {0};
     c.prop = NewWidgetProp();

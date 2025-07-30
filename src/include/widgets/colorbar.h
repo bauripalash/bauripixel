@@ -35,8 +35,16 @@ typedef struct {
     Color *colors;
     int colorCount;
     Vector2 scroll;
+    Rectangle view;
+
     int boxSize;
     int boxSpacing;
+
+    Rectangle usableRect;
+    Rectangle usedRect;
+    int maxColumns;
+    int usedColumns;
+    int usedRows;
 
     bool hoverColorList;
     int hoverIndex;
@@ -49,8 +57,11 @@ typedef struct {
 
 ColorBarState NewColorBar();
 void SetColorBarAnchor(ColorBarState *cb, Vector2 anchor, Vector2 bottom);
-int ColorBar(ColorBarState *state);
+// int ColorBar(ColorBarState *state);
 int AddToColorBar(ColorBarState *cb, Color color);
 void ClearColorBar(ColorBarState *cb);
 bool CurrentColorChanged(ColorBarState *state);
+
+int ColorBarDraw(ColorBarState *state);
+int ColorBarLogic(ColorBarState *state);
 #endif

@@ -37,6 +37,9 @@ MenuBarState mb;
 void Layout();
 void ApplyStyle();
 
+void LayoutDraw();
+void LayoutLogic();
+
 #define DISABLE_COLORBAR
 #define TOP_SPACE 80
 
@@ -106,10 +109,12 @@ int RunApp() {
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
     while (!WindowShouldClose()) {
+        LayoutLogic();
         BeginDrawing();
         {
             ClearBackground(ColorXDarkGray1);
-            Layout();
+            // Layout();
+            LayoutDraw();
         }
         EndDrawing();
     }
@@ -120,6 +125,10 @@ int RunApp() {
 
     return 0;
 }
+
+void LayoutLogic() { ColorBarLogic(&cb); }
+
+void LayoutDraw() { ColorBarDraw(&cb); }
 
 void Layout() {
     if (mb.menuOpen) {
@@ -139,7 +148,7 @@ void Layout() {
         &canvas, (Vector2){-1, -1},
         (Vector2){cb.prop.bounds.width + CBAR_MARGIN_LEFT, -1}
     );
-    ColorBar(&cb);
+    // ColorBar(&cb);
 
     if (CurrentColorChanged(&cb)) {
         canvas.current = cb.currentColor;
@@ -163,6 +172,5 @@ void Layout() {
         TraceLog(LOG_ERROR, "Menu Clicked -> %d", mAction);
     }
 
-
-    //DrawFPS(200, 0);
+    // DrawFPS(200, 0);
 }
