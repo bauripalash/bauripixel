@@ -291,6 +291,47 @@ DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr) {
     }
 }
 
+static Color ImageGetPixel(Image * img, int posX, int posY) {
+	if (posX < 0 || posX >= img->width) {
+		return RED;
+	} 
+
+	if (posY < 0 || posY >= img->height) {
+		return BLUE;
+	}
+
+	return GetImageColor(*img, posX, posY);
+}
+
+typedef struct FillSeg{
+	int xLeft;
+	int xRight;
+	int y;
+}FillSeg ;
+
+static void BpFill(CanvasState * state, Image * img, int posX, int posY, Color fillClr){
+	int width = img->width;
+	int height = img->height;
+	Color targetColor = ImageGetPixel(img, posX, posY);
+	if (ColorIsEqual(fillClr, targetColor)) {
+		return;
+	}
+	int lx = posX - 1;
+	int rx = posX + 1;
+	while (lx >= 0 && ColorIsEqual(targetColor, ImageGetPixel(img, lx - 1, posY))) {
+		lx--;
+	}
+
+	while (rx < width - 1 && ColorIsEqual(targetColor, ImageGetPixel(img, rx + 1, posY))) {
+		rx++;
+	
+	}
+
+	TraceLog(LOG_ERROR, "LX,RX [%d, %d]" , lx, rx);
+
+	//TraceLog(LOG_WARNING, "Pos Color -> %d" , ColorToInt(ImageGetPixel(img, posX, posY)));
+}
+
 void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
     bool locked = GuiIsLocked();
@@ -409,6 +450,14 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
             break;
         }
+		case DT_BUCKET:{
+				if (leftPressed) {
+					BpFill(state, &state->canvasImg, curPx, curPy, dClr);
+					UpdateTexture(state->canvasTxt, canvas->data);
+				}
+
+				break;
+		}
 
         default:
             break;
