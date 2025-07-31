@@ -22,6 +22,7 @@ typedef struct ToolBtnInfo {
     DToolInfo circleFillTool;
     DToolInfo rectTool;
     DToolInfo rectFillTool;
+    DToolInfo bucketTool;
     DToolInfo panTool;
 
 } ToolBtnInfo;

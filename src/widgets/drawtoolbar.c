@@ -33,6 +33,8 @@ ToolBtnInfo NewToolBtnInfo() {
     tb.rectFillTool =
         NewTool(DT_RECT_FILL, RECT_FILL_PNG_DATA, RECT_FILL_PNG_SIZE);
 
+    tb.bucketTool = NewTool(DT_BUCKET, BUCKET_PNG_DATA, BUCKET_PNG_SIZE);
+
     tb.panTool = NewTool(DT_PAN, PAN_PNG_DATA, PAN_PNG_SIZE);
 
     return tb;
@@ -111,6 +113,8 @@ DrawTool HandleDToolsShortcuts(DrawToolBarState *state) {
         } else {
             tool = DT_RECT;
         }
+    } else if (IsKeyPressed(KEY_G)) {
+        tool = DT_BUCKET;
     }
 
     if (tool != state->currentTool) {
@@ -177,6 +181,7 @@ static bool otherEraser = false;
 static bool otherLine = false;
 static bool otherCircle = false;
 static bool otherRect = false;
+static bool otherBucket = false;
 static bool otherPan = false;
 
 #define rd (float)0.125
@@ -209,6 +214,7 @@ int DrawToolbar(DrawToolBarState *state) {
     DToolInfo circleTools[] = {
         state->tools.circleTool, state->tools.circleFillTool
     };
+    DToolInfo bucketTools[] = {state->tools.bucketTool};
 
     DToolInfo panTools[] = {state->tools.panTool};
 
@@ -241,6 +247,13 @@ int DrawToolbar(DrawToolBarState *state) {
     state->currentTool = BpToolButton(
         btnRect, state->currentTool, &otherRect, ArrCount(circleTools),
         circleTools
+    );
+
+    btnRect.y += yInc;
+
+    state->currentTool = BpToolButton(
+        btnRect, state->currentTool, &otherBucket, ArrCount(bucketTools),
+        bucketTools
     );
 
     btnRect.y += yInc;

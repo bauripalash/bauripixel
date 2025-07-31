@@ -13,6 +13,7 @@ typedef enum DrawTool {
     DT_CIRCLE_FILL,
     DT_RECT,
     DT_RECT_FILL,
+    DT_BUCKET,
 
     DT_PAN
 
