@@ -12,7 +12,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-
 CanvasState NewCanvas() {
     CanvasState c = {0};
     c.prop = NewWidgetProp();
