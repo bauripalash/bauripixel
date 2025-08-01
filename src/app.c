@@ -167,6 +167,7 @@ void LayoutLogic() {
     if (CurrentColorChanged(&cb)) {
         canvas.current = cb.currentColor;
     }
+
     CanvasLogic(&canvas);
 }
 
@@ -195,4 +196,6 @@ void LayoutDraw() {
 
     if (menuBarOpen)
         GuiLock();
+
+    DrawFPS(200, 50);
 }

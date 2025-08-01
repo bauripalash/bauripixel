@@ -2,9 +2,12 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "../external/raygui.h"
 #include "../external/raylib.h"
+#include "../external/stb/stb_ds.h"
 #include "../include/utils.h"
 #include "../include/widgets/canvas.h"
 
@@ -291,45 +294,72 @@ DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr) {
     }
 }
 
-static Color ImageGetPixel(Image * img, int posX, int posY) {
-	if (posX < 0 || posX >= img->width) {
-		return RED;
-	} 
+static Color ImageGetPixel(Image *img, int posX, int posY) {
+    if (posX < 0 || posX >= img->width) {
+        return RED;
+    }
 
-	if (posY < 0 || posY >= img->height) {
-		return BLUE;
-	}
+    if (posY < 0 || posY >= img->height) {
+        return BLUE;
+    }
 
-	return GetImageColor(*img, posX, posY);
+    return GetImageColor(*img, posX, posY);
 }
 
-typedef struct FillSeg{
-	int xLeft;
-	int xRight;
-	int y;
-}FillSeg ;
+typedef struct FillSeg {
+    int x;
+    int y;
+} FillSeg;
 
-static void BpFill(CanvasState * state, Image * img, int posX, int posY, Color fillClr){
-	int width = img->width;
-	int height = img->height;
-	Color targetColor = ImageGetPixel(img, posX, posY);
-	if (ColorIsEqual(fillClr, targetColor)) {
-		return;
-	}
-	int lx = posX - 1;
-	int rx = posX + 1;
-	while (lx >= 0 && ColorIsEqual(targetColor, ImageGetPixel(img, lx - 1, posY))) {
-		lx--;
-	}
+// scanline flood fill
+static void
+BpFill(CanvasState *state, Image *img, int posX, int posY, Color fillClr) {
+    int width = img->width;
+    int height = img->height;
+    int startX = posX;
+    int startY = posY;
 
-	while (rx < width - 1 && ColorIsEqual(targetColor, ImageGetPixel(img, rx + 1, posY))) {
-		rx++;
-	
-	}
+    Color targetColor = ImageGetPixel(img, posX, posY);
+    if (ColorIsEqual(fillClr, targetColor)) {
+        return;
+    }
 
-	TraceLog(LOG_ERROR, "LX,RX [%d, %d]" , lx, rx);
+    FillSeg *stack = NULL;
+    arrpush(stack, ((FillSeg){posX, posY}));
+    int len = 1;
+    while (len > 0) {
+        FillSeg seg = arrpop(stack);
+        int y = seg.y;
+        int x = seg.x;
+        int leftX = x;
+        int rightX = x;
 
-	//TraceLog(LOG_WARNING, "Pos Color -> %d" , ColorToInt(ImageGetPixel(img, posX, posY)));
+        while (leftX > 0 &&
+               ColorIsEqual(ImageGetPixel(img, leftX - 1, y), targetColor)) {
+            leftX--;
+        }
+
+        while (rightX < width - 1 &&
+               ColorIsEqual(ImageGetPixel(img, rightX + 1, y), targetColor)) {
+            rightX++;
+        }
+        for (int xi = leftX; xi <= rightX; xi++) {
+            ImageDrawPixel(img, xi, y, fillClr);
+
+            if (y > 0 &&
+                ColorIsEqual(ImageGetPixel(img, xi, y - 1), targetColor)) {
+                arrpush(stack, ((FillSeg){xi, y - 1}));
+            }
+
+            if (y < height - 1 &&
+                ColorIsEqual(ImageGetPixel(img, xi, y + 1), targetColor)) {
+                arrpush(stack, ((FillSeg){xi, y + 1}));
+            }
+        }
+        len = arrlen(stack);
+    }
+
+    arrfree(stack);
 }
 
 void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
@@ -450,14 +480,14 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
             break;
         }
-		case DT_BUCKET:{
-				if (leftPressed) {
-					BpFill(state, &state->canvasImg, curPx, curPy, dClr);
-					UpdateTexture(state->canvasTxt, canvas->data);
-				}
+        case DT_BUCKET: {
+            if (leftPressed) {
+                BpFill(state, &state->canvasImg, curPx, curPy, dClr);
+                UpdateTexture(state->canvasTxt, canvas->data);
+            }
 
-				break;
-		}
+            break;
+        }
 
         default:
             break;

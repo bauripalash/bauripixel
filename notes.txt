@@ -28,8 +28,18 @@ Canvas, Colorbar handling has been split into two parts, Drawing and Logic
 is a complicated one, most of the input handling is dependent on drawing, apart
 from that, only mouse left and right clicks inputs are used, so I kept it in 
 Drawing part, though shortcut handling will be handled by Logic section. In the
-case of Menubar, it has the same situtation, but the clicking on menu items are
+case of Menubar, it has the same situation, but the clicking on menu items are
 returned from Drawing section, and handled in Logic section.
 
 ~ Palash Bauri
 Wednesday, July 30, 2025 5:43 PM IST
+
+=================================
+Incident Report : RAM Usage Spike
+=================================
+Friday, August 1, 2025 7:31 PM IST, I built the program with (32000 x 32000) 
+canvas size. Instantly the RAM usage spiked and reached to 10.3GB. Nothing was 
+being displayed on the window frame.
+
+~ Palash Bauri
+Friday, August 1, 2025 7:33 PM IST
