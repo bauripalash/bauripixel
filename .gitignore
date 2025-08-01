@@ -1,5 +1,6 @@
 ##### Project #####
 build/
+build-web/
 .cache/
 valgrind.log
 infer-out/
