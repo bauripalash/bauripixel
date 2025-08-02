@@ -58,8 +58,6 @@ typedef struct {
 ColorBarState NewColorBar();
 void SetColorBarAnchor(ColorBarState *cb, Vector2 anchor, Vector2 bottom);
 // int ColorBar(ColorBarState *state);
-int AddToColorBar(ColorBarState *cb, Color color);
-void ClearColorBar(ColorBarState *cb);
 bool CurrentColorChanged(ColorBarState *state);
 
 int ColorBarDraw(ColorBarState *state);

@@ -20,6 +20,7 @@ add_executable(${PROJECT_NAME})
 add_subdirectory(src)
 set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
 if (WIN32 OR MINGW OR MSYS OR CYGWIN) 
 	add_compile_definitions(BPM_OS_WIN)

@@ -4,6 +4,7 @@
 #include "widget.h"
 
 #include "../drawtools.h"
+#include "../layers.h"
 #include <stdbool.h>
 
 #define CANVAS_MARGIN_TB   10
@@ -43,8 +44,9 @@ typedef struct {
     Texture bgTxt;
     Color bgColor;
 
-    Image canvasImg;
-    Texture canvasTxt;
+    LayerList *layers;
+    LayerObj *curLayer;
+
     Texture previewTxt;
     Image previewImg;
     // Vector2 txtPos;
@@ -78,7 +80,9 @@ typedef struct {
 
 } CanvasState;
 
-CanvasState NewCanvas();
+CanvasState NewCanvas(int w, int h);
+void FreeCanvas(CanvasState *c);
+void UpdateCanvasLayers(CanvasState *c, LayerList *list, LayerObj *current);
 void SetCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
 void UpdateCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
 void CenterAlignCanvas(CanvasState *state);

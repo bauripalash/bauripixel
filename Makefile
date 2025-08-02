@@ -14,6 +14,10 @@ build:
 run: build
 	./$(CMAKE_OUTPUT)
 
+.PHONY:zvalgrind
+zvalgrind: zbuild
+	valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all $(ZIG_OUTPUT) > valgrind.log 2>&1
+
 .PHONY: cmake_setup
 cmake_setup:
 	cmake -S . -B build -G Ninja

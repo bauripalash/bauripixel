@@ -12,12 +12,12 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-CanvasState NewCanvas() {
+CanvasState NewCanvas(int w, int h) {
     CanvasState c = {0};
     c.prop = NewWidgetProp();
+    c.gridSize = (Vector2){w, h};
     c.hoverX = 0;
     c.hoverY = 0;
-    c.gridSize = (Vector2){DEFAULT_GRID_SIZE, DEFAULT_GRID_SIZE};
     c.anchor = (Vector2){0, 0};
     c.bottomAnchor = (Vector2){0, 0};
     c.curTool = DT_PENCIL;
@@ -69,14 +69,12 @@ CanvasState NewCanvas() {
     );
     c.bgTxt = LoadTextureFromImage(c.bgImg);
 
-    c.canvasImg = GenImageColor(c.gridSize.x, c.gridSize.y, BLANK);
-    c.canvasTxt = LoadTextureFromImage(c.canvasImg);
     c.previewImg = GenImageColor(c.gridSize.x, c.gridSize.y, BLANK);
     c.previewTxt = LoadTextureFromImage(c.previewImg);
 
     Vector2 txtCenter = {
-        c.drawArea.x + c.canvasTxt.width * 0.5f,
-        c.drawArea.y + c.canvasTxt.height * 0.5f,
+        c.drawArea.x + w * 0.5f,
+        c.drawArea.y + h * 0.5f,
     };
 
     Vector2 daCenter = {
@@ -111,6 +109,33 @@ CanvasState NewCanvas() {
     c.hoverVThumb = false;
 
     return c;
+}
+
+void FreeCanvas(CanvasState *c) {
+    if (c == NULL) {
+        return;
+    }
+
+    if (c->bgImg.data != NULL) {
+        UnloadImage(c->bgImg);
+        UnloadTexture(c->bgTxt);
+    }
+
+    if (c->previewImg.data != NULL) {
+        UnloadImage(c->previewImg);
+        UnloadTexture(c->previewTxt);
+    }
+}
+
+void UpdateCanvasLayers(
+    CanvasState *state, LayerList *list, LayerObj *current
+) {
+    if (state == NULL || list == NULL || list->layers == NULL) {
+        return;
+    }
+
+    state->layers = list;
+    state->curLayer = current;
 }
 
 void updateBounds(CanvasState *c) {
@@ -169,8 +194,8 @@ void SetCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
     UpdateCanvasAnchor(state, anchor, bottom);
 
     Vector2 txtCenter = {
-        state->drawArea.x + state->canvasTxt.width * 0.5f,
-        state->drawArea.y + state->canvasTxt.height * 0.5f,
+        state->drawArea.x + state->gridSize.x * 0.5f,
+        state->drawArea.y + state->gridSize.y * 0.5f,
     };
 
     Vector2 daCenter = {

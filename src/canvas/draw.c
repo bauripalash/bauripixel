@@ -2,7 +2,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "../external/raygui.h"
@@ -405,23 +404,23 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
     bool keepRatio =
         IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT) && !locked;
 
-    Image *canvas = &state->canvasImg;
+    LayerObj *layer = state->curLayer;
     Image *preview = &state->previewImg;
 
     if (!locked && atDrawArea) {
         switch (curtool) {
         case DT_PENCIL: {
             if (leftDown) {
-                DrawBrush(state, canvas, curPx, curPy, dClr);
-                UpdateTexture(state->canvasTxt, canvas->data);
+                DrawBrush(state, &layer->img, curPx, curPy, dClr);
+                SyncImgLayerObj(layer);
             }
             break;
         }
 
         case DT_ERASER: {
             if (leftDown) {
-                DrawBrush(state, canvas, curPx, curPy, dClr);
-                UpdateTexture(state->canvasTxt, canvas->data);
+                DrawBrush(state, &layer->img, curPx, curPy, dClr);
+                SyncImgLayerObj(layer);
             }
             break;
         }
@@ -433,8 +432,8 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
             }
 
             if (leftReleased && state->lineDragging) {
-                BPDrawLine(state, canvas, state->lineStart, curPos, dClr);
-                UpdateTexture(state->canvasTxt, canvas->data);
+                BPDrawLine(state, &layer->img, state->lineStart, curPos, dClr);
+                SyncImgLayerObj(layer);
                 MakeVecZero(&state->lineStart);
                 state->lineDragging = false;
             }
@@ -450,10 +449,10 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
             if (leftReleased && state->rectDragging) {
                 BPDrawRectangle(
-                    state, canvas, state->rectStart, curPos, dClr,
+                    state, &layer->img, state->rectStart, curPos, dClr,
                     curtool == DT_RECT_FILL
                 );
-                UpdateTexture(state->canvasTxt, canvas->data);
+                SyncImgLayerObj(state->curLayer);
                 MakeVecZero(&state->rectStart);
                 state->rectDragging = false;
             }
@@ -470,10 +469,10 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
             if (leftReleased && state->circleDragging) {
                 BPDrawEllipse(
-                    state, canvas, state->circleStart, curPos, dClr,
+                    state, &layer->img, state->circleStart, curPos, dClr,
                     curtool == DT_CIRCLE_FILL, keepRatio
                 );
-                UpdateTexture(state->canvasTxt, canvas->data);
+                SyncImgLayerObj(layer);
                 MakeVecZero(&state->circleStart);
                 state->circleDragging = false;
             }
@@ -482,8 +481,9 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
         }
         case DT_BUCKET: {
             if (leftPressed) {
-                BpFill(state, &state->canvasImg, curPx, curPy, dClr);
-                UpdateTexture(state->canvasTxt, canvas->data);
+                BpFill(state, &layer->img, curPx, curPy, dClr);
+                // UpdateTexture(state->curLayer->txt, canvas->data);
+                SyncImgLayerObj(layer);
             }
 
             break;
@@ -559,7 +559,14 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
 void DrawingCanvasDraw(CanvasState *state, Rectangle bounds) {
     DrawTexture(state->bgTxt, state->drawArea.x, state->drawArea.y, WHITE);
-    DrawTexture(state->canvasTxt, state->drawArea.x, state->drawArea.y, WHITE);
+
+    for (int i = state->layers->count - 1; i >= 0; i--) {
+        DrawTexture(
+            state->layers->layers[i]->txt, state->drawArea.x, state->drawArea.y,
+            WHITE
+        );
+    }
+
     UpdateTexture(state->previewTxt, state->previewImg.data);
     DrawTexture(state->previewTxt, state->drawArea.x, state->drawArea.y, WHITE);
 }

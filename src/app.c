@@ -1,47 +1,22 @@
-// #define DEBUG
-
-#include <math.h>
-
-#include <stdbool.h>
-
 #include "include/colors.h"
+#include "include/gui.h"
 #include "include/menuinfo.h"
+#include "include/tabs.h"
 #include "include/theme.h"
-#include "include/widgets/canvas.h"
-#include "include/widgets/colorbar.h"
-#include "include/widgets/drawtoolbar.h"
-#include "include/widgets/menubar.h"
-#include "include/widgets/statusbar.h"
-#include "include/widgets/widget.h"
+#include <stdbool.h>
 
 #define STB_DS_IMPLEMENTATION
 #include "external/stb/stb_ds.h"
 
 #include "external/raylib.h"
-#include "external/raymath.h"
 #define RAYGUI_IMPLEMENTATION
 #include "external/raygui.h"
 
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 700
 
-static int oldHCb = 0;
-static int oldVCb = 0;
-
-ColorBarState cb;
-CanvasState canvas;
-DrawToolBarState dtb;
-StatusBarState sb;
-MenuBarState mb;
-
-void Layout();
-void ApplyStyle();
-
-void LayoutDraw();
-void LayoutLogic();
-
-#define DISABLE_COLORBAR
-#define TOP_SPACE 80
+void LayoutDraw(Gui *gui);
+void LayoutLogic(Gui *gui);
 
 int RunApp() {
 
@@ -56,135 +31,120 @@ int RunApp() {
     LoadAppDarkTheme();
     LoadAppFont();
 
+    Gui *gui = NewGui();
+
+    if (gui == NULL) {
+        TraceLog(LOG_ERROR, "Failed to create Gui Object : TODO");
+        return -1;
+    }
+
+    TabObj *initTab = NewTabObj(32, 32); // for experimenting
+                                         // TD : Handle Error;
+
+    AddColorToTab(initTab, ColorBlack);
+    AddColorToTab(initTab, ColorPurple);
+    AddColorToTab(initTab, ColorRedDark);
+    AddColorToTab(initTab, ColorOrange);
+    AddColorToTab(initTab, ColorYellow);
+    AddColorToTab(initTab, ColorGreenLightest);
+    AddColorToTab(initTab, ColorGreenLighter);
+    AddColorToTab(initTab, ColorGreenDarkest);
+
+    AddColorToTab(initTab, ColorBlueDarkest);
+    AddColorToTab(initTab, ColorBlueLighter);
+    AddColorToTab(initTab, ColorBlueLightest);
+    AddColorToTab(initTab, ColorCyan);
+
+    AddColorToTab(initTab, ColorWhite);
+    AddColorToTab(initTab, ColorGrayLightest);
+    AddColorToTab(initTab, ColorGrayLighter);
+    AddColorToTab(initTab, ColorGrayDarkest);
+    AddColorToTab(initTab, RAYWHITE);
+
+    AddToTabList(gui->tabList, initTab);
+    gui->curTab = gui->tabList->tabs[0];
+
+    gui->state->statusbar.colorbar = &gui->curTab->state->cb;
+    gui->state->statusbar.canvas = &gui->curTab->state->cvs;
+
     float sbarHeight = 30;
-    mb = NewMenuBar();
-    sb = NewStatusBar();
-    SetStatusBarPosition(&sb, 0, sbarHeight);
 
-    cb = NewColorBar();
-    AddToColorBar(&cb, ColorBlack);
-    AddToColorBar(&cb, ColorPurple);
-    AddToColorBar(&cb, ColorRedDark);
-    AddToColorBar(&cb, ColorOrange);
-    AddToColorBar(&cb, ColorYellow);
-    AddToColorBar(&cb, ColorGreenLightest);
-    AddToColorBar(&cb, ColorGreenLighter);
-    AddToColorBar(&cb, ColorGreenDarkest);
+    SetStatusBarPosition(&gui->state->statusbar, 0, sbarHeight);
 
-    AddToColorBar(&cb, ColorBlueDarkest);
-    AddToColorBar(&cb, ColorBlueLighter);
-    AddToColorBar(&cb, ColorBlueLightest);
-    AddToColorBar(&cb, ColorCyan);
-
-    AddToColorBar(&cb, ColorWhite);
-    AddToColorBar(&cb, ColorGrayLightest);
-    AddToColorBar(&cb, ColorGrayLighter);
-    AddToColorBar(&cb, ColorGrayDarkest);
-    AddToColorBar(&cb, RAYWHITE);
-
-    dtb = NewDrawToolBar();
-    cb.prop.active = true;
-
-    canvas = NewCanvas();
-    canvas.prop.active = true;
-
-    SetColorBarAnchor(&cb, (Vector2){-1, TOP_SPACE}, Vector2Zero());
-
-    SetCanvasAnchor(
-        &canvas, (Vector2){dtb.prop.bounds.width, TOP_SPACE},
-        (Vector2){cb.prop.bounds.width, 30}
-    );
-
-    dtb.anchor.x = 0;
-    dtb.anchor.y = TOP_SPACE + CANVAS_MARGIN_TB;
-    dtb.optAnchor.y = 20;
-    oldHCb = cb.prop.bounds.width;
-    oldVCb = cb.prop.bounds.height;
-    dtb.maxBrushSize = (int)fmaxf(canvas.gridSize.x, canvas.gridSize.y);
-
-    sb.canvas = &canvas;
-    sb.colorbar = &cb;
-    CenterAlignCanvas(&canvas);
+    SyncTabData(gui->curTab);
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
     while (!WindowShouldClose()) {
-        LayoutLogic();
+        LayoutLogic(gui);
         BeginDrawing();
         {
             ClearBackground(ColorXDarkGray1);
-            // Layout();
-            LayoutDraw();
+            LayoutDraw(gui);
         }
         EndDrawing();
     }
 
-    // ExportImage(canvas.canvasImg, "_temp.png");
-    ClearColorBar(&cb);
     CloseWindow();
+    FreeGui(gui);
 
     return 0;
 }
 
 static MenuAction maction = MACTION_COUNT;
 
-void handleMenubar() {
+void handleMenubar(Gui *gui) {
     if (maction != MACTION_COUNT) {
         if (maction == MACTION_SAVE_FILE) {
-            ExportImage(canvas.canvasImg, "_temp.png");
+            ExportImage(gui->curTab->curLayer->img, "_temp.png");
             TraceLog(LOG_WARNING, "[+] Saved file as `_temp.png`");
         }
     }
 }
 
-void LayoutLogic() {
+void LayoutLogic(Gui *gui) {
 
     if (GuiIsLocked())
         GuiUnlock();
 
-    handleMenubar();
+    SyncTabData(gui->curTab);
 
-    bool menuBarOpen = mb.menuOpen;
-    bool sliderHover = dtb.sliderHover;
+    handleMenubar(gui);
+
+    bool menuBarOpen = gui->state->menubar.menuOpen;
+    bool sliderHover = gui->curTab->state->dtb.sliderHover;
     if (menuBarOpen || sliderHover) {
         GuiLock();
     }
-    ColorBarLogic(&cb);
+    ColorBarLogic(&gui->curTab->state->cb);
     if (sliderHover) {
         GuiUnlock();
     }
-    HandleDToolsShortcuts(&dtb);
+    HandleDToolsShortcuts(&gui->curTab->state->dtb);
     if (sliderHover) {
         GuiLock();
     }
-    canvas.curTool = dtb.currentTool;
-    canvas.brushSize = dtb.brushSize;
-    canvas.brushShape = dtb.brushShape;
-    UpdateCanvasAnchor(
-        &canvas, (Vector2){-1, -1},
-        (Vector2){cb.prop.bounds.width + CBAR_MARGIN_LEFT, -1}
-    );
-    if (CurrentColorChanged(&cb)) {
-        canvas.current = cb.currentColor;
-    }
 
-    CanvasLogic(&canvas);
+    CanvasLogic(&gui->curTab->state->cvs);
 }
 
-void LayoutDraw() {
-    bool menuBarOpen = mb.menuOpen;
-    bool sliderHover = dtb.sliderHover;
+void LayoutDraw(Gui *gui) {
+    bool menuBarOpen = gui->state->menubar.menuOpen;
+    bool sliderHover = gui->curTab->state->dtb.sliderHover;
+
+    SyncTabData(gui->curTab);
+
     if (menuBarOpen || sliderHover) {
         GuiLock();
     }
-    CanvasDraw(&canvas);
-    ColorBarDraw(&cb);
-    StatusBar(&sb);
+    CanvasDraw(&gui->curTab->state->cvs);
+    ColorBarDraw(&gui->curTab->state->cb);
+    StatusBar(&gui->state->statusbar);
 
     if (sliderHover)
         GuiUnlock();
 
-    DrawToolbar(&dtb);
+    DrawToolbar(&gui->curTab->state->dtb);
 
     if (sliderHover)
         GuiLock();
@@ -192,7 +152,7 @@ void LayoutDraw() {
     if (menuBarOpen)
         GuiUnlock();
 
-    maction = MenuBar(&mb);
+    maction = MenuBar(&gui->state->menubar);
 
     if (menuBarOpen)
         GuiLock();

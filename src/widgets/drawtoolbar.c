@@ -7,12 +7,21 @@
 #include "../include/utils.h"
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 static DToolInfo NewTool(DrawTool tool, const unsigned char *img, int size) {
 
     DToolInfo t = {.tool = tool, .img = LoadImageFromMemory(".png", img, size)};
     t.txt = LoadTextureFromImage(t.img);
     return t;
+}
+
+static void FreeTool(DToolInfo tool) {
+    if (tool.img.data != NULL) {
+        UnloadImage(tool.img);
+    }
+
+    UnloadTexture(tool.txt);
 }
 
 ToolBtnInfo NewToolBtnInfo() {
@@ -62,7 +71,21 @@ DrawToolBarState NewDrawToolBar() {
 
     return dtb;
 }
-void FreeDrawToolBar(DrawToolBarState *state) { return; }
+void FreeDrawToolBar(DrawToolBarState *state) {
+    if (state == NULL) {
+        return;
+    }
+
+    FreeTool(state->tools.pencilTool);
+    FreeTool(state->tools.eraserTool);
+    FreeTool(state->tools.lineTool);
+    FreeTool(state->tools.circleTool);
+    FreeTool(state->tools.circleFillTool);
+    FreeTool(state->tools.rectTool);
+    FreeTool(state->tools.rectFillTool);
+    FreeTool(state->tools.bucketTool);
+    FreeTool(state->tools.panTool);
+}
 
 static void updateBounds(DrawToolBarState *dtb) {
     dtb->prop.bounds.x = dtb->anchor.x + DTBAR_MARGIN_L;

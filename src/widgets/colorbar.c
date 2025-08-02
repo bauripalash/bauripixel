@@ -63,19 +63,6 @@ void SetColorBarAnchor(ColorBarState *state, Vector2 anchor, Vector2 bottom) {
     updateBounds(state);
 }
 
-int AddToColorBar(ColorBarState *cb, Color color) {
-    arrpush(cb->colors, color);
-    cb->colorCount = arrlen(cb->colors);
-
-    return cb->colorCount - 1;
-}
-
-void ClearColorBar(ColorBarState *cb) {
-    if (cb->colors != NULL) {
-        arrfree(cb->colors);
-    }
-}
-
 bool CurrentColorChanged(ColorBarState *state) {
     return state->prevIndex != state->currentIndex;
 }
