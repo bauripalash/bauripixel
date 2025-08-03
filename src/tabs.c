@@ -28,6 +28,7 @@ TabStateObj *NewTabState(int w, int h) {
     ts->cb.prop.active = true;
     ts->dtb.prop.active = true;
     ts->lb.p.active = true;
+    ts->lb.previewBg = &ts->cvs.bgTxt;
 
     SetDrawToolBarAnchor(&ts->dtb, (Vector2){-1, -1}, (Vector2){-1, 30});
 

@@ -62,6 +62,69 @@ static void updateBounds(LayerBarState *lb) {
 
 #define HANDLE_THICKNESS 10
 
+bool LayerItemDraw(
+    LayerBarState *lb, Rectangle rect, LayerObj *layer, bool isCur
+) {
+    Font f = GuiGetFont();
+    bool locked = GuiIsLocked();
+
+    Color bg = ColorGrayDarkest;
+    Color normalBrdr = ColorGrayLightest;
+    Color hoverBrdr = ColorGrayLighter;
+    Color activeBrdr = ColorWhite;
+    Color brdr = normalBrdr;
+
+    Vector2 mpos = GetMousePosition();
+
+    bool hover = CheckCollisionPointRec(mpos, rect) && !locked;
+    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+    if (hover) {
+        brdr = hoverBrdr;
+    }
+
+    if (isCur) {
+        brdr = activeBrdr;
+    }
+
+    DrawRectangleRounded(rect, 0.125, 0, bg);
+    DrawRectangleRoundedLinesEx(rect, 0.125, 0, 2, brdr);
+
+    Rectangle previewRect = {
+        rect.x + 5, rect.y + 5, rect.height - 10, rect.height - 10
+    };
+
+    Rectangle prevSrc = {
+        0,
+        0,
+        layer->img.width,
+        layer->img.height,
+    };
+
+    Vector2 origin = {0};
+
+    DrawTexturePro(*lb->previewBg, prevSrc, previewRect, origin, 0, ColorWhite);
+    DrawTexturePro(layer->txt, prevSrc, previewRect, origin, 0, ColorWhite);
+
+    Vector2 textpos = {
+        rect.x + 5 + previewRect.width + 5,
+        rect.y + (rect.height / 2.0f) - f.baseSize / 2.0f
+    };
+
+    GuiDrawIcon(
+        layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, textpos.x, textpos.y, 1,
+        ColorWhite
+    );
+    textpos.x += 16;
+
+    DrawTextEx(
+        f, TextFormat("Layer #%d", layer->index), textpos, f.baseSize, 0,
+        ColorWhite
+    );
+
+    return clicked;
+}
+
 int LayerBarLogic(LayerBarState *lb) {
     if (lb->p.active) {
         updateBounds(lb);
@@ -99,7 +162,7 @@ int LayerBarLogic(LayerBarState *lb) {
     return -1;
 }
 
-#define LH 16
+#define LH 40
 
 int LayerBarDraw(LayerBarState *lb) {
     if (lb->p.active) {
@@ -117,17 +180,18 @@ int LayerBarDraw(LayerBarState *lb) {
 
         float px = lb->p.bounds.x + 10;
         float py = bounds.y + 32 + 10;
+        float pyinc = LH + 10;
 
         for (int i = 0; i < lb->list->count; i++) {
             LayerObj *lr = lb->list->layers[i];
-            Rectangle layerBtn = {px, py + (i * LH), 50, LH};
+            Rectangle layerBtn = {px, py, 300, LH};
 
             bool isCur = i == lb->curLayer->index;
-            const char *ltxt =
-                TextFormat("Layer #%d | %s", lr->index, isCur ? "A" : "B");
-            if (GuiLabelButton(layerBtn, ltxt)) {
+            if (LayerItemDraw(lb, layerBtn, lr, isCur)) {
                 lb->selLayer = lr;
             }
+
+            py += pyinc;
         }
     }
     return -1;

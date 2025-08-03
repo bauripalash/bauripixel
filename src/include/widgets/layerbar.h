@@ -15,6 +15,7 @@ typedef struct LayerBarState {
     LayerList *list;
     LayerObj *curLayer;
     LayerObj *selLayer;
+    Texture2D *previewBg;
 
     Vector2 scroll;
     Rectangle view;
