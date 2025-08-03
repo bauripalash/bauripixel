@@ -112,8 +112,8 @@ static void updateBounds(DrawToolBarState *dtb) {
     dtb->prop.bounds.y = dtb->anchor.y;
 
     dtb->prop.bounds.width = DEFAULT_DTBAR_WIDTH;
-    dtb->prop.bounds.height =
-        dtb->bottom.y - dtb->prop.bounds.y - DTBAR_MARGIN_TB;
+    dtb->prop.bounds.height = GetScreenHeight() - dtb->bottom.y -
+                              dtb->prop.bounds.y - DTBAR_MARGIN_TB;
 }
 
 GuiIconName getIconName(int b) {

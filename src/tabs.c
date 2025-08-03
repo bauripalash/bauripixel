@@ -29,15 +29,17 @@ TabStateObj *NewTabState(int w, int h) {
     ts->dtb.prop.active = true;
     ts->lb.p.active = true;
 
-    SetLayerBarAnchor(&ts->lb, (Vector2){-1, -1}, (Vector2){-1, 30});
+    SetDrawToolBarAnchor(&ts->dtb, (Vector2){-1, -1}, (Vector2){-1, 30});
 
-    SetDrawToolBarAnchor(
-        &ts->dtb, (Vector2){-1, -1}, (Vector2){-1, ts->lb.p.bounds.y}
-    );
     SetColorBarAnchor(&ts->cb, (Vector2){-1, TOP_WIN_MARGIN}, (Vector2){0, 0});
     SetCanvasAnchor(
         &ts->cvs, (Vector2){ts->dtb.prop.bounds.width, TOP_WIN_MARGIN},
         (Vector2){ts->cb.prop.bounds.x, ts->lb.p.bounds.y}
+    );
+
+    SetLayerBarAnchor(
+        &ts->lb, (Vector2){ts->cvs.anchor.x, -1},
+        (Vector2){ts->cb.prop.bounds.x + ts->cb.prop.bounds.width, 30}
     );
 
     ts->dtb.anchor.x = 0;
@@ -65,10 +67,11 @@ void SyncTabData(TabObj *tab) {
     tab->state->cvs.brushShape = tab->state->dtb.brushShape;
     tab->state->cb.colors = tab->colors;
     tab->state->cb.colorCount = tab->colorCount;
+    tab->state->lb.curLayer = tab->curLayer;
+    tab->state->cvs.curLayer = tab->curLayer;
 
     SetDrawToolBarAnchor(
-        &tab->state->dtb, (Vector2){-1, -1},
-        (Vector2){-1, tab->state->lb.p.bounds.y}
+        &tab->state->dtb, (Vector2){-1, -1}, (Vector2){-1, -1}
     );
 
     if (CurrentColorChanged(&tab->state->cb)) {
@@ -80,8 +83,9 @@ void SyncTabData(TabObj *tab) {
         (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
     );
 
-    // TraceLog(LOG_WARNING, "Canvas %f | %f",
-    // tab->state->cvs.prop.bounds.width,tab->state->cvs.prop.bounds.height);
+    if (tab->state->lb.selLayer->index != tab->curLayer->index) {
+        tab->curLayer = tab->state->lb.selLayer;
+    }
 }
 
 void AddColorToTab(TabObj *tab, Color color) {
@@ -119,10 +123,14 @@ TabObj *NewTabObj(int w, int h) {
 
     UpdateCanvasLayers(&t->state->cvs, t->layers, t->curLayer);
     t->state->lb.list = t->layers;
+    t->state->lb.curLayer = t->curLayer;
+    t->state->lb.selLayer = t->curLayer;
     t->index = 0;
 
     t->canvasWidth = w;
     t->canvasHeight = h;
+
+    t->state->lb.gridSize = (Vector2){w, h};
 
     t->bg = BLANK;
     t->colorCount = 0;

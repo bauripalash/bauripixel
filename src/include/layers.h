@@ -1,6 +1,7 @@
 #ifndef LAYERS_H
 #define LAYERS_H
 #include "../external/raylib.h"
+#include <stdbool.h>
 
 typedef struct LayerObj {
     int index;
@@ -8,6 +9,7 @@ typedef struct LayerObj {
     Texture2D txt;
     int mode;
     char *name;
+    bool visible;
 } LayerObj;
 
 LayerObj *NewLayerObj(int w, int h);

@@ -142,13 +142,13 @@ void LayoutDraw(Gui *gui) {
     CanvasDraw(&gui->curTab->state->cvs);
     ColorBarDraw(&gui->curTab->state->cb);
     StatusBar(&gui->state->statusbar);
-    LayerBarDraw(&gui->curTab->state->lb);
 
     if (sliderHover)
         GuiUnlock();
 
     DrawToolbar(&gui->curTab->state->dtb);
 
+    LayerBarDraw(&gui->curTab->state->lb);
     if (sliderHover)
         GuiLock();
 

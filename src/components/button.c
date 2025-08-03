@@ -175,3 +175,59 @@ DrawTool BpToolButton(
 
     return clicked;
 }
+
+bool BpDummyRaisedButton(Rectangle bounds) {
+    bool locked = GuiIsLocked();
+    Color bg = ColorGrayDarkest;
+    Color hoverBg = ColorGrayLighter;
+    Color brdr = ColorGrayLightest;
+    Color shadow = ColorBlack;
+
+    Vector2 mpos = GetMousePosition();
+
+    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
+    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height - 5};
+
+    if (clicked) {
+        rect.y += 5;
+    } else {
+        DrawRectangleRounded(
+            (Rectangle){rect.x, rect.y, rect.width, rect.height + 5}, 0.2, 0,
+            shadow
+        );
+    }
+
+    DrawRectangleRounded(rect, 0.2, 0, hover ? hoverBg : bg);
+    DrawRectangleRoundedLinesEx(
+        (Rectangle){rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4},
+        0.2, 0, 2, brdr
+    );
+
+    return clicked;
+}
+
+bool BpDummyButton(Rectangle bounds) {
+    bool locked = GuiIsLocked();
+    Color bg = ColorGrayDarkest;
+    Color hoverBg = ColorGrayLighter;
+    Color brdr = ColorGrayLightest;
+    Color shadow = ColorBlack;
+
+    Vector2 mpos = GetMousePosition();
+
+    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
+    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height};
+
+    DrawRectangleRoundedLinesEx(rect, 0.2, 0, 2, shadow);
+
+    DrawRectangleRounded(rect, 0.2, 0, hover ? hoverBg : bg);
+
+    DrawRectangleRoundedLinesEx(
+        (Rectangle){rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4},
+        0.2, 0, 2, brdr
+    );
+
+    return clicked;
+}

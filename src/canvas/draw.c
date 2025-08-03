@@ -412,7 +412,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
         case DT_PENCIL: {
             if (leftDown) {
                 DrawBrush(state, &layer->img, curPx, curPy, dClr);
-                SyncImgLayerObj(layer);
+                SyncImgLayerObj(state->curLayer);
             }
             break;
         }
@@ -420,7 +420,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
         case DT_ERASER: {
             if (leftDown) {
                 DrawBrush(state, &layer->img, curPx, curPy, dClr);
-                SyncImgLayerObj(layer);
+                SyncImgLayerObj(state->curLayer);
             }
             break;
         }
@@ -433,7 +433,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
             if (leftReleased && state->lineDragging) {
                 BPDrawLine(state, &layer->img, state->lineStart, curPos, dClr);
-                SyncImgLayerObj(layer);
+                SyncImgLayerObj(state->curLayer);
                 MakeVecZero(&state->lineStart);
                 state->lineDragging = false;
             }
@@ -472,7 +472,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
                     state, &layer->img, state->circleStart, curPos, dClr,
                     curtool == DT_CIRCLE_FILL, keepRatio
                 );
-                SyncImgLayerObj(layer);
+                SyncImgLayerObj(state->curLayer);
                 MakeVecZero(&state->circleStart);
                 state->circleDragging = false;
             }
@@ -482,8 +482,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
         case DT_BUCKET: {
             if (leftPressed) {
                 BpFill(state, &layer->img, curPx, curPy, dClr);
-                // UpdateTexture(state->curLayer->txt, canvas->data);
-                SyncImgLayerObj(layer);
+                SyncImgLayerObj(state->curLayer);
             }
 
             break;
@@ -561,10 +560,10 @@ void DrawingCanvasDraw(CanvasState *state, Rectangle bounds) {
     DrawTexture(state->bgTxt, state->drawArea.x, state->drawArea.y, WHITE);
 
     for (int i = state->layers->count - 1; i >= 0; i--) {
-        DrawTexture(
-            state->layers->layers[i]->txt, state->drawArea.x, state->drawArea.y,
-            WHITE
-        );
+        LayerObj *lr = state->layers->layers[i];
+        if (lr->visible) {
+            DrawTexture(lr->txt, state->drawArea.x, state->drawArea.y, WHITE);
+        }
     }
 
     UpdateTexture(state->previewTxt, state->previewImg.data);

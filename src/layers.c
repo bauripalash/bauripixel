@@ -1,6 +1,7 @@
 #include "include/layers.h"
 #include "external/raylib.h"
 #include "external/stb/stb_ds.h"
+#include <stdbool.h>
 #include <stdlib.h>
 
 LayerObj *NewLayerObj(int w, int h) {
@@ -12,6 +13,7 @@ LayerObj *NewLayerObj(int w, int h) {
     l->index = 0;
     l->mode = 0;
     l->name = NULL;
+    l->visible = true;
 
     l->img = GenImageColor(w, h, BLANK);
     l->txt = LoadTextureFromImage(l->img);
@@ -53,6 +55,7 @@ LayerList *NewLayerList(int w, int h) {
     ll->layers = NULL;
 
     LayerObj *initLayer = NewLayerObj(w, h);
+    initLayer->index = 0;
     if (initLayer == NULL) {
         free(ll);
         return NULL;

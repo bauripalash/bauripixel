@@ -27,6 +27,8 @@ DrawTool BpToolButton(
     const DToolInfo *tools
 );
 
+bool BpDummyButton(Rectangle bounds);
+
 // FUTURE: Custom Brush | Using DToolInfo as for prototype
 void BpBrushShapeButton(
     Rectangle bounds, BrushShape *shape, const DToolInfo *tools
