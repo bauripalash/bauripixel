@@ -6,6 +6,7 @@
 #include "widgets/canvas.h"
 #include "widgets/colorbar.h"
 #include "widgets/drawtoolbar.h"
+#include "widgets/layerbar.h"
 
 typedef struct TabStateObj {
 
@@ -17,6 +18,9 @@ typedef struct TabStateObj {
 
     // DrawToolBar
     DrawToolBarState dtb;
+
+    // LayerBar
+    LayerBarState lb;
 
 } TabStateObj;
 

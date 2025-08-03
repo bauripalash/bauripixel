@@ -5,6 +5,7 @@
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
 #include "include/widgets/drawtoolbar.h"
+#include "include/widgets/layerbar.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -21,15 +22,22 @@ TabStateObj *NewTabState(int w, int h) {
 
     ts->cb = NewColorBar();
     ts->dtb = NewDrawToolBar();
+    ts->lb = NewLayerBar();
 
     ts->cvs.prop.active = true;
     ts->cb.prop.active = true;
     ts->dtb.prop.active = true;
+    ts->lb.p.active = true;
 
+    SetLayerBarAnchor(&ts->lb, (Vector2){-1, -1}, (Vector2){-1, 30});
+
+    SetDrawToolBarAnchor(
+        &ts->dtb, (Vector2){-1, -1}, (Vector2){-1, ts->lb.p.bounds.y}
+    );
     SetColorBarAnchor(&ts->cb, (Vector2){-1, TOP_WIN_MARGIN}, (Vector2){0, 0});
     SetCanvasAnchor(
         &ts->cvs, (Vector2){ts->dtb.prop.bounds.width, TOP_WIN_MARGIN},
-        (Vector2){ts->cb.prop.bounds.width, 30}
+        (Vector2){ts->cb.prop.bounds.x, ts->lb.p.bounds.y}
     );
 
     ts->dtb.anchor.x = 0;
@@ -58,14 +66,22 @@ void SyncTabData(TabObj *tab) {
     tab->state->cb.colors = tab->colors;
     tab->state->cb.colorCount = tab->colorCount;
 
-    UpdateCanvasAnchor(
-        &tab->state->cvs, (Vector2){-1, -1},
-        (Vector2){tab->state->cb.prop.bounds.width + CBAR_MARGIN_LEFT, -1}
+    SetDrawToolBarAnchor(
+        &tab->state->dtb, (Vector2){-1, -1},
+        (Vector2){-1, tab->state->lb.p.bounds.y}
     );
 
     if (CurrentColorChanged(&tab->state->cb)) {
         tab->state->cvs.current = tab->state->cb.currentColor;
     }
+
+    UpdateCanvasAnchor(
+        &tab->state->cvs, (Vector2){-1, -1},
+        (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
+    );
+
+    // TraceLog(LOG_WARNING, "Canvas %f | %f",
+    // tab->state->cvs.prop.bounds.width,tab->state->cvs.prop.bounds.height);
 }
 
 void AddColorToTab(TabObj *tab, Color color) {
@@ -102,6 +118,7 @@ TabObj *NewTabObj(int w, int h) {
                                         // layer after creation;
 
     UpdateCanvasLayers(&t->state->cvs, t->layers, t->curLayer);
+    t->state->lb.list = t->layers;
     t->index = 0;
 
     t->canvasWidth = w;

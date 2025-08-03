@@ -31,6 +31,7 @@ typedef struct {
     WidgetProp prop;
     Vector2 optAnchor;
     Vector2 anchor;
+    Vector2 bottom;
 
     Vector2 toolBtnMargin;
     Vector2 toolbarPadding;
@@ -51,6 +52,9 @@ typedef struct {
 
 DrawTool HandleDToolsShortcuts(DrawToolBarState *state);
 DrawToolBarState NewDrawToolBar();
+void SetDrawToolBarAnchor(
+    DrawToolBarState *dtb, Vector2 anchor, Vector2 bottom
+);
 void FreeDrawToolBar(DrawToolBarState *state);
 int DrawToolbar(DrawToolBarState *state);
 

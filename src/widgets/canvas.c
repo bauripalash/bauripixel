@@ -7,6 +7,7 @@
 #include "../include/components.h"
 #include "../include/drawtools.h"
 #include "../include/options.h"
+#include "../include/utils.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -35,7 +36,7 @@ CanvasState NewCanvas(int w, int h) {
     c.prop.bounds.width = GetScreenWidth() -
                           (CANVAS_MARGIN_L + CANVAS_MARGIN_R) -
                           c.bottomAnchor.x;
-    c.prop.bounds.height = GetScreenHeight() - (CANVAS_MARGIN_TB * 2);
+    c.prop.bounds.height = c.bottomAnchor.y - c.anchor.y - CANVAS_MARGIN_TB;
 
     c.camera = (Camera2D){0};
 
@@ -141,11 +142,10 @@ void UpdateCanvasLayers(
 void updateBounds(CanvasState *c) {
     c->prop.bounds.x = c->anchor.x + CANVAS_MARGIN_L;
     c->prop.bounds.y = c->anchor.y + CANVAS_MARGIN_TB;
-    c->prop.bounds.width = GetScreenWidth() -
-                           (CANVAS_MARGIN_L + CANVAS_MARGIN_R) - c->anchor.x -
-                           c->bottomAnchor.x;
-    c->prop.bounds.height = GetScreenHeight() - (CANVAS_MARGIN_TB * 2) -
-                            c->anchor.y - c->bottomAnchor.y;
+    c->prop.bounds.width =
+        c->bottomAnchor.x - c->anchor.x - (CANVAS_MARGIN_L + CANVAS_MARGIN_R);
+    c->prop.bounds.height =
+        c->bottomAnchor.y - c->anchor.y - CANVAS_MARGIN_TB * 2;
 
     Rectangle bounds = c->prop.bounds;
     c->drawArea = (Rectangle){

@@ -3,6 +3,7 @@
 #include "include/menuinfo.h"
 #include "include/tabs.h"
 #include "include/theme.h"
+#include "include/widgets/layerbar.h"
 #include <stdbool.h>
 
 #define STB_DS_IMPLEMENTATION
@@ -126,6 +127,7 @@ void LayoutLogic(Gui *gui) {
     }
 
     CanvasLogic(&gui->curTab->state->cvs);
+    LayerBarLogic(&gui->curTab->state->lb);
 }
 
 void LayoutDraw(Gui *gui) {
@@ -140,6 +142,7 @@ void LayoutDraw(Gui *gui) {
     CanvasDraw(&gui->curTab->state->cvs);
     ColorBarDraw(&gui->curTab->state->cb);
     StatusBar(&gui->state->statusbar);
+    LayerBarDraw(&gui->curTab->state->lb);
 
     if (sliderHover)
         GuiUnlock();

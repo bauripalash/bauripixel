@@ -54,6 +54,7 @@ DrawToolBarState NewDrawToolBar() {
     dtb.prop = NewWidgetProp();
     dtb.currentTool = DT_PENCIL;
     dtb.anchor = (Vector2){0, 0};
+    dtb.bottom = (Vector2){0, 0};
     dtb.toolbarPadding = (Vector2){0, 10};
     dtb.toolBtnMargin = (Vector2){10, 9};
 
@@ -87,12 +88,32 @@ void FreeDrawToolBar(DrawToolBarState *state) {
     FreeTool(state->tools.panTool);
 }
 
+void SetDrawToolBarAnchor(
+    DrawToolBarState *dtb, Vector2 anchor, Vector2 bottom
+) {
+    if (anchor.x != -1) {
+        dtb->anchor.x = anchor.x;
+    }
+
+    if (anchor.y != -1) {
+        dtb->anchor.y = anchor.y;
+    }
+
+    if (bottom.x != -1) {
+        dtb->bottom.x = bottom.x;
+    }
+
+    if (bottom.y != -1) {
+        dtb->bottom.y = bottom.y;
+    }
+}
 static void updateBounds(DrawToolBarState *dtb) {
     dtb->prop.bounds.x = dtb->anchor.x + DTBAR_MARGIN_L;
     dtb->prop.bounds.y = dtb->anchor.y;
 
     dtb->prop.bounds.width = DEFAULT_DTBAR_WIDTH;
-    dtb->prop.bounds.height = GetScreenHeight() - dtb->prop.bounds.y - 30 - 10;
+    dtb->prop.bounds.height =
+        dtb->bottom.y - dtb->prop.bounds.y - DTBAR_MARGIN_TB;
 }
 
 GuiIconName getIconName(int b) {
