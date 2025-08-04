@@ -5,6 +5,7 @@
 #include "../include/components.h"
 #include "../include/drawtools.h"
 #include <stdbool.h>
+#include <string.h>
 
 #define ICON_WIDTH 32
 
@@ -220,6 +221,7 @@ bool BpDummyButton(Rectangle bounds) {
     bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
     Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height};
 
+	/*
     DrawRectangleRoundedLinesEx(rect, 0.2, 0, 2, shadow);
 
     DrawRectangleRounded(rect, 0.2, 0, hover ? hoverBg : bg);
@@ -228,6 +230,65 @@ bool BpDummyButton(Rectangle bounds) {
         (Rectangle){rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4},
         0.2, 0, 2, brdr
     );
+	*/
+
+	float thick = 2;
+	
+	Vector2 tl = (Vector2){bounds.x + thick, bounds.y};
+	Vector2 tr = (Vector2){(bounds.x + bounds.width) - thick, bounds.y};
+	Vector2 bl = (Vector2){bounds.x + thick, (bounds.y + bounds.height) - thick};
+	Vector2 br = (Vector2){(bounds.x + bounds.width) - thick, (bounds.y + bounds.height) - thick};
+	
+	Rectangle innerRect = {
+		bounds.x + thick,
+		bounds.y + thick,
+		bounds.width - thick * 2,
+		bounds.height - thick * 2
+	};
+	DrawRectangleRounded((Rectangle){
+		bounds.x,
+		bounds.y,
+		bounds.width,
+		bounds.height + 4
+	}, 0.1, 2, ColorBlack);
+
+	DrawRectangleRec(innerRect, ColorGrayLighter);
+	DrawRectangleLinesEx(innerRect, thick, ColorWhite);
+
+	Color sc = ColorBlack;
+	
+	DrawRectangleRec((Rectangle){
+		innerRect.x,
+		innerRect.y,
+		thick,thick,
+	}, sc);
+
+	DrawRectangleRec((Rectangle){
+		innerRect.x + innerRect.width - thick,
+		innerRect.y,
+		thick,
+		thick
+	}, sc);
+
+	DrawRectangleRec((Rectangle){
+		innerRect.x,
+		innerRect.y + innerRect.height - thick,
+		thick,thick,
+	}, sc);
+
+	DrawRectangleRec((Rectangle){
+		innerRect.x + innerRect.width - thick,
+		innerRect.y + innerRect.height - thick,
+		thick,
+		thick
+	}, sc);
+
+
+	GuiDrawIcon(ICON_BIN, innerRect.x + 5, innerRect.y + 5, 1, ColorWhite);
+
+
+
+	
 
     return clicked;
 }
