@@ -39,8 +39,8 @@ TabStateObj *NewTabState(int w, int h) {
     );
 
     SetLayerBarAnchor(
-        &ts->lb, (Vector2){ts->cvs.anchor.x, -1},
-        (Vector2){ts->cb.prop.bounds.x + ts->cb.prop.bounds.width, 30}
+        &ts->lb, (Vector2){ts->cvs.prop.bounds.x, -1},
+        (Vector2){ts->cvs.prop.bounds.x + ts->cvs.prop.bounds.width, 30}
     );
 
     ts->dtb.anchor.x = 0;
@@ -82,6 +82,13 @@ void SyncTabData(TabObj *tab) {
     UpdateCanvasAnchor(
         &tab->state->cvs, (Vector2){-1, -1},
         (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
+    );
+
+    SetLayerBarAnchor(
+        &tab->state->lb, (Vector2){tab->state->cvs.prop.bounds.x, -1},
+        (
+            Vector2
+        ){tab->state->cvs.prop.bounds.x + tab->state->cvs.prop.bounds.width, -1}
     );
 
     if (tab->state->lb.selLayer->index != tab->curLayer->index) {

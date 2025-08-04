@@ -54,8 +54,8 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
 }
 
 static void updateBounds(LayerBarState *lb) {
-    lb->p.bounds.x = lb->anchor.x + LB_MARGIN_LR;
-    lb->p.bounds.width = GetScreenWidth() - lb->p.bounds.x - 10;
+    lb->p.bounds.x = lb->anchor.x;
+    lb->p.bounds.width = lb->bottom.x - lb->anchor.x;
     lb->p.bounds.y =
         GetScreenHeight() - lb->p.bounds.height - lb->bottom.y - LB_MARGIN_TB;
 }
@@ -68,7 +68,7 @@ bool LayerItemDraw(
     Font f = GuiGetFont();
     bool locked = GuiIsLocked();
 
-    Color bg = ColorGrayDarkest;
+    Color bg = ColorGrayDarker;
     Color normalBrdr = ColorGrayLightest;
     Color hoverBrdr = ColorGrayLighter;
     Color activeBrdr = ColorWhite;
@@ -170,7 +170,7 @@ int LayerBarDraw(LayerBarState *lb) {
 
         Rectangle bounds = lb->p.bounds;
 
-        BpRoundedPanel(bounds, 0.125);
+        BpRoundedPanel(bounds, 2, 0.125, true);
 
         if (BpDummyButton((Rectangle){bounds.x + 10, bounds.y + 5, 32, 32})) {
             LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);

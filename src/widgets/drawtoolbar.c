@@ -205,7 +205,7 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
 
 static int DrawOptToolbar(DrawToolBarState *state) {
     Rectangle bounds = {
-        state->prop.bounds.x, state->optAnchor.y + DTBAR_MARGIN_TB,
+        state->prop.bounds.x, state->optAnchor.y + 12,
         GetScreenWidth() - DTBAR_MARGIN_R - DTBAR_MARGIN_L, 60 - DTBAR_MARGIN_TB
     };
 
@@ -215,7 +215,7 @@ static int DrawOptToolbar(DrawToolBarState *state) {
         bounds.height - DTBAR_MARGIN_TB * 2
     };
 
-    BpRoundedPanel(bounds, 0.125);
+    BpRoundedPanel(bounds, 2, 0.125, true);
     OptToolsPencil(state, drawBounds);
     return -1;
 }
@@ -240,7 +240,7 @@ int DrawToolbar(DrawToolBarState *state) {
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 
-    BpRoundedPanel(bounds, 0.125);
+    BpRoundedPanel(bounds, 2, 0.125, true);
 
     float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
     Rectangle btnRect = {

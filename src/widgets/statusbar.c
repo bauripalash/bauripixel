@@ -51,7 +51,7 @@ bool StatusBar(StatusBarState *state) {
 
         updateBounds(state);
 
-        BpRoundedPanel(state->prop.bounds, 0.125);
+        BpRoundedPanel(state->prop.bounds, 2, 0.125, false);
         Font font = GuiGetFont();
         float fontSize = font.baseSize;
         Color textClr = ColorGrayLightest;

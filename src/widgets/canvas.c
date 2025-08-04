@@ -155,15 +155,13 @@ void updateBounds(CanvasState *c) {
         bounds.height - (CANVAS_DRAW_MARGIN * 2) - c->scrollThickness * 3
     };
 
-    c->vScrollRect = (Rectangle){c->prop.bounds.x + c->prop.bounds.width -
-                                     c->scrollThickness,
-                                 c->prop.bounds.y, c->scrollThickness,
-                                 c->prop.bounds.height};
+    c->vScrollRect =
+        (Rectangle){c->drawArea.x + c->drawArea.width, c->drawArea.y,
+                    c->scrollThickness, c->drawArea.height};
 
-    c->hScrollRect = (Rectangle){c->prop.bounds.x,
-                                 c->prop.bounds.y + c->prop.bounds.height -
-                                     c->scrollThickness,
-                                 c->prop.bounds.width, c->scrollThickness};
+    c->hScrollRect =
+        (Rectangle){c->drawArea.x, c->drawArea.y + c->drawArea.height,
+                    c->drawArea.width, c->scrollThickness};
 }
 
 void UpdateCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
@@ -522,7 +520,7 @@ bool CanvasDraw(CanvasState *state) {
             state->drawArea.height
         };
         Rectangle bounds = state->prop.bounds;
-        BpRoundedPanel(bounds, DA_ROUNDNESS);
+        BpRoundedPanel(bounds, 4, 0.02, false);
         CanvasScrollBarsDraw(state);
 
         BeginScissorMode(
@@ -539,15 +537,6 @@ bool CanvasDraw(CanvasState *state) {
         EndMode2D();
 
         EndScissorMode();
-        DrawRectangleRoundedLinesEx(bounds, DA_ROUNDNESS, 0, 3, ColorBlack);
-
-        DrawRectangleRoundedLinesEx(
-            (Rectangle){
-                bounds.x + 2, bounds.y + 2, bounds.width - 4, bounds.height - 4
-
-            },
-            DA_ROUNDNESS, 0, 2, ColorGrayLightest
-        );
     }
     return false;
 }
