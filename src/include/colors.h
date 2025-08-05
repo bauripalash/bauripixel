@@ -81,14 +81,14 @@
 #define HexColorTPinkLight    BpHexColor(fbbbad)
 #define HexColorTPink         BpHexColor(ee8695)
 #define HexColorTGrayLightest BpHexColor(4a7a96)
-#define HexColorTGrayLigher   BpHexColor(333f58)
-#define HexColorTDarker       BpHexColor(292831)
+#define HexColorTGrayLighter  BpHexColor(333f58)
+#define HexColorTGrayDarker   BpHexColor(292831)
 
 #define ColorTPinkLight       BpSolidColor(0xfb, 0xbb, 0xad)
 #define ColorTPink            BpSolidColor(0xee, 0x86, 0x95)
 #define ColorTGrayLightest    BpSolidColor(0x4a, 0x7a, 0x96)
-#define ColorTGrayLigher      BpSolidColor(0x33, 0x3f, 0x58)
-#define ColorTDarker          BpSolidColor(0x29, 0x28, 0x31)
+#define ColorTGrayLighter     BpSolidColor(0x33, 0x3f, 0x58)
+#define ColorTGrayDarker      BpSolidColor(0x29, 0x28, 0x31)
 
 /*
  * Winter Wonderland Palette by Jimison3

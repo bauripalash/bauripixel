@@ -239,8 +239,11 @@ int DrawToolbar(DrawToolBarState *state) {
     if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
         SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
+    DrawOptToolbar(state);
 
     BpRoundedPanel(bounds, 2, 0.125, true);
+    // BpDummyPanel((Rectangle){bounds.x, bounds.y - 14, bounds.width,
+    // bounds.height + 20}, 2, 0.125, false, (Vector4){.z = -1});
 
     float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
     Rectangle btnRect = {
@@ -305,8 +308,6 @@ int DrawToolbar(DrawToolBarState *state) {
     state->currentTool = BpToolButton(
         btnRect, state->currentTool, &otherPan, ArrCount(panTools), panTools
     );
-
-    DrawOptToolbar(state);
 
     return -1;
 }

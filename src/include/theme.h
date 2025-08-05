@@ -12,6 +12,9 @@
 #include "utils.h"
 // clang-format on
 
+#define xclr BpHexColor(333f58)
+#define sclr BpHexColor(292831)
+
 // ============== OPT THEME START ============
 static const OptThemeProp darkThemeOpts[] = {
     {T_SCROLLBAR_BG, HexColorVGray},     {T_SCROLLBAR_FG, HexColorVGreen},
@@ -20,7 +23,9 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_SLIDER_BG, HexColorBlack},        {T_SLIDER_BORDER, HexColorGrayLighter},
     {T_SLIDER_FG, HexColorVGreen},       {T_SLIDER_TEXT_PRE, HexColorVWhite},
     {T_SLIDER_TEXT_POST, HexColorVGray}, {T_ISLIDER_BG, HexColorBlack},
-    {T_ISLIDER_FG, HexColorWhite},
+    {T_ISLIDER_FG, HexColorWhite},       {T_PANEL_BG, HexColorVGreen},
+    {T_PANEL_SHADOW, HexColorVGray},     {T_PANEL_BORDER, HexColorSWhite},
+    {T_APP_BG, HexColorVGrayLight}
 };
 
 static const OptThemeProp lightThemeOpts[] = {

@@ -1,6 +1,7 @@
 #include "include/colors.h"
 #include "include/gui.h"
 #include "include/menuinfo.h"
+#include "include/options.h"
 #include "include/tabs.h"
 #include "include/theme.h"
 #include "include/widgets/layerbar.h"
@@ -26,6 +27,7 @@ int RunApp() {
         FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE
     );
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
+    SetWindowState(FLAG_WINDOW_MAXIMIZED);
 
     SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     SetTargetFPS(60);
@@ -65,7 +67,7 @@ int RunApp() {
         LayoutLogic(gui);
         BeginDrawing();
         {
-            ClearBackground(ColorVGrayLight);
+            ClearBackground(GetColor(OptThemeGet(T_APP_BG)));
             LayoutDraw(gui);
         }
         EndDrawing();
