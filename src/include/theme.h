@@ -14,12 +14,12 @@
 
 // ============== OPT THEME START ============
 static const OptThemeProp darkThemeOpts[] = {
-    {T_SCROLLBAR_BG, HexColorXGray},     {T_SCROLLBAR_FG, HexColorXGreen},
-    {T_SCROLLBAR_HVR_BG, HexColorBlack}, {T_SCROLLBAR_HVR_FG, HexColorXGreen},
-    {T_SCROLLBAR_CLK_BG, HexColorBlack}, {T_SCROLLBAR_CLK_FG, HexColorXGreen},
+    {T_SCROLLBAR_BG, HexColorVGray},     {T_SCROLLBAR_FG, HexColorVGreen},
+    {T_SCROLLBAR_HVR_BG, HexColorBlack}, {T_SCROLLBAR_HVR_FG, HexColorVGreen},
+    {T_SCROLLBAR_CLK_BG, HexColorBlack}, {T_SCROLLBAR_CLK_FG, HexColorVGreen},
     {T_SLIDER_BG, HexColorBlack},        {T_SLIDER_BORDER, HexColorGrayLighter},
-    {T_SLIDER_FG, HexColorXGreen},       {T_SLIDER_TEXT_PRE, HexColorXWhite},
-    {T_SLIDER_TEXT_POST, HexColorXGray}, {T_ISLIDER_BG, HexColorBlack},
+    {T_SLIDER_FG, HexColorVGreen},       {T_SLIDER_TEXT_PRE, HexColorVWhite},
+    {T_SLIDER_TEXT_POST, HexColorVGray}, {T_ISLIDER_BG, HexColorBlack},
     {T_ISLIDER_FG, HexColorWhite},
 };
 

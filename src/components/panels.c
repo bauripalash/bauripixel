@@ -47,8 +47,8 @@ void BpDummyPanel(Rectangle bounds, float thick, float roundness, bool shadow) {
         innerRect.height - tk * 2
     };
 
-    DrawRectangleRec(innerRect, Fade(ColorXGrayLight, 0.3));
-    DrawRectangleLinesEx(innerRect, thick, ColorXWhite);
+    DrawRectangleRec(innerRect, Fade(ColorVGrayLight, 0.3));
+    DrawRectangleLinesEx(innerRect, thick, ColorVWhite);
     /*
     Vector2 tl = {innerRect.x, innerRect.y};
     Vector2 tr = {innerRect.x + innerRect.width, innerRect.y};
@@ -62,7 +62,7 @@ void BpDummyPanel(Rectangle bounds, float thick, float roundness, bool shadow) {
     DrawLineEx(bl, br, thick, Fade(ColorXWhite,0.5));
     DrawLineEx(tr, br, thick, Fade(ColorXWhite,0.5));
     */
-    Color sc = ColorXGrayLight;
+    Color sc = ColorVGrayLight;
 
     DrawRectangleRec(
         (Rectangle){

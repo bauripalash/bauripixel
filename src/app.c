@@ -42,10 +42,10 @@ int RunApp() {
     TabObj *initTab = NewTabObj(32, 32); // for experimenting
                                          // TD : Handle Error;
 
-    AddColorToTab(initTab, ColorXGray);
-    AddColorToTab(initTab, ColorXGrayLight);
-    AddColorToTab(initTab, ColorXGreen);
-    AddColorToTab(initTab, ColorXWhite);
+    AddColorToTab(initTab, ColorVGray);
+    AddColorToTab(initTab, ColorVGrayLight);
+    AddColorToTab(initTab, ColorVGreen);
+    AddColorToTab(initTab, ColorVWhite);
 
     AddToTabList(gui->tabList, initTab);
     gui->curTab = gui->tabList->tabs[0];
@@ -65,7 +65,7 @@ int RunApp() {
         LayoutLogic(gui);
         BeginDrawing();
         {
-            ClearBackground(ColorXGrayLight);
+            ClearBackground(ColorVGrayLight);
             LayoutDraw(gui);
         }
         EndDrawing();
