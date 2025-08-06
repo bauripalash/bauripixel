@@ -94,6 +94,10 @@ void SyncTabData(TabObj *tab) {
     if (tab->state->lb.selLayer->index != tab->curLayer->index) {
         tab->curLayer = tab->state->lb.selLayer;
     }
+
+    float tabTop = tab->state->dtb.optAnchor.y + 12 - 5;
+    float tabHeight =
+        (tab->state->lb.p.bounds.y + tab->state->lb.p.bounds.height) - tabTop;
 }
 
 void AddColorToTab(TabObj *tab, Color color) {
@@ -146,6 +150,7 @@ TabObj *NewTabObj(int w, int h) {
 
     t->filepath = NULL; // will be set later
     t->state->dtb.maxBrushSize = (int)fmaxf((float)w, (float)h);
+    t->tabPanel = (Rectangle){0};
 
     return t;
 }

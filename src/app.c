@@ -1,4 +1,5 @@
 #include "include/colors.h"
+#include "include/components.h"
 #include "include/gui.h"
 #include "include/menuinfo.h"
 #include "include/options.h"
@@ -126,6 +127,16 @@ void LayoutDraw(Gui *gui) {
     if (menuBarOpen || sliderHover) {
         GuiLock();
     }
+
+    float py = gui->state->menubar.prop.bounds.y +
+               gui->state->menubar.prop.bounds.height + 5;
+    float px = gui->state->menubar.prop.bounds.x + 5;
+    float pw = gui->state->menubar.prop.bounds.width - 10;
+    float ph =
+        GetScreenHeight() - gui->state->statusbar.prop.bounds.height - 5 - py;
+
+    DrawRectangleRec((Rectangle){px, py, pw, ph}, ColorGrayLighter);
+    DrawRectangleLinesEx((Rectangle){px, py, pw, ph}, 2, ColorWhite);
     CanvasDraw(&gui->curTab->state->cvs);
     ColorBarDraw(&gui->curTab->state->cb);
     StatusBar(&gui->state->statusbar);

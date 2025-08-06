@@ -5,6 +5,49 @@
 
 #define BpHexColor(x)         (int)0x##x##ff
 
+// Sweetie 16 by GrafxKid
+// from https://lospec.com/palette-list/sweetie-16
+
+#define HexColorBlack         (int)0x1a1c2cff
+#define HexColorPurple        (int)0x5d275dff
+#define HexColorRedDark       (int)0xb13e53ff
+#define HexColorOrange        (int)0xef7d57ff
+#define HexColorYellow        (int)0xffcd75ff
+
+#define HexColorGreenLightest (int)0xa7f070ff
+#define HexColorGreenLighter  (int)0x38b764ff
+#define HexColorGreenDarkest  (int)0x257179ff
+
+#define HexColorBlueDarkest   (int)0x29366fff
+#define HexColorBlueLighter   (int)0x3b5dc9ff
+#define HexColorBlueLightest  (int)0x41a6f6ff
+#define HexColorCyan          (int)0x73eff7ff
+
+#define HexColorWhite         (int)0xf4f4f4ff
+#define HexColorGrayLightest  (int)0x94b0c2ff
+#define HexColorGrayLighter   (int)0x566c86ff
+#define HexColorGrayDarker    (int)0x333c57ff
+
+#define ColorBlack            (Color){0x1A, 0x1C, 0x2C, 0xFF}
+#define ColorPurple           (Color){0x5D, 0x27, 0x5D, 0xFF}
+#define ColorRedDark          (Color){0xB1, 0x3E, 0x53, 0xFF}
+#define ColorOrange           (Color){0xEF, 0x7D, 0x57, 0xFF}
+#define ColorYellow           (Color){0xFF, 0xCD, 0x75, 0xFF}
+
+#define ColorGreenLightest    (Color){0xA7, 0xF0, 0x70, 0xFF}
+#define ColorGreenLighter     (Color){0x38, 0xB7, 0x64, 0xFF}
+#define ColorGreenDarker      (Color){0x25, 0x71, 0x79, 0xFF}
+
+#define ColorBlueDarkest      (Color){0x29, 0x36, 0x6F, 0xFF}
+#define ColorBlueLighter      (Color){0x3B, 0x5D, 0xC9, 0xFF}
+#define ColorBlueLightest     (Color){0x41, 0xA6, 0xF6, 0xFF}
+#define ColorCyan             (Color){0x73, 0xEF, 0xF7, 0xFF}
+
+#define ColorWhite            (Color){0xF4, 0xF4, 0xF4, 0xFF}
+#define ColorGrayLightest     (Color){0x94, 0xB0, 0xC2, 0xFF}
+#define ColorGrayLighter      (Color){0x56, 0x6C, 0x86, 0xFF}
+#define ColorGrayDarker       (Color){0x33, 0x3C, 0x57, 0xFF}
+
 // Custom Colors
 #define HexColorTransparent 0
 #define ColorTransparent    (Color){0, 0, 0, 0}
@@ -19,44 +62,6 @@
 
 #define HexColorBlack (int)0x1a1c2cff
 #define ColorBlack    (Color){0x1A, 0x1C, 0x2C, 0xFF}
-
-// LTRO-2 Palette by JamesTDG
-// https://lospec.com/palette-list/ltro-2
-
-#define HexColorWhite        (int)0xeae1f0ff
-#define HexColorGrayLightest (int)0x837185ff
-#define HexColorGrayLighter  (int)0x36313bff
-#define HexColorGrayDarker   (int)0x1c1c1fff
-#define HexColorRedLight     (int)0xf4a3a6ff
-#define HexColorRed          (int)0xf63f4cff
-#define HexColorPurple       (int)0x8e3e77ff
-// #define HexColorBlueLightest  (int)0x69d2ebff
-// #define HexColorBlueLighter   (int)0x6883d8ff
-// #define HexColorBlueDarker    (int)0x574fb0ff
-#define HexColorGreenishLight (int)0xc6c283ff
-#define HexColorGreenishDark  (int)0x8d902eff
-#define HexColorBrownDark     (int)0x8b5b37ff
-#define HexColorYellowLight   (int)0xf4db7eff
-#define HexColorYellow        (int)0xfdbb27ff
-#define HexColorBrownLight    (int)0xc36b33ff
-// #define Color (int)0x
-
-#define ColorWhite         (Color){0xea, 0xe1, 0xf0, 0xff}
-#define ColorGrayLightest  (Color){0x83, 0x71, 0x85, 0xff}
-#define ColorGrayLighter   (Color){0x36, 0x31, 0x3b, 0xff}
-#define ColorGrayDarker    (Color){0x1c, 0x1c, 0x1f, 0xff}
-#define ColorRedLight      (Color){0xf4, 0xa3, 0xa6, 0xff}
-#define ColorRed           (Color){0xf6, 0x3f, 0x4c, 0xff}
-#define ColorPurple        (Color){0x8e, 0x3e, 0x77, 0xff}
-#define ColorBlueLightest  (Color){0x69, 0xd2, 0xeb, 0xff}
-#define ColorBlueLighter   (Color){0x68, 0x83, 0xd8, 0xff}
-#define ColorBlueDarker    (Color){0x57, 0x4f, 0xb0, 0xff}
-#define ColorGreenishLight (Color){0xc6, 0xc2, 0x83, 0xff}
-#define ColorGreenishDark  (Color){0x8d, 0x90, 0x2e, 0xff}
-#define ColorBrownDark     (Color){0x8b, 0x5b, 0x37, 0xff}
-#define ColorYellowLight   (Color){0xf4, 0xdb, 0x7e, 0xff}
-#define ColorYellow        (Color){0xfd, 0xbb, 0x27, 0xff}
-#define ColorBrownLight    (Color){0xc3, 0x6b, 0x33, 0xff}
 
 // Velstad-4-by-mainzero Palette by Arkzero87
 // https://lospec.com/palette-list/velstad-4-by-mainzero

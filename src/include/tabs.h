@@ -37,6 +37,7 @@ typedef struct TabObj {
     LayerList *layers;
     LayerObj *curLayer;
     char *filepath;
+    Rectangle tabPanel;
 
     TabStateObj *state;
 } TabObj;

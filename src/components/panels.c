@@ -62,7 +62,7 @@ void BpDummyPanel(
     };
 
     DrawRectangleRec(
-        innerRect, Fade(panelBg, 0.1)
+        innerRect, Fade(panelBg, 0.8)
     ); // Fade(ColorVGrayLight, 0.3));
     // DrawRectangleLinesEx(innerRect, thick, panelBorder);
 
