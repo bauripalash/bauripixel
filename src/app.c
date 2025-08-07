@@ -5,6 +5,8 @@
 #include "include/options.h"
 #include "include/tabs.h"
 #include "include/theme.h"
+#include "include/utils.h"
+#include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
 #include <stdbool.h>
 
@@ -60,7 +62,7 @@ int RunApp() {
 
     SetStatusBarPosition(&gui->state->statusbar, 0, sbarHeight);
 
-    SyncTabData(gui->curTab);
+    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
@@ -96,7 +98,7 @@ void LayoutLogic(Gui *gui) {
     if (GuiIsLocked())
         GuiUnlock();
 
-    SyncTabData(gui->curTab);
+    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
 
     handleMenubar(gui);
 
@@ -118,45 +120,53 @@ void LayoutLogic(Gui *gui) {
     LayerBarLogic(&gui->curTab->state->lb);
 }
 
+int tabActive = 0;
+
 void LayoutDraw(Gui *gui) {
-    bool menuBarOpen = gui->state->menubar.menuOpen;
-    bool sliderHover = gui->curTab->state->dtb.sliderHover;
+    /*
+bool menuBarOpen = gui->state->menubar.menuOpen;
+bool sliderHover = gui->curTab->state->dtb.sliderHover;
 
-    SyncTabData(gui->curTab);
+SyncTabData(gui->curTab);
 
-    if (menuBarOpen || sliderHover) {
-        GuiLock();
-    }
+if (menuBarOpen || sliderHover) {
+    GuiLock();
+}
 
-    float py = gui->state->menubar.prop.bounds.y +
-               gui->state->menubar.prop.bounds.height + 5;
-    float px = gui->state->menubar.prop.bounds.x + 5;
-    float pw = gui->state->menubar.prop.bounds.width - 10;
-    float ph =
-        GetScreenHeight() - gui->state->statusbar.prop.bounds.height - 5 - py;
+float py = gui->state->menubar.prop.bounds.y +
+           gui->state->menubar.prop.bounds.height + 5;
+float px = gui->state->menubar.prop.bounds.x + 5;
+float pw = gui->state->menubar.prop.bounds.width - 10;
+float ph =
+    GetScreenHeight() - gui->state->statusbar.prop.bounds.height - 5 - py;
 
-    DrawRectangleRec((Rectangle){px, py, pw, ph}, ColorGrayLighter);
-    DrawRectangleLinesEx((Rectangle){px, py, pw, ph}, 2, ColorWhite);
-    CanvasDraw(&gui->curTab->state->cvs);
-    ColorBarDraw(&gui->curTab->state->cb);
+DrawRectangleRec((Rectangle){px, py, pw, ph}, ColorGrayLighter);
+DrawRectangleLinesEx((Rectangle){px, py, pw, ph}, 2, ColorWhite);
+CanvasDraw(&gui->curTab->state->cvs);
+ColorBarDraw(&gui->curTab->state->cb);
+StatusBar(&gui->state->statusbar);
+
+if (sliderHover)
+    GuiUnlock();
+
+DrawToolbar(&gui->curTab->state->dtb);
+
+LayerBarDraw(&gui->curTab->state->lb);
+if (sliderHover)
+    GuiLock();
+
+if (menuBarOpen)
+    GuiUnlock();
+
+maction = MenuBar(&gui->state->menubar);
+
+if (menuBarOpen)
+    GuiLock();
+    */
+
+    BpRoundedPanel(gui->curTab->tabPanel, 2, 0.07, false);
     StatusBar(&gui->state->statusbar);
-
-    if (sliderHover)
-        GuiUnlock();
-
-    DrawToolbar(&gui->curTab->state->dtb);
-
-    LayerBarDraw(&gui->curTab->state->lb);
-    if (sliderHover)
-        GuiLock();
-
-    if (menuBarOpen)
-        GuiUnlock();
-
     maction = MenuBar(&gui->state->menubar);
-
-    if (menuBarOpen)
-        GuiLock();
 
     DrawFPS(200, 50);
 }

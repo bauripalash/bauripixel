@@ -7,6 +7,8 @@
 #include "widgets/colorbar.h"
 #include "widgets/drawtoolbar.h"
 #include "widgets/layerbar.h"
+#include "widgets/menubar.h"
+#include "widgets/statusbar.h"
 
 typedef struct TabStateObj {
 
@@ -44,7 +46,7 @@ typedef struct TabObj {
 
 TabObj *NewTabObj(int w, int h);
 void FreeTabObj(TabObj *tab);
-void SyncTabData(TabObj *tab);
+void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status);
 void AddColorToTab(TabObj *tab, Color color);
 
 typedef struct TabList {

@@ -6,11 +6,16 @@
 #include "include/widgets/colorbar.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
+#include "include/widgets/menubar.h"
+#include "include/widgets/statusbar.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define TOP_WIN_MARGIN 80
+#define TOP_WIN_MARGIN    80
+#define TAB_PANEL_MARGIN  10
+#define TAB_HEADER_WIDTH  80
+#define TAB_HEADER_HEIGHT 24
 
 TabStateObj *NewTabState(int w, int h) {
     TabStateObj *ts = malloc(sizeof(TabStateObj));
@@ -62,7 +67,7 @@ void FreeTabState(TabStateObj *state) {
     free(state);
 }
 
-void SyncTabData(TabObj *tab) {
+void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
     tab->state->cvs.curTool = tab->state->dtb.currentTool;
     tab->state->cvs.brushSize = tab->state->dtb.brushSize;
     tab->state->cvs.brushShape = tab->state->dtb.brushShape;
@@ -71,8 +76,17 @@ void SyncTabData(TabObj *tab) {
     tab->state->lb.curLayer = tab->curLayer;
     tab->state->cvs.curLayer = tab->curLayer;
 
+    tab->tabPanel = (Rectangle){TAB_PANEL_MARGIN,
+                                menu->prop.bounds.y + menu->prop.bounds.height +
+                                    TAB_PANEL_MARGIN + TAB_HEADER_HEIGHT,
+                                GetScreenWidth() - TAB_PANEL_MARGIN * 2, 0};
+
+    tab->tabPanel.height =
+        status->prop.bounds.y - tab->tabPanel.y - TAB_PANEL_MARGIN;
+
     SetDrawToolBarAnchor(
-        &tab->state->dtb, (Vector2){-1, -1}, (Vector2){-1, -1}
+        &tab->state->dtb, (Vector2){tab->tabPanel.x, tab->tabPanel.y},
+        (Vector2){-1, -1}
     );
 
     if (CurrentColorChanged(&tab->state->cb)) {
@@ -94,10 +108,6 @@ void SyncTabData(TabObj *tab) {
     if (tab->state->lb.selLayer->index != tab->curLayer->index) {
         tab->curLayer = tab->state->lb.selLayer;
     }
-
-    float tabTop = tab->state->dtb.optAnchor.y + 12 - 5;
-    float tabHeight =
-        (tab->state->lb.p.bounds.y + tab->state->lb.p.bounds.height) - tabTop;
 }
 
 void AddColorToTab(TabObj *tab, Color color) {
