@@ -51,6 +51,8 @@
 // Custom Colors
 #define HexColorTransparent 0
 #define ColorTransparent    (Color){0, 0, 0, 0}
+#define HexColorCPanel      BpHexColor(2e364e)
+#define ColorCPanel         BpSolidColor(0x2e, 0x36, 0x4e)
 
 #define ColorFDGrayLighter  (Fade(ColorGrayLighter, 0.4))
 

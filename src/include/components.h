@@ -29,6 +29,10 @@ DrawTool BpToolButton(
 
 bool BpDummyButton(Rectangle bounds);
 
+int BpTabItem(
+    Rectangle bounds, const char *name, int index, float tabWidth, bool active
+);
+
 // FUTURE: Custom Brush | Using DToolInfo as for prototype
 void BpBrushShapeButton(
     Rectangle bounds, BrushShape *shape, const DToolInfo *tools

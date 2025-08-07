@@ -46,6 +46,11 @@ int RunApp() {
 
     TabObj *initTab = NewTabObj(32, 32); // for experimenting
                                          // TD : Handle Error;
+    initTab->index = 0;
+    TabObj *twoTab = NewTabObj(8, 8);
+    twoTab->index = 1;
+    AddColorToTab(twoTab, ColorBlueDarkest);
+    AddColorToTab(twoTab, ColorBlueLightest);
 
     AddColorToTab(initTab, ColorVGray);
     AddColorToTab(initTab, ColorVGrayLight);
@@ -53,6 +58,7 @@ int RunApp() {
     AddColorToTab(initTab, ColorVWhite);
 
     AddToTabList(gui->tabList, initTab);
+    AddToTabList(gui->tabList, twoTab);
     gui->curTab = gui->tabList->tabs[0];
 
     gui->state->statusbar.colorbar = &gui->curTab->state->cb;
@@ -63,6 +69,10 @@ int RunApp() {
     SetStatusBarPosition(&gui->state->statusbar, 0, sbarHeight);
 
     SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
+
+    SyncTabData(
+        gui->tabList->tabs[1], &gui->state->menubar, &gui->state->statusbar
+    );
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
@@ -122,6 +132,31 @@ void LayoutLogic(Gui *gui) {
 
 int tabActive = 0;
 
+int tab0 = true;
+int tab1 = false;
+int tab2 = false;
+
+void TabItemsDraw(Gui *gui) {
+    int tabCount = gui->tabList->count;
+    TraceLog(LOG_WARNING, "tab count -> %d", tabCount);
+    for (int t = 0; t < tabCount; t++) {
+
+        TabObj *tab = gui->tabList->tabs[t];
+        TraceLog(LOG_WARNING, "draw tab #%d", tab->index);
+        int result = BpTabItem(
+            tab->tabPanel, TextFormat("Untitled %d", t), tab->index, 150,
+            gui->curTab->index == tab->index
+        );
+
+        if (result == 0) {
+            TraceLog(LOG_ERROR, "Open Tab %d", tab->index);
+            gui->curTab = tab;
+        } else if (result == 1) {
+            TraceLog(LOG_ERROR, "Close Tab %d", tab->index);
+        }
+    }
+}
+
 void LayoutDraw(Gui *gui) {
     /*
 bool menuBarOpen = gui->state->menubar.menuOpen;
@@ -163,10 +198,13 @@ maction = MenuBar(&gui->state->menubar);
 if (menuBarOpen)
     GuiLock();
     */
+    BpRoundedPanel(gui->curTab->tabPanel, 2, 0.0f, false);
 
-    BpRoundedPanel(gui->curTab->tabPanel, 2, 0.07, false);
+    TabItemsDraw(gui);
+
+    // CanvasDraw(&gui->curTab->state->cvs);
     StatusBar(&gui->state->statusbar);
     maction = MenuBar(&gui->state->menubar);
 
-    DrawFPS(200, 50);
+    // DrawFPS(200, 50);
 }

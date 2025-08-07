@@ -23,7 +23,7 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_SLIDER_BG, HexColorBlack},        {T_SLIDER_BORDER, HexColorGrayLighter},
     {T_SLIDER_FG, HexColorVGreen},       {T_SLIDER_TEXT_PRE, HexColorVWhite},
     {T_SLIDER_TEXT_POST, HexColorVGray}, {T_ISLIDER_BG, HexColorBlack},
-    {T_ISLIDER_FG, HexColorWhite},       {T_PANEL_BG, HexColorGrayDarker},
+    {T_ISLIDER_FG, HexColorWhite},       {T_PANEL_BG, HexColorCPanel},
     {T_PANEL_SHADOW, HexColorBlack},     {T_PANEL_BORDER, HexColorSWhite},
     {T_APP_BG, HexColorGrayLighter}
 };
@@ -43,6 +43,9 @@ static const GuiStyleProp RgDarkThemeProps[] = {
     {TEXTBOX, TEXT_COLOR_NORMAL, HexColorWhite},
     {TEXTBOX, TEXT_COLOR_FOCUSED, HexColorWhite},
     {TEXTBOX, TEXT_COLOR_PRESSED, HexColorWhite},
+    {LABEL, TEXT_COLOR_NORMAL, HexColorWhite},
+    {LABEL, TEXT_COLOR_FOCUSED, HexColorWhite},
+    {LABEL, TEXT_COLOR_PRESSED, HexColorWhite},
 };
 
 // ============== RAGUI THEME END ==============

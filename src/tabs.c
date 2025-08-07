@@ -94,12 +94,16 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
     }
 
     UpdateCanvasAnchor(
-        &tab->state->cvs, (Vector2){-1, -1},
-        (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
+        &tab->state->cvs, (Vector2){-1, tab->tabPanel.y},
+        (Vector2){tab->state->cb.prop.bounds.x - TAB_PANEL_MARGIN * 2,
+                  tab->state->lb.p.bounds.y}
     );
 
     SetLayerBarAnchor(
-        &tab->state->lb, (Vector2){tab->state->cvs.prop.bounds.x, -1},
+        &tab->state->lb,
+        (Vector2){
+            tab->state->cvs.prop.bounds.x,
+        },
         (
             Vector2
         ){tab->state->cvs.prop.bounds.x + tab->state->cvs.prop.bounds.width, -1}
@@ -219,5 +223,6 @@ void AddToTabList(TabList *list, TabObj *tab) {
     }
 
     arrput(list->tabs, tab);
+    list->count = arrlen(list->tabs);
 }
 void RemoveIdxTabList(TabList *list, int index) { return; }
