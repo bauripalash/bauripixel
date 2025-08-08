@@ -19,7 +19,7 @@ ColorBarState NewColorBar() {
     cb.colorCount = 0;
 
     cb.anchor = (Vector2){0, 0};
-    cb.bottomStop = (Vector2){0, 0};
+    cb.bottom = (Vector2){0, 0};
     cb.scroll = (Vector2){0, 0};
     cb.view = (Rectangle){0};
     cb.usableRect = (Rectangle){0};
@@ -47,7 +47,8 @@ ColorBarState NewColorBar() {
 
 static void updateBounds(ColorBarState *state) {
     state->prop.bounds.x =
-        GetScreenWidth() - state->prop.bounds.width - CBAR_MARGIN_RIGHT;
+        state->bottom.x - state->prop.bounds.width - CBAR_MARGIN_RIGHT;
+
     state->prop.bounds.y = state->anchor.y + CBAR_MARGIN_TOPBOTTOM;
 }
 void SetColorBarAnchor(ColorBarState *state, Vector2 anchor, Vector2 bottom) {
@@ -58,6 +59,14 @@ void SetColorBarAnchor(ColorBarState *state, Vector2 anchor, Vector2 bottom) {
 
     if (anchor.y >= 0) {
         state->anchor.y = anchor.y;
+    }
+
+    if (bottom.x != -1) {
+        state->bottom.x = bottom.x;
+    }
+
+    if (bottom.y != -1) {
+        state->bottom.y = bottom.y;
     }
 
     updateBounds(state);

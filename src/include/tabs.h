@@ -46,6 +46,8 @@ typedef struct TabObj {
 
 TabObj *NewTabObj(int w, int h);
 void FreeTabObj(TabObj *tab);
+
+void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status);
 void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status);
 void AddColorToTab(TabObj *tab, Color color);
 

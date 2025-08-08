@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#define OPTBAR_HEIGHT 50
 
 static DToolInfo NewTool(DrawTool tool, const unsigned char *img, int size) {
 
@@ -57,6 +58,9 @@ DrawToolBarState NewDrawToolBar() {
     dtb.bottom = (Vector2){0, 0};
     dtb.toolbarPadding = (Vector2){0, 10};
     dtb.toolBtnMargin = (Vector2){10, 9};
+
+    dtb.toolsRect = (Rectangle){};
+    dtb.optRect = (Rectangle){};
 
     dtb.prop.bounds.width = DEFAULT_DTBAR_WIDTH;
     dtb.prop.bounds.height = 0;
@@ -114,6 +118,16 @@ static void updateBounds(DrawToolBarState *dtb) {
     dtb->prop.bounds.width = DEFAULT_DTBAR_WIDTH;
     dtb->prop.bounds.height = GetScreenHeight() - dtb->bottom.y -
                               dtb->prop.bounds.y - DTBAR_MARGIN_TB;
+
+    dtb->optRect =
+        (Rectangle){dtb->prop.bounds.x, dtb->anchor.y + DTBAR_MARGIN_TB,
+                    dtb->bottom.x - dtb->prop.bounds.x - DTBAR_MARGIN_L,
+                    OPTBAR_HEIGHT};
+
+    dtb->toolsRect =
+        (Rectangle){dtb->prop.bounds.x,
+                    dtb->prop.bounds.y + OPTBAR_HEIGHT + DTBAR_MARGIN_TB * 2,
+                    dtb->prop.bounds.width, dtb->prop.bounds.height};
 }
 
 GuiIconName getIconName(int b) {
@@ -204,10 +218,7 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
 }
 
 static int DrawOptToolbar(DrawToolBarState *state) {
-    Rectangle bounds = {
-        state->prop.bounds.x, state->optAnchor.y + 12,
-        GetScreenWidth() - DTBAR_MARGIN_R - DTBAR_MARGIN_L, 60 - DTBAR_MARGIN_TB
-    };
+    Rectangle bounds = state->optRect;
 
     Rectangle drawBounds = {
         bounds.x + DTBAR_MARGIN_L, bounds.y + DTBAR_MARGIN_TB,
@@ -241,15 +252,16 @@ int DrawToolbar(DrawToolBarState *state) {
     }
     DrawOptToolbar(state);
 
-    BpRoundedPanel(bounds, 2, 0.125, true);
-    // BpDummyPanel((Rectangle){bounds.x, bounds.y - 14, bounds.width,
-    // bounds.height + 20}, 2, 0.125, false, (Vector4){.z = -1});
+    Rectangle toolsRect = state->toolsRect;
+
+    toolsRect.height = state->bottom.y - toolsRect.y - DTBAR_MARGIN_TB * 2;
+
+    BpRoundedPanel(toolsRect, 2, 0.125, true);
 
     float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
     Rectangle btnRect = {
-        (state->prop.bounds.x + state->prop.bounds.width / 2.0f) -
-            (DEFAULT_DT_BTN_SIZE / 2.0f),
-        state->prop.bounds.y + state->toolbarPadding.y,
+        (toolsRect.x + toolsRect.width / 2.0f) - (DEFAULT_DT_BTN_SIZE / 2.0f),
+        toolsRect.y + state->toolbarPadding.y,
         DEFAULT_DT_BTN_SIZE,
         DEFAULT_DT_BTN_SIZE,
     };

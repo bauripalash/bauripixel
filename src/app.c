@@ -47,10 +47,6 @@ int RunApp() {
     TabObj *initTab = NewTabObj(32, 32); // for experimenting
                                          // TD : Handle Error;
     initTab->index = 0;
-    TabObj *twoTab = NewTabObj(8, 8);
-    twoTab->index = 1;
-    AddColorToTab(twoTab, ColorBlueDarkest);
-    AddColorToTab(twoTab, ColorBlueLightest);
 
     AddColorToTab(initTab, ColorVGray);
     AddColorToTab(initTab, ColorVGrayLight);
@@ -58,7 +54,6 @@ int RunApp() {
     AddColorToTab(initTab, ColorVWhite);
 
     AddToTabList(gui->tabList, initTab);
-    AddToTabList(gui->tabList, twoTab);
     gui->curTab = gui->tabList->tabs[0];
 
     gui->state->statusbar.colorbar = &gui->curTab->state->cb;
@@ -68,14 +63,9 @@ int RunApp() {
 
     SetStatusBarPosition(&gui->state->statusbar, 0, sbarHeight);
 
-    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
-
-    SyncTabData(
-        gui->tabList->tabs[1], &gui->state->menubar, &gui->state->statusbar
-    );
-
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
+    SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
     while (!WindowShouldClose()) {
         LayoutLogic(gui);
         BeginDrawing();
@@ -138,11 +128,9 @@ int tab2 = false;
 
 void TabItemsDraw(Gui *gui) {
     int tabCount = gui->tabList->count;
-    TraceLog(LOG_WARNING, "tab count -> %d", tabCount);
     for (int t = 0; t < tabCount; t++) {
 
         TabObj *tab = gui->tabList->tabs[t];
-        TraceLog(LOG_WARNING, "draw tab #%d", tab->index);
         int result = BpTabItem(
             tab->tabPanel, TextFormat("Untitled %d", t), tab->index, 150,
             gui->curTab->index == tab->index
@@ -158,53 +146,40 @@ void TabItemsDraw(Gui *gui) {
 }
 
 void LayoutDraw(Gui *gui) {
-    /*
-bool menuBarOpen = gui->state->menubar.menuOpen;
-bool sliderHover = gui->curTab->state->dtb.sliderHover;
+    bool menuOpen = gui->state->menubar.menuOpen;
+    bool sizeSliderHover = gui->curTab->state->dtb.sliderHover;
 
-SyncTabData(gui->curTab);
+    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
 
-if (menuBarOpen || sliderHover) {
-    GuiLock();
-}
+    if (menuOpen || sizeSliderHover) {
+        GuiLock();
+    }
 
-float py = gui->state->menubar.prop.bounds.y +
-           gui->state->menubar.prop.bounds.height + 5;
-float px = gui->state->menubar.prop.bounds.x + 5;
-float pw = gui->state->menubar.prop.bounds.width - 10;
-float ph =
-    GetScreenHeight() - gui->state->statusbar.prop.bounds.height - 5 - py;
-
-DrawRectangleRec((Rectangle){px, py, pw, ph}, ColorGrayLighter);
-DrawRectangleLinesEx((Rectangle){px, py, pw, ph}, 2, ColorWhite);
-CanvasDraw(&gui->curTab->state->cvs);
-ColorBarDraw(&gui->curTab->state->cb);
-StatusBar(&gui->state->statusbar);
-
-if (sliderHover)
-    GuiUnlock();
-
-DrawToolbar(&gui->curTab->state->dtb);
-
-LayerBarDraw(&gui->curTab->state->lb);
-if (sliderHover)
-    GuiLock();
-
-if (menuBarOpen)
-    GuiUnlock();
-
-maction = MenuBar(&gui->state->menubar);
-
-if (menuBarOpen)
-    GuiLock();
-    */
     BpRoundedPanel(gui->curTab->tabPanel, 2, 0.0f, false);
-
     TabItemsDraw(gui);
 
-    // CanvasDraw(&gui->curTab->state->cvs);
+    CanvasDraw(&gui->curTab->state->cvs);
+    ColorBarDraw(&gui->curTab->state->cb);
     StatusBar(&gui->state->statusbar);
+
+    if (sizeSliderHover) {
+        GuiUnlock();
+    }
+
+    DrawToolbar(&gui->curTab->state->dtb);
+
+    if (sizeSliderHover) {
+        GuiLock();
+    }
+
+    LayerBarDraw(&gui->curTab->state->lb);
+    if (menuOpen) {
+        GuiUnlock();
+    }
     maction = MenuBar(&gui->state->menubar);
+    if (menuOpen) {
+        GuiLock();
+    }
 
     // DrawFPS(200, 50);
 }

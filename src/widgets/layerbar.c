@@ -56,8 +56,7 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
 static void updateBounds(LayerBarState *lb) {
     lb->p.bounds.x = lb->anchor.x;
     lb->p.bounds.width = lb->bottom.x - lb->anchor.x;
-    lb->p.bounds.y =
-        GetScreenHeight() - lb->p.bounds.height - lb->bottom.y - LB_MARGIN_TB;
+    lb->p.bounds.y = lb->bottom.y - lb->p.bounds.height - LB_MARGIN_TB * 2;
 }
 
 #define HANDLE_THICKNESS 10

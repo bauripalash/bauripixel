@@ -29,9 +29,11 @@ typedef struct ToolBtnInfo {
 
 typedef struct {
     WidgetProp prop;
-    Vector2 optAnchor;
     Vector2 anchor;
     Vector2 bottom;
+
+    Rectangle optRect;
+    Rectangle toolsRect;
 
     Vector2 toolBtnMargin;
     Vector2 toolbarPadding;

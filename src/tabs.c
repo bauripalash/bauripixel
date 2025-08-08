@@ -15,7 +15,7 @@
 #define TOP_WIN_MARGIN    80
 #define TAB_PANEL_MARGIN  10
 #define TAB_HEADER_WIDTH  80
-#define TAB_HEADER_HEIGHT 24
+#define TAB_HEADER_HEIGHT 30
 
 TabStateObj *NewTabState(int w, int h) {
     TabStateObj *ts = malloc(sizeof(TabStateObj));
@@ -50,7 +50,6 @@ TabStateObj *NewTabState(int w, int h) {
 
     ts->dtb.anchor.x = 0;
     ts->dtb.anchor.y = TOP_WIN_MARGIN + CANVAS_MARGIN_TB;
-    ts->dtb.optAnchor.y = 20;
 
     return ts;
 }
@@ -65,6 +64,11 @@ void FreeTabState(TabStateObj *state) {
     FreeDrawToolBar(&state->dtb);
     FreeCanvas(&state->cvs);
     free(state);
+}
+
+void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
+    SyncTabData(tab, menu, status);
+    CenterAlignCanvas(&tab->state->cvs);
 }
 
 void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
@@ -86,7 +90,8 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
 
     SetDrawToolBarAnchor(
         &tab->state->dtb, (Vector2){tab->tabPanel.x, tab->tabPanel.y},
-        (Vector2){-1, -1}
+        (Vector2){tab->tabPanel.x + tab->tabPanel.width,
+                  tab->tabPanel.y + tab->tabPanel.height}
     );
 
     if (CurrentColorChanged(&tab->state->cb)) {
@@ -94,9 +99,17 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
     }
 
     UpdateCanvasAnchor(
-        &tab->state->cvs, (Vector2){-1, tab->tabPanel.y},
-        (Vector2){tab->state->cb.prop.bounds.x - TAB_PANEL_MARGIN * 2,
-                  tab->state->lb.p.bounds.y}
+        &tab->state->cvs,
+        (Vector2){tab->state->dtb.toolsRect.x + tab->state->dtb.toolsRect.width,
+                  tab->state->dtb.optRect.y + tab->state->dtb.optRect.height},
+        (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
+    );
+
+    SetColorBarAnchor(
+        &tab->state->cb,
+        (Vector2){-1,
+                  tab->state->dtb.optRect.y + tab->state->dtb.optRect.height},
+        (Vector2){tab->tabPanel.x + tab->tabPanel.width, -1}
     );
 
     SetLayerBarAnchor(
@@ -104,9 +117,9 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         (Vector2){
             tab->state->cvs.prop.bounds.x,
         },
-        (
-            Vector2
-        ){tab->state->cvs.prop.bounds.x + tab->state->cvs.prop.bounds.width, -1}
+        (Vector2){tab->state->cvs.prop.bounds.x +
+                      tab->state->cvs.prop.bounds.width,
+                  tab->tabPanel.y + tab->tabPanel.height}
     );
 
     if (tab->state->lb.selLayer->index != tab->curLayer->index) {

@@ -16,7 +16,7 @@ void BpRoundedPanel(Rectangle bounds, float thick, float shadowr, bool shadow) {
     BpDummyPanel(bounds, thick, shadowr, shadow, (Vector4){0, 0, 0, 0});
 }
 
-float tabHeight = 24;
+float tabHeight = 30;
 float tabThick = 2;
 #define TABITEM_PADDING 5
 int BpTabItem(
@@ -41,7 +41,7 @@ int BpTabItem(
     float tabX0 = tabRect.x;
     float tabX1 = tabRect.x + tabRect.width;
 
-    BpDummyPanel(tabRect, 2, 0.0f, false, (Vector4){.w = active ? -1 : 0});
+    BpDummyPanel(tabRect, 2, 0.0f, false, (Vector4){.w = -1});
     if (active) {
         DrawRectangleRec(innerRect, panelBg);
     }
@@ -62,9 +62,9 @@ int BpTabItem(
     }
 
     Rectangle usableBounds = {
-        innerRect.x + TABITEM_PADDING, innerRect.y + TABITEM_PADDING,
+        innerRect.x + TABITEM_PADDING, tabRect.y + TABITEM_PADDING,
         innerRect.width - TABITEM_PADDING * 2,
-        innerRect.height - TABITEM_PADDING * 2
+        tabRect.height - TABITEM_PADDING * 2
     };
 
     Rectangle nameBounds = {

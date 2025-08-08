@@ -28,7 +28,7 @@ typedef struct {
     int currentIndex;
     Color currentColor;
     Vector2 anchor;
-    Vector2 bottomStop;
+    Vector2 bottom;
 
     // Will be memory allocated
     // will be used with stb_ds
