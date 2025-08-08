@@ -1,6 +1,7 @@
 #include "include/tabs.h"
 #include "external/raylib.h"
 #include "external/stb/stb_ds.h"
+#include "include/defaults.h"
 #include "include/layers.h"
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
@@ -24,41 +25,15 @@ TabStateObj *NewTabState(Rectangle panel, int w, int h) {
     }
 
     ts->cvs = NewCanvas(w, h);
-
     ts->cb = NewColorBar();
     ts->dtb = NewDrawToolBar();
     ts->lb = NewLayerBar();
 
-    ts->cvs.prop.active = true;
-    ts->cb.prop.active = true;
-    ts->dtb.prop.active = true;
-    ts->lb.p.active = true;
+    ts->cvs.prop.active = false;
+    ts->cb.prop.active = false;
+    ts->dtb.prop.active = false;
+    ts->lb.p.active = false;
     ts->lb.previewBg = &ts->cvs.bgTxt;
-
-    SetDrawToolBarAnchor(
-        &ts->dtb, (Vector2){panel.x, panel.y},
-        (Vector2){panel.x + panel.width, panel.y + panel.height}
-    );
-
-    SetColorBarAnchor(
-        &ts->cb, (Vector2){-1, ts->dtb.optRect.y + ts->dtb.optRect.height},
-        (Vector2){panel.x + panel.width, -1}
-    );
-
-    SetLayerBarAnchor(
-        &ts->lb, (Vector2){ts->dtb.toolsRect.x + ts->dtb.toolsRect.width, -1},
-        (Vector2){ts->cb.prop.bounds.x, panel.y + panel.height}
-    );
-
-    SetCanvasAnchor(
-        &ts->cvs,
-        (Vector2){ts->dtb.toolsRect.x + ts->dtb.toolsRect.width,
-                  ts->dtb.optRect.y + ts->dtb.optRect.height},
-        (Vector2){ts->cb.prop.bounds.x, ts->lb.p.bounds.y}
-    );
-
-    ts->dtb.anchor.x = 0;
-    ts->dtb.anchor.y = TOP_WIN_MARGIN + CANVAS_MARGIN_TB;
 
     return ts;
 }
@@ -80,12 +55,23 @@ void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         return;
     }
     SyncTabData(tab, menu, status);
+    tab->state->dtb.prop.active = true;
+    tab->state->cb.prop.active = true;
+    tab->state->lb.p.active = true;
+    tab->state->cvs.prop.active = true;
+    SetCanvasAnchor(
+        &tab->state->cvs,
+        (Vector2){tab->state->dtb.toolsRect.x + tab->state->dtb.toolsRect.width,
+                  tab->state->dtb.optRect.y + tab->state->dtb.optRect.height},
+        (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
+    );
     CenterAlignCanvas(&tab->state->cvs);
 
     tab->setupDone = true;
 }
 
 void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
+
     tab->state->cvs.curTool = tab->state->dtb.currentTool;
     tab->state->cvs.brushSize = tab->state->dtb.brushSize;
     tab->state->cvs.brushShape = tab->state->dtb.brushShape;
@@ -94,18 +80,23 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
     tab->state->lb.curLayer = tab->curLayer;
     tab->state->cvs.curLayer = tab->curLayer;
 
-    tab->tabPanel = (Rectangle){TAB_PANEL_MARGIN,
-                                menu->prop.bounds.y + menu->prop.bounds.height +
-                                    TAB_PANEL_MARGIN + TAB_HEADER_HEIGHT,
-                                GetScreenWidth() - TAB_PANEL_MARGIN * 2, 0};
+    // 5 is menubar margin
+    float menuHeight = DEF_MENUBAR_HEIGHT;
 
-    tab->tabPanel.height =
-        status->prop.bounds.y - tab->tabPanel.y - TAB_PANEL_MARGIN;
+    tab->tabPanel =
+        (Rectangle){TAB_PANEL_MARGIN,
+                    menuHeight + TAB_PANEL_MARGIN + TAB_HEADER_HEIGHT,
+                    GetScreenWidth() - TAB_PANEL_MARGIN * 2, 0};
 
+    float statusHeight = DEF_STATUSBAR_HEIGHT;
+    float statusY = GetScreenHeight() - statusHeight;
+
+    tab->tabPanel.height = statusY - tab->tabPanel.y - TAB_PANEL_MARGIN;
+
+    Rectangle panel = tab->tabPanel;
     SetDrawToolBarAnchor(
-        &tab->state->dtb, (Vector2){tab->tabPanel.x, tab->tabPanel.y},
-        (Vector2){tab->tabPanel.x + tab->tabPanel.width,
-                  tab->tabPanel.y + tab->tabPanel.height}
+        &tab->state->dtb, (Vector2){panel.x, panel.y},
+        (Vector2){panel.x + panel.width, panel.y + panel.height}
     );
 
     SetColorBarAnchor(
@@ -120,8 +111,7 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         (Vector2){
             tab->state->dtb.toolsRect.x + tab->state->dtb.toolsRect.width,
         },
-        (Vector2){tab->state->cb.prop.bounds.x,
-                  tab->tabPanel.y + tab->tabPanel.height}
+        (Vector2){tab->state->cb.prop.bounds.x, panel.y + panel.height}
     );
 
     if (CurrentColorChanged(&tab->state->cb)) {
@@ -132,12 +122,17 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         tab->curLayer = tab->state->lb.selLayer;
     }
 
-    UpdateCanvasAnchor(
-        &tab->state->cvs,
-        (Vector2){tab->state->dtb.toolsRect.x + tab->state->dtb.toolsRect.width,
-                  tab->state->dtb.optRect.y + tab->state->dtb.optRect.height},
-        (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
-    );
+    if (tab->setupDone) {
+
+        UpdateCanvasAnchor(
+            &tab->state->cvs,
+            (Vector2){
+                tab->state->dtb.toolsRect.x + tab->state->dtb.toolsRect.width,
+                tab->state->dtb.optRect.y + tab->state->dtb.optRect.height
+            },
+            (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
+        );
+    }
 }
 
 void AddColorToTab(TabObj *tab, Color color) {
@@ -155,11 +150,16 @@ TabObj *NewTabObj(int w, int h) {
         return NULL;
     }
 
-    t->tabPanel =
-        (Rectangle){TAB_PANEL_MARGIN, 25 + TAB_PANEL_MARGIN + TAB_HEADER_HEIGHT,
-                    GetScreenHeight() - TAB_PANEL_MARGIN * 2};
-    t->tabPanel.height =
-        (GetScreenHeight() - 30) - t->tabPanel.y - TAB_PANEL_MARGIN;
+    float menuHeight = DEF_MENUBAR_HEIGHT;
+
+    t->tabPanel = (Rectangle){TAB_PANEL_MARGIN,
+                              menuHeight + TAB_PANEL_MARGIN + TAB_HEADER_HEIGHT,
+                              GetScreenWidth() - TAB_PANEL_MARGIN * 2, 0};
+
+    float statusY = GetScreenHeight() - DEF_STATUSBAR_HEIGHT;
+
+    t->tabPanel.height = statusY - t->tabPanel.y - TAB_PANEL_MARGIN;
+
     t->state = NewTabState(t->tabPanel, w, h);
     if (t->state == NULL) {
         free(t);

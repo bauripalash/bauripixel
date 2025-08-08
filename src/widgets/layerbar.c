@@ -35,6 +35,12 @@ LayerBarState NewLayerBar() {
 
 void FreeLayerBar(LayerBarState *lb) { return; }
 
+static void updateBounds(LayerBarState *lb) {
+    lb->p.bounds.x = lb->anchor.x + LB_MARGIN_LR;
+    lb->p.bounds.width = lb->bottom.x - lb->anchor.x - LB_MARGIN_LR * 2;
+    lb->p.bounds.y = lb->bottom.y - lb->p.bounds.height - LB_MARGIN_TB * 2;
+}
+
 void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
     if (anchor.x != -1) {
         lb->anchor.x = anchor.x;
@@ -51,12 +57,8 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
     if (bottom.y != -1) {
         lb->bottom.y = bottom.y;
     }
-}
 
-static void updateBounds(LayerBarState *lb) {
-    lb->p.bounds.x = lb->anchor.x + LB_MARGIN_LR;
-    lb->p.bounds.width = lb->bottom.x - lb->anchor.x - LB_MARGIN_LR * 2;
-    lb->p.bounds.y = lb->bottom.y - lb->p.bounds.height - LB_MARGIN_TB * 2;
+    updateBounds(lb);
 }
 
 #define HANDLE_THICKNESS 10

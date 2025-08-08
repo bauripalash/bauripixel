@@ -59,8 +59,8 @@ DrawToolBarState NewDrawToolBar() {
     dtb.toolbarPadding = (Vector2){0, 10};
     dtb.toolBtnMargin = (Vector2){10, 9};
 
-    dtb.toolsRect = (Rectangle){};
-    dtb.optRect = (Rectangle){};
+    dtb.toolsRect = (Rectangle){0};
+    dtb.optRect = (Rectangle){0};
 
     dtb.prop.bounds.width = DEFAULT_DTBAR_WIDTH;
     dtb.prop.bounds.height = 0;
@@ -92,6 +92,25 @@ void FreeDrawToolBar(DrawToolBarState *state) {
     FreeTool(state->tools.panTool);
 }
 
+static void updateBounds(DrawToolBarState *dtb) {
+    dtb->prop.bounds.x = dtb->anchor.x + DTBAR_MARGIN_L;
+    dtb->prop.bounds.y = dtb->anchor.y;
+
+    dtb->prop.bounds.width = DEFAULT_DTBAR_WIDTH;
+    dtb->prop.bounds.height = GetScreenHeight() - dtb->bottom.y -
+                              dtb->prop.bounds.y - DTBAR_MARGIN_TB;
+
+    dtb->optRect =
+        (Rectangle){dtb->prop.bounds.x, dtb->anchor.y + DTBAR_MARGIN_TB,
+                    dtb->bottom.x - dtb->prop.bounds.x - DTBAR_MARGIN_L,
+                    OPTBAR_HEIGHT};
+
+    dtb->toolsRect =
+        (Rectangle){dtb->prop.bounds.x,
+                    dtb->prop.bounds.y + OPTBAR_HEIGHT + DTBAR_MARGIN_TB * 2,
+                    dtb->prop.bounds.width, dtb->prop.bounds.height};
+}
+
 void SetDrawToolBarAnchor(
     DrawToolBarState *dtb, Vector2 anchor, Vector2 bottom
 ) {
@@ -110,24 +129,8 @@ void SetDrawToolBarAnchor(
     if (bottom.y != -1) {
         dtb->bottom.y = bottom.y;
     }
-}
-static void updateBounds(DrawToolBarState *dtb) {
-    dtb->prop.bounds.x = dtb->anchor.x + DTBAR_MARGIN_L;
-    dtb->prop.bounds.y = dtb->anchor.y;
 
-    dtb->prop.bounds.width = DEFAULT_DTBAR_WIDTH;
-    dtb->prop.bounds.height = GetScreenHeight() - dtb->bottom.y -
-                              dtb->prop.bounds.y - DTBAR_MARGIN_TB;
-
-    dtb->optRect =
-        (Rectangle){dtb->prop.bounds.x, dtb->anchor.y + DTBAR_MARGIN_TB,
-                    dtb->bottom.x - dtb->prop.bounds.x - DTBAR_MARGIN_L,
-                    OPTBAR_HEIGHT};
-
-    dtb->toolsRect =
-        (Rectangle){dtb->prop.bounds.x,
-                    dtb->prop.bounds.y + OPTBAR_HEIGHT + DTBAR_MARGIN_TB * 2,
-                    dtb->prop.bounds.width, dtb->prop.bounds.height};
+    updateBounds(dtb);
 }
 
 GuiIconName getIconName(int b) {
@@ -242,84 +245,90 @@ static bool otherPan = false;
 #define rd (float)0.125
 
 int DrawToolbar(DrawToolBarState *state) {
-    updateBounds(state);
+    if (state->prop.active) {
 
-    Rectangle bounds = state->prop.bounds;
-    Vector2 mpos = GetMousePosition();
+        updateBounds(state);
 
-    if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        Rectangle bounds = state->prop.bounds;
+        Vector2 mpos = GetMousePosition();
+
+        if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        }
+        DrawOptToolbar(state);
+
+        Rectangle toolsRect = state->toolsRect;
+
+        toolsRect.height = state->bottom.y - toolsRect.y - DTBAR_MARGIN_TB * 2;
+
+        BpRoundedPanel(toolsRect, 2, 0.125, true);
+
+        float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
+        Rectangle btnRect = {
+            (toolsRect.x + toolsRect.width / 2.0f) -
+                (DEFAULT_DT_BTN_SIZE / 2.0f),
+            toolsRect.y + state->toolbarPadding.y,
+            DEFAULT_DT_BTN_SIZE,
+            DEFAULT_DT_BTN_SIZE,
+        };
+
+        DToolInfo penTools[] = {state->tools.pencilTool};
+        DToolInfo eraserTools[] = {state->tools.eraserTool};
+        DToolInfo lineTools[] = {state->tools.lineTool};
+        DToolInfo rectTools[] = {
+            state->tools.rectTool, state->tools.rectFillTool
+        };
+        DToolInfo circleTools[] = {
+            state->tools.circleTool, state->tools.circleFillTool
+        };
+        DToolInfo bucketTools[] = {state->tools.bucketTool};
+
+        DToolInfo panTools[] = {state->tools.panTool};
+
+        state->currentTool = BpToolButton(
+            btnRect, state->currentTool, &otherPen, ArrCount(penTools), penTools
+        );
+
+        btnRect.y += yInc;
+
+        state->currentTool = BpToolButton(
+            btnRect, state->currentTool, &otherEraser, ArrCount(eraserTools),
+            eraserTools
+        );
+
+        btnRect.y += yInc;
+
+        state->currentTool = BpToolButton(
+            btnRect, state->currentTool, &otherLine, ArrCount(lineTools),
+            lineTools
+        );
+
+        btnRect.y += yInc;
+
+        state->currentTool = BpToolButton(
+            btnRect, state->currentTool, &otherCircle, ArrCount(rectTools),
+            rectTools
+        );
+
+        btnRect.y += yInc;
+
+        state->currentTool = BpToolButton(
+            btnRect, state->currentTool, &otherRect, ArrCount(circleTools),
+            circleTools
+        );
+
+        btnRect.y += yInc;
+
+        state->currentTool = BpToolButton(
+            btnRect, state->currentTool, &otherBucket, ArrCount(bucketTools),
+            bucketTools
+        );
+
+        btnRect.y += yInc;
+
+        state->currentTool = BpToolButton(
+            btnRect, state->currentTool, &otherPan, ArrCount(panTools), panTools
+        );
     }
-    DrawOptToolbar(state);
-
-    Rectangle toolsRect = state->toolsRect;
-
-    toolsRect.height = state->bottom.y - toolsRect.y - DTBAR_MARGIN_TB * 2;
-
-    BpRoundedPanel(toolsRect, 2, 0.125, true);
-
-    float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
-    Rectangle btnRect = {
-        (toolsRect.x + toolsRect.width / 2.0f) - (DEFAULT_DT_BTN_SIZE / 2.0f),
-        toolsRect.y + state->toolbarPadding.y,
-        DEFAULT_DT_BTN_SIZE,
-        DEFAULT_DT_BTN_SIZE,
-    };
-
-    DToolInfo penTools[] = {state->tools.pencilTool};
-    DToolInfo eraserTools[] = {state->tools.eraserTool};
-    DToolInfo lineTools[] = {state->tools.lineTool};
-    DToolInfo rectTools[] = {state->tools.rectTool, state->tools.rectFillTool};
-    DToolInfo circleTools[] = {
-        state->tools.circleTool, state->tools.circleFillTool
-    };
-    DToolInfo bucketTools[] = {state->tools.bucketTool};
-
-    DToolInfo panTools[] = {state->tools.panTool};
-
-    state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherPen, ArrCount(penTools), penTools
-    );
-
-    btnRect.y += yInc;
-
-    state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherEraser, ArrCount(eraserTools),
-        eraserTools
-    );
-
-    btnRect.y += yInc;
-
-    state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherLine, ArrCount(lineTools), lineTools
-    );
-
-    btnRect.y += yInc;
-
-    state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherCircle, ArrCount(rectTools),
-        rectTools
-    );
-
-    btnRect.y += yInc;
-
-    state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherRect, ArrCount(circleTools),
-        circleTools
-    );
-
-    btnRect.y += yInc;
-
-    state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherBucket, ArrCount(bucketTools),
-        bucketTools
-    );
-
-    btnRect.y += yInc;
-
-    state->currentTool = BpToolButton(
-        btnRect, state->currentTool, &otherPan, ArrCount(panTools), panTools
-    );
-
     return -1;
 }

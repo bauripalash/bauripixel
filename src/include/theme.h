@@ -17,15 +17,26 @@
 
 // ============== OPT THEME START ============
 static const OptThemeProp darkThemeOpts[] = {
-    {T_SCROLLBAR_BG, HexColorVGray},     {T_SCROLLBAR_FG, HexColorVGreen},
-    {T_SCROLLBAR_HVR_BG, HexColorBlack}, {T_SCROLLBAR_HVR_FG, HexColorVGreen},
-    {T_SCROLLBAR_CLK_BG, HexColorBlack}, {T_SCROLLBAR_CLK_FG, HexColorVGreen},
-    {T_SLIDER_BG, HexColorBlack},        {T_SLIDER_BORDER, HexColorGrayLighter},
-    {T_SLIDER_FG, HexColorVGreen},       {T_SLIDER_TEXT_PRE, HexColorVWhite},
-    {T_SLIDER_TEXT_POST, HexColorVGray}, {T_ISLIDER_BG, HexColorBlack},
-    {T_ISLIDER_FG, HexColorWhite},       {T_PANEL_BG, HexColorCPanel},
-    {T_PANEL_SHADOW, HexColorBlack},     {T_PANEL_BORDER, HexColorSWhite},
-    {T_APP_BG, HexColorGrayLighter}
+    {T_SCROLLBAR_BG, HexColorVGray},
+    {T_SCROLLBAR_FG, HexColorVGreen},
+    {T_SCROLLBAR_HVR_BG, HexColorBlack},
+    {T_SCROLLBAR_HVR_FG, HexColorVGreen},
+    {T_SCROLLBAR_CLK_BG, HexColorBlack},
+    {T_SCROLLBAR_CLK_FG, HexColorVGreen},
+    {T_SLIDER_BG, HexColorBlack},
+    {T_SLIDER_BORDER, HexColorGrayLighter},
+    {T_SLIDER_FG, HexColorVGreen},
+    {T_SLIDER_TEXT_PRE, HexColorVWhite},
+    {T_SLIDER_TEXT_POST, HexColorVGray},
+    {T_ISLIDER_BG, HexColorBlack},
+    {T_ISLIDER_FG, HexColorWhite},
+    {T_PANEL_BG, HexColorCPanel},
+    {T_PANEL_SHADOW, HexColorBlack},
+    {T_PANEL_BORDER, HexColorSWhite},
+    {T_APP_BG, HexColorCPanel},
+    {T_TAB_PANEL_BG, HexColorGrayLighter},
+    {T_TAB_ITEM_ACTIVE, HexColorGrayLighter},
+    {T_TAB_ITEM_INACTIVE, HexColorCPanel},
 };
 
 static const OptThemeProp lightThemeOpts[] = {

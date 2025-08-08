@@ -20,9 +20,6 @@ StatusBarState NewStatusBar() {
 
     return sb;
 }
-void SetStatusBarPosition(StatusBarState *state, float x, float height) {
-    state->prop.bounds.height = height;
-}
 
 static void updateBounds(StatusBarState *state) {
     state->prop.bounds.x = STATUSBAR_MARGIN;
@@ -31,6 +28,10 @@ static void updateBounds(StatusBarState *state) {
         GetScreenHeight() - state->prop.bounds.height - STATUSBAR_MARGIN;
 }
 
+void SetStatusBarPosition(StatusBarState *state, float x, float height) {
+    state->prop.bounds.height = height;
+    updateBounds(state);
+}
 static void drawBounds(Rectangle bounds) {
     DrawRectangleRounded(bounds, 0.125, 0, ColorFDGrayLighter);
     DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 2, ColorBlack);

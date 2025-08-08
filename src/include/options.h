@@ -23,6 +23,9 @@ typedef enum OptThemeKey {
     T_PANEL_BORDER,
     T_PANEL_BG,
     T_APP_BG,
+    T_TAB_PANEL_BG,
+    T_TAB_ITEM_ACTIVE,
+    T_TAB_ITEM_INACTIVE,
 
     T_MAX_THEME_KEYS
 } OptThemeKey;

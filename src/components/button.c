@@ -287,7 +287,8 @@ DrawRectangleRoundedLinesEx(
         sc
     );
 
-    GuiDrawIcon(ICON_BIN, innerRect.x + 5, innerRect.y + 5, 1, ColorWhite);
+    // GuiDrawIcon(ICON_GRID_FILL, innerRect.x + 5, innerRect.y + 5, 1,
+    // ColorWhite);
 
     return clicked;
 }

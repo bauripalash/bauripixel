@@ -26,7 +26,11 @@ int BpTabItem(
     if (!active) {
         OptThemeSet(T_PANEL_BG, HexColorGrayLighter);
     }
-    Color panelBg = GetColor(OptThemeGet(T_PANEL_BG));
+    Color panelBg = GetColor(OptThemeGet(T_TAB_ITEM_ACTIVE));
+    if (!active) {
+        OptThemeSet(T_PANEL_BG, OptThemeGet(T_TAB_ITEM_INACTIVE));
+    }
+
     Color panelBorder = GetColor(OptThemeGet(T_PANEL_BORDER));
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     Rectangle tabRect =
@@ -79,10 +83,6 @@ int BpTabItem(
 
     GuiLabel(nameBounds, name);
 
-    if (!active) {
-        OptThemeSet(T_PANEL_BG, ogPanelBg);
-    }
-
     Vector2 mpos = GetMousePosition();
     if (!GuiIsLocked() && !CheckCollisionPointRec(mpos, xButton) &&
         CheckCollisionPointRec(GetMousePosition(), tabRect) &&
@@ -93,6 +93,7 @@ int BpTabItem(
     if (GuiLabelButton(xButton, GuiIconText(ICON_CROSS, NULL)) != 0) {
         return 1;
     }
+    OptThemeSet(T_PANEL_BG, ogPanelBg);
 
     return -1;
 }

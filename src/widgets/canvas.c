@@ -7,7 +7,6 @@
 #include "../include/components.h"
 #include "../include/drawtools.h"
 #include "../include/options.h"
-#include "../include/utils.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -16,6 +15,7 @@
 CanvasState NewCanvas(int w, int h) {
     CanvasState c = {0};
     c.prop = NewWidgetProp();
+    c.prop.bounds = (Rectangle){0};
     c.gridSize = (Vector2){w, h};
     c.hoverX = 0;
     c.hoverY = 0;
@@ -31,38 +31,18 @@ CanvasState NewCanvas(int w, int h) {
 
     c.current = ColorBlack;
     c.pxSize = INIT_CELL_SIZE;
-    c.prop.bounds.x = CANVAS_MARGIN_L;
-    c.prop.bounds.y = CANVAS_MARGIN_TB;
-    c.prop.bounds.width = GetScreenWidth() -
-                          (CANVAS_MARGIN_L + CANVAS_MARGIN_R) -
-                          c.bottomAnchor.x;
-    c.prop.bounds.height = c.bottomAnchor.y - c.anchor.y - CANVAS_MARGIN_TB;
-
     c.camera = (Camera2D){0};
-
-    Rectangle bounds = c.prop.bounds;
-    c.drawArea = (Rectangle){
-        bounds.x + CANVAS_DRAW_MARGIN + c.scrollThickness,
-        bounds.y + CANVAS_DRAW_MARGIN + c.scrollThickness,
-        bounds.width - (CANVAS_DRAW_MARGIN * 2) - c.scrollThickness * 3,
-        bounds.height - (CANVAS_DRAW_MARGIN * 2) - c.scrollThickness * 3
-    };
-
-    c.hScrollRect = (Rectangle){c.drawArea.x, c.drawArea.y + c.drawArea.height,
-                                c.drawArea.width, c.scrollThickness};
-
-    c.vScrollRect = (Rectangle){c.drawArea.x + c.drawArea.width, c.drawArea.y,
-                                c.scrollThickness, c.drawArea.height};
+    c.drawArea = (Rectangle){0};
+    c.hScrollRect = (Rectangle){0};
+    c.vScrollRect = (Rectangle){0};
     c.vScrollDragging = false;
     c.hScrollDragging = false;
     c.panning = false;
     c.enablePanning = false;
 
-    float zm = c.drawArea.width / c.gridSize.x / 2.0f;
-
     c.camera.target = (Vector2){0, 0};
 
-    c.camera.zoom = zm;
+    c.camera.zoom = 1.0f;
 
     c.bgColor = BLANK;
     c.bgImg = GenImageChecked(
@@ -72,20 +52,9 @@ CanvasState NewCanvas(int w, int h) {
 
     c.previewImg = GenImageColor(c.gridSize.x, c.gridSize.y, BLANK);
     c.previewTxt = LoadTextureFromImage(c.previewImg);
-
-    Vector2 txtCenter = {
-        c.drawArea.x + w * 0.5f,
-        c.drawArea.y + h * 0.5f,
-    };
-
-    Vector2 daCenter = {
-        c.drawArea.x + c.drawArea.width * 0.5f,
-        c.drawArea.y + c.drawArea.height * 0.5f
-    };
-
-    c.camera.target = txtCenter;
-    c.camera.offset = daCenter;
-    c.point = txtCenter;
+    c.camera.target = Vector2Zero();
+    c.camera.offset = Vector2Zero();
+    c.point = Vector2Zero();
 
     // --
     c.brushSize = 1;
@@ -189,7 +158,23 @@ void UpdateCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
 }
 
 void SetCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
-    UpdateCanvasAnchor(state, anchor, bottom);
+    if (anchor.x != -1) {
+        state->anchor.x = anchor.x;
+    }
+
+    if (anchor.y != -1) {
+        state->anchor.y = anchor.y;
+    }
+
+    if (bottom.x != -1) {
+        state->bottomAnchor.x = bottom.x;
+    }
+
+    if (bottom.y != -1) {
+        state->bottomAnchor.y = bottom.y;
+    }
+
+    updateBounds(state);
 
     Vector2 txtCenter = {
         state->drawArea.x + state->gridSize.x * 0.5f,
@@ -201,9 +186,13 @@ void SetCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
         state->drawArea.y + state->drawArea.height * 0.5f
     };
 
+    float zm = state->drawArea.width / state->gridSize.x / 2.0f;
+
+    state->camera.zoom = zm;
     state->camera.target = txtCenter;
     state->point = txtCenter;
     state->camera.offset = daCenter;
+    CenterAlignCanvas(state);
 }
 
 void CenterAlignCanvas(CanvasState *state) {
@@ -217,6 +206,8 @@ void CenterAlignCanvas(CanvasState *state) {
         state->drawArea.y + state->drawArea.height * 0.5f
     };
 
+    float zm = state->drawArea.width / state->gridSize.x / 2.0f;
+    state->camera.zoom = zm;
     state->camera.target = txtCenter;
     state->point = txtCenter;
     state->camera.offset = daCenter;

@@ -3,11 +3,11 @@
 #include "../external/raylib.h"
 #include "../include/colors.h"
 #include "../include/components.h"
+#include "../include/defaults.h"
 #include "../include/utils.h"
 #include <stdbool.h>
 
-#define DEF_MENUBAR_HEIGHT 25
-#define MENUBAR_PADDING    5
+#define MENUBAR_PADDING 5
 
 MenuBarState NewMenuBar() {
     MenuBarState state = {0};

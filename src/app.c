@@ -1,5 +1,6 @@
 #include "include/colors.h"
 #include "include/components.h"
+#include "include/defaults.h"
 #include "include/gui.h"
 #include "include/menuinfo.h"
 #include "include/options.h"
@@ -17,11 +18,10 @@
 #define RAYGUI_IMPLEMENTATION
 #include "external/raygui.h"
 
-#define WINDOW_WIDTH  800
-#define WINDOW_HEIGHT 700
-
 void LayoutDraw(Gui *gui);
 void LayoutLogic(Gui *gui);
+
+static int frameCounter = 1;
 
 int RunApp() {
 
@@ -29,10 +29,10 @@ int RunApp() {
     SetConfigFlags(
         FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE
     );
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "BauriPixel");
+    InitWindow(DEF_WIN_WIDTH, DEF_WIN_HEIGHT, "BauriPixel");
     SetWindowState(FLAG_WINDOW_MAXIMIZED);
 
-    SetWindowMinSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    SetWindowMinSize(DEF_MIN_WIN_WIDTH, DEF_MIN_WIN_HEIGHT);
     SetTargetFPS(60);
     LoadAppDarkTheme();
     LoadAppFont();
@@ -59,14 +59,21 @@ int RunApp() {
     gui->state->statusbar.colorbar = &gui->curTab->state->cb;
     gui->state->statusbar.canvas = &gui->curTab->state->cvs;
 
-    float sbarHeight = 30;
-
-    SetStatusBarPosition(&gui->state->statusbar, 0, sbarHeight);
+    SetStatusBarPosition(&gui->state->statusbar, 0, DEF_STATUSBAR_HEIGHT);
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
-    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
+    SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
     while (!WindowShouldClose()) {
+
+        TraceLog(LOG_ERROR, "==> F %d <==", frameCounter);
+        Vector2 winSize = {
+            GetScreenWidth(),
+            GetScreenHeight(),
+        };
+
+        TraceVector(winSize, "WinSIZE ->");
+
         LayoutLogic(gui);
         BeginDrawing();
         {
@@ -74,6 +81,7 @@ int RunApp() {
             LayoutDraw(gui);
         }
         EndDrawing();
+        frameCounter++;
     }
 
     CloseWindow();
@@ -130,7 +138,7 @@ void TabItemsDraw(Gui *gui) {
     int tabCount = gui->tabList->count;
     for (int t = 0; t < tabCount; t++) {
         TabObj *tab = gui->tabList->tabs[t];
-        SetupTabData(tab, &gui->state->menubar, &gui->state->statusbar);
+        // SetupTabData(tab, &gui->state->menubar, &gui->state->statusbar);
         int result = BpTabItem(
             tab->tabPanel, TextFormat("Untitled %d", t), tab->index, 150,
             gui->curTab->index == tab->index
@@ -154,8 +162,12 @@ void LayoutDraw(Gui *gui) {
     if (menuOpen || sizeSliderHover) {
         GuiLock();
     }
+    int ogPanel = OptThemeGet(T_PANEL_BG);
+    OptThemeSet(T_PANEL_BG, OptThemeGet(T_TAB_PANEL_BG));
 
     BpRoundedPanel(gui->curTab->tabPanel, 2, 0.0f, false);
+
+    OptThemeSet(T_PANEL_BG, ogPanel);
     TabItemsDraw(gui);
 
     CanvasDraw(&gui->curTab->state->cvs);
@@ -180,6 +192,8 @@ void LayoutDraw(Gui *gui) {
     if (menuOpen) {
         GuiLock();
     }
+
+    // DrawText(TextFormat("F %d", frameCounter), 500, 500, 16, RED);
 
     // DrawFPS(200, 50);
 }
