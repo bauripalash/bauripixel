@@ -65,7 +65,7 @@ int RunApp() {
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
-    SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
+    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
     while (!WindowShouldClose()) {
         LayoutLogic(gui);
         BeginDrawing();
@@ -129,8 +129,8 @@ int tab2 = false;
 void TabItemsDraw(Gui *gui) {
     int tabCount = gui->tabList->count;
     for (int t = 0; t < tabCount; t++) {
-
         TabObj *tab = gui->tabList->tabs[t];
+        SetupTabData(tab, &gui->state->menubar, &gui->state->statusbar);
         int result = BpTabItem(
             tab->tabPanel, TextFormat("Untitled %d", t), tab->index, 150,
             gui->curTab->index == tab->index
@@ -149,7 +149,7 @@ void LayoutDraw(Gui *gui) {
     bool menuOpen = gui->state->menubar.menuOpen;
     bool sizeSliderHover = gui->curTab->state->dtb.sliderHover;
 
-    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
+    // SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
 
     if (menuOpen || sizeSliderHover) {
         GuiLock();

@@ -9,6 +9,7 @@
 #include "widgets/layerbar.h"
 #include "widgets/menubar.h"
 #include "widgets/statusbar.h"
+#include <stdbool.h>
 
 typedef struct TabStateObj {
 
@@ -26,7 +27,7 @@ typedef struct TabStateObj {
 
 } TabStateObj;
 
-TabStateObj *NewTabState(int w, int h);
+TabStateObj *NewTabState(Rectangle panel, int w, int h);
 void FreeTabState(TabStateObj *state);
 
 typedef struct TabObj {
@@ -40,6 +41,8 @@ typedef struct TabObj {
     LayerObj *curLayer;
     char *filepath;
     Rectangle tabPanel;
+
+    bool setupDone;
 
     TabStateObj *state;
 } TabObj;

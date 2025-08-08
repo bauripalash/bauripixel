@@ -6,7 +6,7 @@
 
 #define LB_INIT_HEIGHT 150
 #define LB_MIN_HEIGHT  50
-#define LB_MARGIN_LR   20
+#define LB_MARGIN_LR   10
 #define LB_MARGIN_TB   10
 
 LayerBarState NewLayerBar() {
@@ -54,8 +54,8 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
 }
 
 static void updateBounds(LayerBarState *lb) {
-    lb->p.bounds.x = lb->anchor.x;
-    lb->p.bounds.width = lb->bottom.x - lb->anchor.x;
+    lb->p.bounds.x = lb->anchor.x + LB_MARGIN_LR;
+    lb->p.bounds.width = lb->bottom.x - lb->anchor.x - LB_MARGIN_LR * 2;
     lb->p.bounds.y = lb->bottom.y - lb->p.bounds.height - LB_MARGIN_TB * 2;
 }
 

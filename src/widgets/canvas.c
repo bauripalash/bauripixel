@@ -162,24 +162,6 @@ void updateBounds(CanvasState *c) {
     c->hScrollRect =
         (Rectangle){c->drawArea.x, c->drawArea.y + c->drawArea.height,
                     c->drawArea.width, c->scrollThickness};
-
-    if (IsKeyPressed(KEY_TWO)) {
-        TraceRect(c->drawArea, "DrawArea");
-
-        Vector2 txtCenter = {
-            c->drawArea.x + c->gridSize.x * 0.5f,
-            c->drawArea.y + c->gridSize.y * 0.5f,
-        };
-
-        Vector2 daCenter = {
-            c->drawArea.x + c->drawArea.width * 0.5f,
-            c->drawArea.y + c->drawArea.height * 0.5f
-        };
-
-        c->camera.target = txtCenter;
-        c->camera.offset = daCenter;
-        c->point = txtCenter;
-    }
 }
 
 void UpdateCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
@@ -225,7 +207,6 @@ void SetCanvasAnchor(CanvasState *state, Vector2 anchor, Vector2 bottom) {
 }
 
 void CenterAlignCanvas(CanvasState *state) {
-
     Vector2 txtCenter = {
         state->drawArea.x + state->gridSize.x * 0.5f,
         state->drawArea.y + state->gridSize.y * 0.5f,

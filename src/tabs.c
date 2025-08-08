@@ -17,7 +17,7 @@
 #define TAB_HEADER_WIDTH  80
 #define TAB_HEADER_HEIGHT 30
 
-TabStateObj *NewTabState(int w, int h) {
+TabStateObj *NewTabState(Rectangle panel, int w, int h) {
     TabStateObj *ts = malloc(sizeof(TabStateObj));
     if (ts == NULL) {
         return NULL;
@@ -35,17 +35,26 @@ TabStateObj *NewTabState(int w, int h) {
     ts->lb.p.active = true;
     ts->lb.previewBg = &ts->cvs.bgTxt;
 
-    SetDrawToolBarAnchor(&ts->dtb, (Vector2){-1, -1}, (Vector2){-1, 30});
+    SetDrawToolBarAnchor(
+        &ts->dtb, (Vector2){panel.x, panel.y},
+        (Vector2){panel.x + panel.width, panel.y + panel.height}
+    );
 
-    SetColorBarAnchor(&ts->cb, (Vector2){-1, TOP_WIN_MARGIN}, (Vector2){0, 0});
-    SetCanvasAnchor(
-        &ts->cvs, (Vector2){ts->dtb.prop.bounds.width, TOP_WIN_MARGIN},
-        (Vector2){ts->cb.prop.bounds.x, ts->lb.p.bounds.y}
+    SetColorBarAnchor(
+        &ts->cb, (Vector2){-1, ts->dtb.optRect.y + ts->dtb.optRect.height},
+        (Vector2){panel.x + panel.width, -1}
     );
 
     SetLayerBarAnchor(
-        &ts->lb, (Vector2){ts->cvs.prop.bounds.x, -1},
-        (Vector2){ts->cvs.prop.bounds.x + ts->cvs.prop.bounds.width, 30}
+        &ts->lb, (Vector2){ts->dtb.toolsRect.x + ts->dtb.toolsRect.width, -1},
+        (Vector2){ts->cb.prop.bounds.x, panel.y + panel.height}
+    );
+
+    SetCanvasAnchor(
+        &ts->cvs,
+        (Vector2){ts->dtb.toolsRect.x + ts->dtb.toolsRect.width,
+                  ts->dtb.optRect.y + ts->dtb.optRect.height},
+        (Vector2){ts->cb.prop.bounds.x, ts->lb.p.bounds.y}
     );
 
     ts->dtb.anchor.x = 0;
@@ -67,8 +76,13 @@ void FreeTabState(TabStateObj *state) {
 }
 
 void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
+    if (tab->setupDone) {
+        return;
+    }
     SyncTabData(tab, menu, status);
     CenterAlignCanvas(&tab->state->cvs);
+
+    tab->setupDone = true;
 }
 
 void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
@@ -94,17 +108,6 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
                   tab->tabPanel.y + tab->tabPanel.height}
     );
 
-    if (CurrentColorChanged(&tab->state->cb)) {
-        tab->state->cvs.current = tab->state->cb.currentColor;
-    }
-
-    UpdateCanvasAnchor(
-        &tab->state->cvs,
-        (Vector2){tab->state->dtb.toolsRect.x + tab->state->dtb.toolsRect.width,
-                  tab->state->dtb.optRect.y + tab->state->dtb.optRect.height},
-        (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
-    );
-
     SetColorBarAnchor(
         &tab->state->cb,
         (Vector2){-1,
@@ -115,16 +118,26 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
     SetLayerBarAnchor(
         &tab->state->lb,
         (Vector2){
-            tab->state->cvs.prop.bounds.x,
+            tab->state->dtb.toolsRect.x + tab->state->dtb.toolsRect.width,
         },
-        (Vector2){tab->state->cvs.prop.bounds.x +
-                      tab->state->cvs.prop.bounds.width,
+        (Vector2){tab->state->cb.prop.bounds.x,
                   tab->tabPanel.y + tab->tabPanel.height}
     );
+
+    if (CurrentColorChanged(&tab->state->cb)) {
+        tab->state->cvs.current = tab->state->cb.currentColor;
+    }
 
     if (tab->state->lb.selLayer->index != tab->curLayer->index) {
         tab->curLayer = tab->state->lb.selLayer;
     }
+
+    UpdateCanvasAnchor(
+        &tab->state->cvs,
+        (Vector2){tab->state->dtb.toolsRect.x + tab->state->dtb.toolsRect.width,
+                  tab->state->dtb.optRect.y + tab->state->dtb.optRect.height},
+        (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
+    );
 }
 
 void AddColorToTab(TabObj *tab, Color color) {
@@ -142,12 +155,18 @@ TabObj *NewTabObj(int w, int h) {
         return NULL;
     }
 
-    t->state = NewTabState(w, h);
-
+    t->tabPanel =
+        (Rectangle){TAB_PANEL_MARGIN, 25 + TAB_PANEL_MARGIN + TAB_HEADER_HEIGHT,
+                    GetScreenHeight() - TAB_PANEL_MARGIN * 2};
+    t->tabPanel.height =
+        (GetScreenHeight() - 30) - t->tabPanel.y - TAB_PANEL_MARGIN;
+    t->state = NewTabState(t->tabPanel, w, h);
     if (t->state == NULL) {
         free(t);
         return NULL;
     }
+
+    t->setupDone = false;
 
     t->layers = NewLayerList(w, h);
 
@@ -177,7 +196,6 @@ TabObj *NewTabObj(int w, int h) {
 
     t->filepath = NULL; // will be set later
     t->state->dtb.maxBrushSize = (int)fmaxf((float)w, (float)h);
-    t->tabPanel = (Rectangle){0};
 
     return t;
 }
