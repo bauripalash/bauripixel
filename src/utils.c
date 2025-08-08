@@ -1,6 +1,7 @@
 #include "include/utils.h"
 #include "external/raylib.h"
 #include <math.h>
+#include <string.h>
 
 int ClampInt(int val, int min, int max) {
     if (val < min) {
@@ -34,3 +35,5 @@ void MakeVecZero(Vector2 *vec) {
     vec->x = 0;
     vec->y = 0;
 }
+
+char *MakeString(const char *str) { return strdup(str); }

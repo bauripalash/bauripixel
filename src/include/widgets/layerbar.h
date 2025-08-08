@@ -11,6 +11,11 @@ typedef struct LayerBarState {
     Vector2 anchor;
     Vector2 bottom;
     bool preview;
+
+    Rectangle usableRect;
+    Rectangle toolsRect;
+    Rectangle layersRect;
+
     Vector2 gridSize;
     LayerList *list;
     LayerObj *curLayer;

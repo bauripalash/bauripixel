@@ -8,6 +8,8 @@
 #define LB_MIN_HEIGHT  50
 #define LB_MARGIN_LR   10
 #define LB_MARGIN_TB   10
+#define LB_PADDING_LR  10
+#define LB_PADDING_TB  10
 
 LayerBarState NewLayerBar() {
     LayerBarState lb = {0};
@@ -30,6 +32,11 @@ LayerBarState NewLayerBar() {
     lb.p.bounds.width = GetScreenWidth() - LB_MARGIN_LR * 2;
     lb.p.bounds.y =
         GetScreenHeight() - lb.p.bounds.height - lb.bottom.y - LB_MARGIN_TB;
+
+    lb.usableRect = (Rectangle){0};
+    lb.toolsRect = (Rectangle){0};
+    lb.layersRect = (Rectangle){0};
+
     return lb;
 }
 
@@ -39,6 +46,23 @@ static void updateBounds(LayerBarState *lb) {
     lb->p.bounds.x = lb->anchor.x + LB_MARGIN_LR;
     lb->p.bounds.width = lb->bottom.x - lb->anchor.x - LB_MARGIN_LR * 2;
     lb->p.bounds.y = lb->bottom.y - lb->p.bounds.height - LB_MARGIN_TB * 2;
+
+    Rectangle bounds = lb->p.bounds;
+
+    lb->usableRect =
+        (Rectangle){bounds.x + LB_PADDING_LR, bounds.y + LB_PADDING_TB,
+                    bounds.width - LB_PADDING_LR * 2,
+                    bounds.height - LB_PADDING_TB * 2};
+
+    lb->toolsRect = (Rectangle){lb->usableRect.x, lb->usableRect.y,
+                                lb->usableRect.width, 28};
+
+    lb->layersRect =
+        (Rectangle){lb->usableRect.x,
+                    lb->toolsRect.y + lb->toolsRect.height + LB_PADDING_TB,
+                    lb->toolsRect.width, 0};
+    lb->layersRect.height =
+        lb->usableRect.height - lb->toolsRect.height - LB_PADDING_TB;
 }
 
 void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
@@ -61,23 +85,29 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
     updateBounds(lb);
 }
 
-#define HANDLE_THICKNESS 10
+#define HANDLE_THICKNESS  10
+
+#define LAYER_ITEM_HEIGHT 35
+
+#define LAYER_NAME_WIDTH  200
 
 bool LayerItemDraw(
-    LayerBarState *lb, Rectangle rect, LayerObj *layer, bool isCur
+    LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
 ) {
     Font f = GuiGetFont();
     bool locked = GuiIsLocked();
+    int fontSize = f.baseSize;
 
     Color bg = ColorGrayDarker;
     Color normalBrdr = ColorGrayLightest;
     Color hoverBrdr = ColorGrayLighter;
     Color activeBrdr = ColorWhite;
     Color brdr = normalBrdr;
-
     Vector2 mpos = GetMousePosition();
 
-    bool hover = CheckCollisionPointRec(mpos, rect) && !locked;
+    Rectangle bounds = {pos.x, pos.y, lb->layersRect.width, LAYER_ITEM_HEIGHT};
+
+    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
     bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
     if (hover) {
@@ -88,40 +118,73 @@ bool LayerItemDraw(
         brdr = activeBrdr;
     }
 
-    DrawRectangleRounded(rect, 0.125, 0, bg);
-    DrawRectangleRoundedLinesEx(rect, 0.125, 0, 2, brdr);
-
-    Rectangle previewRect = {
-        rect.x + 5, rect.y + 5, rect.height - 10, rect.height - 10
+    Rectangle layerToolBounds = {
+        bounds.x + 5, bounds.y, bounds.height * 3, bounds.height
     };
-
-    Rectangle prevSrc = {
-        0,
-        0,
-        layer->img.width,
-        layer->img.height,
+    Rectangle nameBounds = {
+        bounds.x, bounds.y, LAYER_NAME_WIDTH, bounds.height
     };
-
-    Vector2 origin = {0};
-
-    DrawTexturePro(*lb->previewBg, prevSrc, previewRect, origin, 0, ColorWhite);
-    DrawTexturePro(layer->txt, prevSrc, previewRect, origin, 0, ColorWhite);
-
-    Vector2 textpos = {
-        rect.x + 5 + previewRect.width + 5,
-        rect.y + (rect.height / 2.0f) - f.baseSize / 2.0f
-    };
-
-    GuiDrawIcon(
-        layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, textpos.x, textpos.y, 1,
-        ColorWhite
+    BpDummyFlatPanel(bounds, 2, (Vector4){0});
+    BpDummyFlatPanel(nameBounds, 2, (Vector4){});
+    GuiLabelButton(
+        (Rectangle){layerToolBounds.x, bounds.y, bounds.height, bounds.height},
+        GuiIconText(layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, NULL)
     );
-    textpos.x += 16;
-
-    DrawTextEx(
-        f, TextFormat("Layer #%d", layer->index), textpos, f.baseSize, 0,
-        ColorWhite
+    GuiLabelButton(
+        (Rectangle){layerToolBounds.x + bounds.height, bounds.y, bounds.height,
+                    bounds.height},
+        GuiIconText(ICON_GEAR_BIG, NULL)
     );
+    GuiLabelButton(
+        (Rectangle){layerToolBounds.x + bounds.height + bounds.height, bounds.y,
+                    bounds.height, bounds.height},
+        GuiIconText(ICON_BURGER_MENU, NULL)
+    );
+
+    GuiLabelButton(
+        (Rectangle){nameBounds.x + layerToolBounds.width, nameBounds.y,
+                    nameBounds.width - layerToolBounds.width,
+                    nameBounds.height},
+        layer->name
+    );
+    // GuiLabelButton(nameBounds, layer->name);
+
+    // DrawRectangleRounded(bounds, 0.125, 0, bg);
+    // DrawRectangleRoundedLinesEx(rect, 0.125, 0, 2, brdr);
+
+    /*
+Rectangle previewRect = {
+    rect.x + 5, rect.y + 5, rect.height - 10, rect.height - 10
+};
+
+Rectangle prevSrc = {
+    0,
+    0,
+    layer->img.width,
+    layer->img.height,
+};
+
+Vector2 origin = {0};
+
+DrawTexturePro(*lb->previewBg, prevSrc, previewRect, origin, 0, ColorWhite);
+DrawTexturePro(layer->txt, prevSrc, previewRect, origin, 0, ColorWhite);
+
+Vector2 textpos = {
+    rect.x + 5 + previewRect.width + 5,
+    rect.y + (rect.height / 2.0f) - f.baseSize / 2.0f
+};
+
+GuiDrawIcon(
+    layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, textpos.x, textpos.y, 1,
+    ColorWhite
+);
+textpos.x += 16;
+
+DrawTextEx(
+    f, TextFormat("Layer #%d", layer->index), textpos, f.baseSize, 0,
+    ColorWhite
+);
+    */
 
     return clicked;
 }
@@ -170,25 +233,32 @@ int LayerBarDraw(LayerBarState *lb) {
         bool locked = GuiIsLocked();
 
         Rectangle bounds = lb->p.bounds;
+        Rectangle usableBounds = lb->usableRect;
+
+        Rectangle toolBarBounds = lb->toolsRect;
+
+        Rectangle layersBounds = lb->layersRect;
 
         BpRoundedPanel(bounds, 2, 0.125, true);
 
-        if (BpDummyButton((Rectangle){bounds.x + 10, bounds.y + 5, 32, 32})) {
+        if (BpDummyButton((Rectangle){toolBarBounds.x, toolBarBounds.y,
+                                      toolBarBounds.height,
+                                      toolBarBounds.height})) {
             LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
             newLayer->index = lb->list->count;
             AddToLayerList(lb->list, newLayer);
         }
 
-        float px = lb->p.bounds.x + 10;
-        float py = bounds.y + 32 + 10;
-        float pyinc = LH + 10;
+        float px = layersBounds.x;
+        float py = layersBounds.y;
+        float pyinc = LAYER_ITEM_HEIGHT - 1;
 
         for (int i = 0; i < lb->list->count; i++) {
             LayerObj *lr = lb->list->layers[i];
             Rectangle layerBtn = {px, py, 300, LH};
 
             bool isCur = i == lb->curLayer->index;
-            if (LayerItemDraw(lb, layerBtn, lr, isCur)) {
+            if (LayerItemDraw(lb, (Vector2){px, py}, lr, isCur)) {
                 lb->selLayer = lr;
             }
 

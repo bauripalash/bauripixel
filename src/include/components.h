@@ -44,4 +44,5 @@ void BpMenuBarPanel(Vector2 position, float width, int items, float roundness);
 void BpDummyPanel(
     Rectangle bounds, float thick, float roundness, bool shadow, Vector4 borders
 );
+void BpDummyFlatPanel(Rectangle bounds, float thick, Vector4 borders);
 #endif

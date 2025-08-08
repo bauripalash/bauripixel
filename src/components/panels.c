@@ -42,7 +42,9 @@ int BpTabItem(
         tabRect.width - (tabThick * 2) * 2,
         tabRect.height,
     };
+    // Start X position
     float tabX0 = tabRect.x;
+    // End X position
     float tabX1 = tabRect.x + tabRect.width;
 
     BpDummyPanel(tabRect, 2, 0.0f, false, (Vector4){.w = -1});
@@ -115,6 +117,87 @@ void BpMenuBarPanel(Vector2 position, float width, int items, float roundness) {
     Rectangle rect = {position.x, position.y, width, panelHeight};
 
     BpRoundedFlatPanel(rect, roundness);
+}
+
+void BpDummyFlatPanel(Rectangle bounds, float thick, Vector4 borders) {
+    Color panelBorder = GetColor(OptThemeGet(T_PANEL_BORDER));
+    Color panelBg = GetColor(OptThemeGet(T_PANEL_BG));
+    Color panelShadow = GetColor(OptThemeGet(T_PANEL_SHADOW));
+
+    DrawRectangleRec(bounds, panelBg);
+
+    Color sc = ColorVGrayLight;
+
+    if (borders.x != -1) {
+        Color brdr = panelBorder;
+        if (borders.x != 0) {
+            brdr = GetColor((int)borders.x);
+        }
+        DrawRectangleRec(
+            (Rectangle){bounds.x, bounds.y, thick, bounds.height}, brdr
+        );
+
+        // DrawLineEx(tl, bl, thick, brdr);
+    }
+
+    if (borders.y != -1) {
+        Color brdr = panelBorder;
+        if (borders.y != 0) {
+            brdr = GetColor((int)borders.y);
+        }
+
+        DrawRectangleRec(
+            (Rectangle){bounds.x + bounds.width - thick, bounds.y, thick,
+                        bounds.height},
+            brdr
+        );
+
+        // DrawLineEx(tr, br, thick, panelBorder);
+    }
+
+    if (borders.z != -1) {
+        Color brdr = panelBorder;
+        if (borders.z != 0) {
+            brdr = GetColor((int)borders.z);
+        }
+
+        // DrawLineEx(tl, tr, thick, panelBorder);
+        DrawRectangleRec(
+            (Rectangle){bounds.x, bounds.y, bounds.width, thick}, brdr
+        );
+    }
+
+    if (borders.w != -1) {
+        Color brdr = panelBorder;
+        if (borders.w != 0) {
+            brdr = GetColor((int)borders.w);
+        }
+        // DrawLineEx(bl, br, thick, panelBorder);
+        DrawRectangleRec(
+            (Rectangle){bounds.x, bounds.height + bounds.y - thick,
+                        bounds.width, thick},
+            brdr
+        );
+    }
+
+    DrawRectangleRec((Rectangle){bounds.x, bounds.y, thick, thick}, sc);
+    DrawRectangleRec(
+        (Rectangle){bounds.x + bounds.width - thick, bounds.y, thick, thick}, sc
+    );
+    if (borders.w != -1) {
+        DrawRectangleRec(
+            (Rectangle){bounds.x, bounds.y + bounds.height - thick, thick,
+                        thick},
+            sc
+        );
+    }
+    if (borders.w != -1) {
+        DrawRectangleRec(
+            (Rectangle){bounds.x + bounds.width - thick,
+                        bounds.y + bounds.height - thick, thick, thick},
+            sc
+        );
+    }
 }
 
 void BpDummyPanel(

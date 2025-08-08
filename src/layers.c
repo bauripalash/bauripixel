@@ -1,8 +1,10 @@
 #include "include/layers.h"
 #include "external/raylib.h"
 #include "external/stb/stb_ds.h"
+#include "include/utils.h"
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 LayerObj *NewLayerObj(int w, int h) {
     LayerObj *l = malloc(sizeof(LayerObj));
@@ -56,6 +58,7 @@ LayerList *NewLayerList(int w, int h) {
 
     LayerObj *initLayer = NewLayerObj(w, h);
     initLayer->index = 0;
+    initLayer->name = MakeString("Layer 0");
     if (initLayer == NULL) {
         free(ll);
         return NULL;
