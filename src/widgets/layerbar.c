@@ -1,10 +1,13 @@
 #include "../include/widgets/layerbar.h"
+#include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/components.h"
+#include "../include/utils.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define LB_INIT_HEIGHT 150
+#define LB_INIT_HEIGHT 250
 #define LB_MIN_HEIGHT  50
 #define LB_MARGIN_LR   10
 #define LB_MARGIN_TB   10
@@ -27,6 +30,8 @@ LayerBarState NewLayerBar() {
     lb.scroll = (Vector2){0};
     lb.view = (Rectangle){0};
     lb.resizeDragging = false;
+    lb.vScrollDragging = false;
+    lb.hScrollDragging = false;
 
     lb.p.bounds.x = lb.anchor.x + LB_MARGIN_LR;
     lb.p.bounds.width = GetScreenWidth() - LB_MARGIN_LR * 2;
@@ -42,6 +47,7 @@ LayerBarState NewLayerBar() {
 
 void FreeLayerBar(LayerBarState *lb) { return; }
 
+#define SCROLLT 10
 static void updateBounds(LayerBarState *lb) {
     lb->p.bounds.x = lb->anchor.x + LB_MARGIN_LR;
     lb->p.bounds.width = lb->bottom.x - lb->anchor.x - LB_MARGIN_LR * 2;
@@ -51,8 +57,8 @@ static void updateBounds(LayerBarState *lb) {
 
     lb->usableRect =
         (Rectangle){bounds.x + LB_PADDING_LR, bounds.y + LB_PADDING_TB,
-                    bounds.width - LB_PADDING_LR * 2,
-                    bounds.height - LB_PADDING_TB * 2};
+                    bounds.width - LB_PADDING_LR * 2 - SCROLLT,
+                    bounds.height - LB_PADDING_TB * 2 - SCROLLT};
 
     lb->toolsRect = (Rectangle){lb->usableRect.x, lb->usableRect.y,
                                 lb->usableRect.width, 28};
@@ -63,6 +69,14 @@ static void updateBounds(LayerBarState *lb) {
                     lb->toolsRect.width, 0};
     lb->layersRect.height =
         lb->usableRect.height - lb->toolsRect.height - LB_PADDING_TB;
+
+    lb->vScrollRect =
+        (Rectangle){lb->layersRect.x + lb->layersRect.width, lb->layersRect.y,
+                    SCROLLT, lb->layersRect.height};
+
+    lb->hScrollRect = (Rectangle){lb->layersRect.x + 200,
+                                  lb->layersRect.y + lb->layersRect.height,
+                                  lb->layersRect.width - 200, SCROLLT};
 }
 
 void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
@@ -126,23 +140,26 @@ bool LayerItemDraw(
     };
     BpDummyFlatPanel(bounds, 2, (Vector4){0});
     BpDummyFlatPanel(nameBounds, 2, (Vector4){});
+
+    float btnSize = 25;
+
     GuiLabelButton(
-        (Rectangle){layerToolBounds.x, bounds.y, bounds.height, bounds.height},
+        (Rectangle){layerToolBounds.x, bounds.y, btnSize, bounds.height},
         GuiIconText(layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, NULL)
     );
     GuiLabelButton(
-        (Rectangle){layerToolBounds.x + bounds.height, bounds.y, bounds.height,
+        (Rectangle){layerToolBounds.x + btnSize, bounds.y, btnSize,
                     bounds.height},
         GuiIconText(ICON_GEAR_BIG, NULL)
     );
     GuiLabelButton(
-        (Rectangle){layerToolBounds.x + bounds.height + bounds.height, bounds.y,
-                    bounds.height, bounds.height},
+        (Rectangle){layerToolBounds.x + btnSize * 2, bounds.y, btnSize,
+                    bounds.height},
         GuiIconText(ICON_BURGER_MENU, NULL)
     );
 
     GuiLabelButton(
-        (Rectangle){nameBounds.x + layerToolBounds.width, nameBounds.y,
+        (Rectangle){nameBounds.x + btnSize * 3, nameBounds.y,
                     nameBounds.width - layerToolBounds.width,
                     nameBounds.height},
         layer->name
@@ -226,7 +243,72 @@ int LayerBarLogic(LayerBarState *lb) {
     return -1;
 }
 
-#define LH 40
+void DrawScrollBars(LayerBarState *lb, Rectangle content) {
+
+    Vector2 mpos = GetMousePosition();
+    bool hasVerticalScroll = content.height > lb->layersRect.height;
+    bool hasHorizontalScroll = content.width > lb->layersRect.width;
+
+    Rectangle viewArea = lb->layersRect;
+
+    DrawRectangleRounded(lb->vScrollRect, 0.9, 0, Fade(ColorBlack, 0.5));
+    DrawRectangleRounded(lb->hScrollRect, 0.9, 0, Fade(ColorBlack, 0.5));
+
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        lb->hScrollDragging = false;
+        lb->hScrollDragging = false;
+    }
+    float vThumbY = lb->vScrollRect.y + lb->scroll.y;
+
+    float xScale = content.width / lb->hScrollRect.width;
+    float yScale = content.height / lb->vScrollRect.height;
+
+    if (vThumbY < lb->vScrollRect.y) {
+        vThumbY = lb->vScrollRect.y;
+    }
+
+    float hThumbX = lb->hScrollRect.x + lb->scroll.x;
+
+    float vThumbHeight =
+        lb->vScrollRect.height - ((content.height - viewArea.height) * yScale);
+
+    //	float vThumbHeight = (viewArea.height / content.height) *
+    //lb->vScrollRect.height;
+    float hThumbWidth =
+        (viewArea.width / content.width) * lb->hScrollRect.width;
+
+    float minVThumb = lb->vScrollRect.y;
+    float maxVThumb = lb->vScrollRect.y - vThumbHeight;
+
+    TraceVector(lb->scroll, "Scroll ->");
+    TraceLog(LOG_ERROR, "YS -> %f | XS -> %f", yScale, xScale);
+
+    Rectangle vThumb = {
+        lb->vScrollRect.x,
+        vThumbY,
+        SCROLLT,
+        vThumbHeight,
+    };
+
+    if (CheckCollisionPointRec(mpos, vThumb) &&
+        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !lb->vScrollDragging) {
+        lb->vScrollDragging = true;
+    }
+
+    if (lb->vScrollDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        float delta = GetMouseDelta().y;
+        lb->scroll.y += delta;
+    }
+
+    Rectangle hThumb = {lb->hScrollRect.x, lb->hScrollRect.y, 20, SCROLLT};
+
+    if (hasVerticalScroll) {
+        lb->scroll.y =
+            Clamp(lb->scroll.y, 0, lb->vScrollRect.height - vThumbHeight);
+        DrawRectangleRounded(vThumb, 0.9, 0, ColorVGreen);
+    }
+    DrawRectangleRounded(hThumb, 0.9, 0, ColorVGreen);
+}
 
 int LayerBarDraw(LayerBarState *lb) {
     if (lb->p.active) {
@@ -246,24 +328,48 @@ int LayerBarDraw(LayerBarState *lb) {
                                       toolBarBounds.height})) {
             LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
             newLayer->index = lb->list->count;
+            newLayer->name =
+                MakeString(TextFormat("Layer %d", newLayer->index));
             AddToLayerList(lb->list, newLayer);
         }
+        Rectangle layerContentRect = {
+            layersBounds.x, layersBounds.y, layersBounds.width, layersBounds.y
+        };
+
+        BpDummyFlatPanel(layersBounds, 2, (Vector4){0});
 
         float px = layersBounds.x;
         float py = layersBounds.y;
         float pyinc = LAYER_ITEM_HEIGHT - 1;
+        // GuiScrollPanel(layersBounds, NULL, layerContentRect, &lb->scroll,
+        // &lb->view);
+
+        BeginScissorMode(
+            layersBounds.x, layersBounds.y, layersBounds.width,
+            layersBounds.height
+        );
 
         for (int i = 0; i < lb->list->count; i++) {
             LayerObj *lr = lb->list->layers[i];
-            Rectangle layerBtn = {px, py, 300, LH};
+            Rectangle layerBtn = {px, py, 300, LAYER_ITEM_HEIGHT};
 
             bool isCur = i == lb->curLayer->index;
-            if (LayerItemDraw(lb, (Vector2){px, py}, lr, isCur)) {
+            if (LayerItemDraw(
+                    lb, (Vector2){px - lb->scroll.x, py - lb->scroll.y}, lr,
+                    isCur
+                )) {
                 lb->selLayer = lr;
             }
 
             py += pyinc;
         }
+        EndScissorMode();
+
+        layerContentRect.height = py - layerContentRect.height;
+        DrawScrollBars(
+            lb, (Rectangle){0, 0, layersBounds.width,
+                            (LAYER_ITEM_HEIGHT)*lb->list->count}
+        );
     }
     return -1;
 }

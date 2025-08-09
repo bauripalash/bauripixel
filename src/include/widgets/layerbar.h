@@ -16,6 +16,11 @@ typedef struct LayerBarState {
     Rectangle toolsRect;
     Rectangle layersRect;
 
+    Rectangle vScrollRect;
+    Rectangle hScrollRect;
+    bool vScrollDragging;
+    bool hScrollDragging;
+
     Vector2 gridSize;
     LayerList *list;
     LayerObj *curLayer;

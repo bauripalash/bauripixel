@@ -284,6 +284,7 @@ bool CanvasScrollBarsLogic(CanvasState *state) {
     float canvasWidth = cBr.x - cTl.x;
     float canvasHeight = cBr.y - cTl.y;
 
+    // total area that can the canvas go around
     float scrollWidth = viewWidth + canvasWidth * 2;
     float scrollHeight = viewHeight + canvasHeight * 2;
 

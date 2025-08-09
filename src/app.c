@@ -66,13 +66,13 @@ int RunApp() {
     SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
     while (!WindowShouldClose()) {
 
-        TraceLog(LOG_ERROR, "==> F %d <==", frameCounter);
+        // TraceLog(LOG_ERROR, "==> F %d <==", frameCounter);
         Vector2 winSize = {
             GetScreenWidth(),
             GetScreenHeight(),
         };
 
-        TraceVector(winSize, "WinSIZE ->");
+        // TraceVector(winSize, "WinSIZE ->");
 
         LayoutLogic(gui);
         BeginDrawing();
