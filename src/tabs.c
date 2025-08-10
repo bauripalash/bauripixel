@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 #define TOP_WIN_MARGIN    80
-#define TAB_PANEL_MARGIN  10
+#define TAB_PANEL_MARGIN  5
 #define TAB_HEADER_WIDTH  80
 #define TAB_HEADER_HEIGHT 30
 

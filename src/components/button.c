@@ -221,17 +221,6 @@ bool BpDummyButton(Rectangle bounds) {
     bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
     Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height};
 
-    /*
-DrawRectangleRoundedLinesEx(rect, 0.2, 0, 2, shadow);
-
-DrawRectangleRounded(rect, 0.2, 0, hover ? hoverBg : bg);
-
-DrawRectangleRoundedLinesEx(
-    (Rectangle){rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4},
-    0.2, 0, 2, brdr
-);
-    */
-
     float thick = 2;
 
     Vector2 tl = (Vector2){bounds.x + thick, bounds.y};
@@ -245,11 +234,14 @@ DrawRectangleRoundedLinesEx(
         bounds.x + thick, bounds.y + thick, bounds.width - thick * 2,
         bounds.height - thick * 2
     };
-    DrawRectangleRounded(
-        (Rectangle){bounds.x, bounds.y, bounds.width, bounds.height + 4}, 0.1,
-        2, ColorBlack
-    );
+    if (clicked) {
 
+    } else {
+        DrawRectangleRounded(
+            (Rectangle){bounds.x, bounds.y, bounds.width, bounds.height + 4},
+            0.1, 2, ColorBlack
+        );
+    }
     DrawRectangleRec(innerRect, ColorGrayLighter);
     DrawRectangleLinesEx(innerRect, thick, ColorWhite);
 
@@ -286,6 +278,29 @@ DrawRectangleRoundedLinesEx(
                     innerRect.y + innerRect.height - thick, thick, thick},
         sc
     );
+
+    /*
+    DrawRectangleRec((Rectangle){
+            innerRect.x,
+            innerRect.y + innerRect.height,
+            thick,
+            thick * 2
+    }, ColorWhite);
+
+    DrawRectangleRec((Rectangle){
+            innerRect.x + innerRect.width - thick,
+            innerRect.y + innerRect.height,
+            thick,
+            thick * 2
+    }, ColorWhite);
+
+    DrawRectangleRec((Rectangle){
+            innerRect.x + thick,
+            innerRect.y + innerRect.height + thick * 2,
+            innerRect.width - (thick * 2),
+            thick
+    }, ColorWhite);
+    */
 
     // GuiDrawIcon(ICON_GRID_FILL, innerRect.x + 5, innerRect.y + 5, 1,
     // ColorWhite);

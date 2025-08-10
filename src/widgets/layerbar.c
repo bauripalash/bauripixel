@@ -7,9 +7,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define LB_INIT_HEIGHT 250
+#define LB_INIT_HEIGHT 120
 #define LB_MIN_HEIGHT  50
-#define LB_MARGIN_LR   10
+#define LB_MARGIN_LR   5
 #define LB_MARGIN_TB   10
 #define LB_PADDING_LR  10
 #define LB_PADDING_TB  10
