@@ -329,15 +329,17 @@ int LayerBarDraw(LayerBarState *lb) {
 
         BpRoundedPanel(bounds, 2, 0.125, true);
 
-        if (BpDummyButton((Rectangle){toolBarBounds.x, toolBarBounds.y,
-                                      toolBarBounds.height,
-                                      toolBarBounds.height})) {
-            LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
-            newLayer->index = lb->list->count;
-            newLayer->name =
-                MakeString(TextFormat("Layer %d", newLayer->index));
-            AddToLayerList(lb->list, newLayer);
-        }
+        /*
+if (BpDummyButton((Rectangle){toolBarBounds.x, toolBarBounds.y,
+                              toolBarBounds.height,
+                              toolBarBounds.height}, true)) {
+    LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
+    newLayer->index = lb->list->count;
+    newLayer->name =
+        MakeString(TextFormat("Layer %d", newLayer->index));
+    AddToLayerList(lb->list, newLayer);
+}
+        */
         Rectangle layerContentRect = {
             layersBounds.x, layersBounds.y, layersBounds.width, layersBounds.y
         };

@@ -21,13 +21,13 @@ typedef struct DToolInfo {
     Texture txt;
 } DToolInfo;
 
-bool BpDummyToogleButton(Rectangle bounds, bool active);
 DrawTool BpToolButton(
     Rectangle bounds, DrawTool active, bool *showOther, int num,
     const DToolInfo *tools
 );
 
-bool BpDummyButton(Rectangle bounds);
+bool BpDummyToggleButton(Rectangle bounds, bool active);
+bool BpDummyFlatButton(Rectangle bounds);
 
 int BpTabItem(
     Rectangle bounds, const char *name, int index, float tabWidth, bool active

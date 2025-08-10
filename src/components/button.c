@@ -1,57 +1,17 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../external/raymath.h"
-#include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
+#include "../include/options.h"
 #include <stdbool.h>
-#include <string.h>
 
 #define ICON_WIDTH 32
-
-bool BpDummyToogleButton(Rectangle bounds, bool active) {
-    Color bg = ColorGrayDarker;
-    Color activeBg = Fade(ColorGrayLighter, 0.5);
-    Color brdr = ColorGrayLightest;
-    Color shadow = ColorBlack;
-    Vector2 mpos = GetMousePosition();
-
-    float bx = bounds.x;
-    float by = bounds.y;
-    float bw = bounds.width;
-    float bh = bounds.height;
-
-    Rectangle brect = {bx, by, bw, bh};
-
-    bool clicked = CheckCollisionPointRec(mpos, bounds) &&
-                   IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !GuiIsLocked();
-
-    if (clicked || active) {
-        brect.y += 3;
-        bg = activeBg;
-    } else {
-        DrawRectangleRounded((Rectangle){bx, by, bw, bh + 3}, 0.2, 0, shadow);
-    }
-
-    DrawRectangleRounded(brect, 0.2, 0, bg);
-    DrawRectangleRoundedLinesEx(brect, 0.2, 0, 2, shadow);
-    DrawRectangleRoundedLinesEx(
-        (Rectangle){
-            brect.x + 2,
-            brect.y + 2,
-            brect.width - 4,
-            brect.height - 4,
-        },
-        0.2, 0, 2, brdr
-    );
-
-    return clicked;
-}
 
 void BpBrushShapeButton(
     Rectangle bounds, BrushShape *shape, const DToolInfo *tools
 ) {
-    bool clicked = BpDummyToogleButton(bounds, false);
+    bool clicked = BpDummyToggleButton(bounds, false);
     int shapeWidth = bounds.height - 4;
 
     if (*shape == BSP_SQAURE) {
@@ -106,7 +66,7 @@ DrawTool BpToolButton(
 
     if (activeToolIndex >= 0) {
         DToolInfo tool = tools[activeToolIndex];
-        if (BpDummyToogleButton(btnRect, true)) {
+        if (BpDummyToggleButton(btnRect, true)) {
             *showOther = false;
         }
         btnRect.y += 3;
@@ -117,7 +77,7 @@ DrawTool BpToolButton(
 
     } else {
         DToolInfo tool = tools[0];
-        if (BpDummyToogleButton(btnRect, tool.tool == active)) {
+        if (BpDummyToggleButton(btnRect, tool.tool == active)) {
             clicked = tool.tool;
             *showOther = false;
         }
@@ -154,7 +114,7 @@ DrawTool BpToolButton(
                 btnRect.x += (i * btnRect.width) + 10 * i;
                 DToolInfo tool = tools[list[i]];
 
-                if (BpDummyToogleButton(btnRect, false)) {
+                if (BpDummyToggleButton(btnRect, false)) {
                     clicked = tool.tool;
                     *showOther = false;
                 }
@@ -177,76 +137,40 @@ DrawTool BpToolButton(
     return clicked;
 }
 
-bool BpDummyRaisedButton(Rectangle bounds) {
+bool BpDummyFlatButton(Rectangle bounds) {
     bool locked = GuiIsLocked();
-    Color bg = ColorGrayDarker;
-    Color hoverBg = ColorGrayLighter;
-    Color brdr = ColorGrayLightest;
-    Color shadow = ColorBlack;
+    Color bg = GetColor(OptThemeGet(T_BTN_BG)); // ColorGrayDarker;
+    Color hoverBg = GetColor(OptThemeGet(T_BTN_HVR_BG));
+    Color clickBg = GetColor(OptThemeGet(T_BTN_CLK_BG));
+    Color brdr = GetColor(OptThemeGet(T_BTN_BORDER));
+    Color shadowClr = GetColor(OptThemeGet(T_BTN_SHADOW));
+    Color corner = GetColor(OptThemeGet(T_BTN_CORNER));
 
     Vector2 mpos = GetMousePosition();
-
     bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
     bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
-    Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height - 5};
+
+    float thick = OptThemeGet(T_BTN_BRDR_THICK);
+
+    Rectangle innerRect =
+        (Rectangle){bounds.x + thick, bounds.y + thick,
+                    bounds.width - thick * 2, bounds.height - thick * 2};
 
     if (clicked) {
-        rect.y += 5;
+        bg = clickBg;
     } else {
-        DrawRectangleRounded(
-            (Rectangle){rect.x, rect.y, rect.width, rect.height + 5}, 0.2, 0,
-            shadow
-        );
+        if (hover) {
+            bg = hoverBg;
+        }
     }
 
-    DrawRectangleRounded(rect, 0.2, 0, hover ? hoverBg : bg);
-    DrawRectangleRoundedLinesEx(
-        (Rectangle){rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4},
-        0.2, 0, 2, brdr
+    DrawRectangleRec(
+        (Rectangle){bounds.x, bounds.y, bounds.width, bounds.height + thick},
+        shadowClr
     );
 
-    return clicked;
-}
-
-bool BpDummyButton(Rectangle bounds) {
-    bool locked = GuiIsLocked();
-    Color bg = ColorGrayDarker;
-    Color hoverBg = ColorGrayLighter;
-    Color brdr = ColorGrayLightest;
-    Color shadow = ColorBlack;
-
-    Vector2 mpos = GetMousePosition();
-
-    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
-    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
-    Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height};
-
-    float thick = 2;
-
-    Vector2 tl = (Vector2){bounds.x + thick, bounds.y};
-    Vector2 tr = (Vector2){(bounds.x + bounds.width) - thick, bounds.y};
-    Vector2 bl =
-        (Vector2){bounds.x + thick, (bounds.y + bounds.height) - thick};
-    Vector2 br = (Vector2){(bounds.x + bounds.width) - thick,
-                           (bounds.y + bounds.height) - thick};
-
-    Rectangle innerRect = {
-        bounds.x + thick, bounds.y + thick, bounds.width - thick * 2,
-        bounds.height - thick * 2
-    };
-    if (clicked) {
-
-    } else {
-        DrawRectangleRounded(
-            (Rectangle){bounds.x, bounds.y, bounds.width, bounds.height + 4},
-            0.1, 2, ColorBlack
-        );
-    }
-    DrawRectangleRec(innerRect, ColorGrayLighter);
-    DrawRectangleLinesEx(innerRect, thick, ColorWhite);
-
-    Color sc = ColorBlack;
-
+    DrawRectangleRec(innerRect, bg);
+    DrawRectangleLinesEx(innerRect, thick, brdr);
     DrawRectangleRec(
         (Rectangle){
             innerRect.x,
@@ -254,14 +178,14 @@ bool BpDummyButton(Rectangle bounds) {
             thick,
             thick,
         },
-        sc
-    );
+        corner
+    ); // Top Left Dot
 
     DrawRectangleRec(
         (Rectangle){innerRect.x + innerRect.width - thick, innerRect.y, thick,
                     thick},
-        sc
-    );
+        corner
+    ); // Top Right Dot
 
     DrawRectangleRec(
         (Rectangle){
@@ -270,40 +194,95 @@ bool BpDummyButton(Rectangle bounds) {
             thick,
             thick,
         },
-        sc
-    );
+        corner
+    ); // Bottom Left Dot
 
     DrawRectangleRec(
         (Rectangle){innerRect.x + innerRect.width - thick,
                     innerRect.y + innerRect.height - thick, thick, thick},
-        sc
-    );
+        corner
+    ); // Bottom Right Dot
 
-    /*
-    DrawRectangleRec((Rectangle){
+    return clicked;
+}
+
+bool BpDummyToggleButton(Rectangle bounds, bool active) {
+    bool locked = GuiIsLocked();
+    Color bg = GetColor(OptThemeGet(T_BTN_BG)); // ColorGrayDarker;
+    Color hoverBg = GetColor(OptThemeGet(T_BTN_HVR_BG));
+    Color clickBg = GetColor(OptThemeGet(T_BTN_CLK_BG));
+    Color brdr = GetColor(OptThemeGet(T_BTN_BORDER));
+    Color shadowClr = GetColor(OptThemeGet(T_BTN_SHADOW));
+    Color corner = GetColor(OptThemeGet(T_BTN_CORNER));
+
+    Vector2 mpos = GetMousePosition();
+    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
+    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+    float thick = OptThemeGet(T_BTN_BRDR_THICK);
+
+    Rectangle innerRect =
+        (Rectangle){bounds.x + thick, bounds.y + thick,
+                    bounds.width - thick * 2, bounds.height - thick * 2};
+
+    if (active) {
+        innerRect.x += thick;
+        innerRect.y += thick;
+    }
+
+    if (clicked) {
+        if (!active) {
+            innerRect.x += thick;
+            innerRect.y += thick;
+        }
+        bg = clickBg;
+    } else {
+        if (hover) {
+            bg = hoverBg;
+        }
+        if (!active) {
+            DrawRectangleRounded(
+                (Rectangle){bounds.x + thick, bounds.y + thick, bounds.width,
+                            bounds.height},
+                0.2, 0, shadowClr
+            );
+        }
+    }
+
+    DrawRectangleRec(innerRect, bg);
+    DrawRectangleLinesEx(innerRect, thick, brdr);
+
+    DrawRectangleRec(
+        (Rectangle){
             innerRect.x,
-            innerRect.y + innerRect.height,
+            innerRect.y,
             thick,
-            thick * 2
-    }, ColorWhite);
-
-    DrawRectangleRec((Rectangle){
-            innerRect.x + innerRect.width - thick,
-            innerRect.y + innerRect.height,
             thick,
-            thick * 2
-    }, ColorWhite);
+        },
+        corner
+    ); // Top Left Dot
 
-    DrawRectangleRec((Rectangle){
-            innerRect.x + thick,
-            innerRect.y + innerRect.height + thick * 2,
-            innerRect.width - (thick * 2),
-            thick
-    }, ColorWhite);
-    */
+    DrawRectangleRec(
+        (Rectangle){innerRect.x + innerRect.width - thick, innerRect.y, thick,
+                    thick},
+        corner
+    ); // Top Right Dot
 
-    // GuiDrawIcon(ICON_GRID_FILL, innerRect.x + 5, innerRect.y + 5, 1,
-    // ColorWhite);
+    DrawRectangleRec(
+        (Rectangle){
+            innerRect.x,
+            innerRect.y + innerRect.height - thick,
+            thick,
+            thick,
+        },
+        corner
+    ); // Bottom Left Dot
+
+    DrawRectangleRec(
+        (Rectangle){innerRect.x + innerRect.width - thick,
+                    innerRect.y + innerRect.height - thick, thick, thick},
+        corner
+    ); // Bottom Right Dot
 
     return clicked;
 }

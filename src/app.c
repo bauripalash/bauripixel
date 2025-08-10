@@ -6,7 +6,6 @@
 #include "include/options.h"
 #include "include/tabs.h"
 #include "include/theme.h"
-#include "include/utils.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
 #include <stdbool.h>
@@ -192,6 +191,10 @@ void LayoutDraw(Gui *gui) {
     if (menuOpen) {
         GuiLock();
     }
+
+    // BpDummyToggleButton((Rectangle){200, 100, 40, 40}, false);
+    // BpDummyFlatPanel((Rectangle){200,100,40,40}, 2, (Vector4){0,0});
+    // BpDummyFlatButton((Rectangle){200,100, 40, 40});
 
     // DrawText(TextFormat("F %d", frameCounter), 500, 500, 16, RED);
 

@@ -266,7 +266,7 @@ int DrawToolbar(DrawToolBarState *state) {
         float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
         Rectangle btnRect = {
             (toolsRect.x + toolsRect.width / 2.0f) -
-                (DEFAULT_DT_BTN_SIZE / 2.0f),
+                (DEFAULT_DT_BTN_SIZE / 2.0f) - 2,
             toolsRect.y + state->toolbarPadding.y,
             DEFAULT_DT_BTN_SIZE,
             DEFAULT_DT_BTN_SIZE,

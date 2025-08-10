@@ -37,6 +37,14 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_TAB_PANEL_BG, HexColorGrayLighter},
     {T_TAB_ITEM_ACTIVE, HexColorGrayLighter},
     {T_TAB_ITEM_INACTIVE, HexColorCPanel},
+
+    {T_BTN_BG, HexColorGrayDarker},
+    {T_BTN_HVR_BG, HexColorGrayLighter},
+    {T_BTN_CLK_BG, HexColorGrayLighter},
+    {T_BTN_BORDER, HexColorWhite},
+    {T_BTN_CORNER, HexColorGrayLighter},
+    {T_BTN_SHADOW, HexColorBlack},
+    {T_BTN_BRDR_THICK, 2},
 };
 
 static const OptThemeProp lightThemeOpts[] = {

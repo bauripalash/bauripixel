@@ -27,6 +27,14 @@ typedef enum OptThemeKey {
     T_TAB_ITEM_ACTIVE,
     T_TAB_ITEM_INACTIVE,
 
+    T_BTN_BG,
+    T_BTN_HVR_BG,
+    T_BTN_CLK_BG,
+    T_BTN_BORDER,
+    T_BTN_CORNER,
+    T_BTN_SHADOW,
+    T_BTN_BRDR_THICK,
+
     T_MAX_THEME_KEYS
 } OptThemeKey;
 
