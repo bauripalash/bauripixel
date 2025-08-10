@@ -243,6 +243,8 @@ int LayerBarLogic(LayerBarState *lb) {
     return -1;
 }
 
+#define MIN_SLIDER 10.0f
+
 void DrawScrollBars(LayerBarState *lb, Rectangle content) {
 
     Vector2 mpos = GetMousePosition();
@@ -258,37 +260,40 @@ void DrawScrollBars(LayerBarState *lb, Rectangle content) {
         lb->hScrollDragging = false;
         lb->hScrollDragging = false;
     }
-    float vThumbY = lb->vScrollRect.y + lb->scroll.y;
 
-    float xScale = content.width / lb->hScrollRect.width;
-    float yScale = content.height / lb->vScrollRect.height;
-
-    if (vThumbY < lb->vScrollRect.y) {
-        vThumbY = lb->vScrollRect.y;
+    if (CheckCollisionPointRec(mpos, viewArea)) {
+        float wheelMove = GetMouseWheelMove();
+        float wheelDelta = wheelMove * 20.0f;
+        lb->scroll.y -= wheelDelta;
     }
 
-    float hThumbX = lb->hScrollRect.x + lb->scroll.x;
+    float maxScrollY = content.height - viewArea.height;
+    if (maxScrollY < 0.0f) {
+        maxScrollY = 0.0f;
+    }
 
-    float vThumbHeight =
-        lb->vScrollRect.height - ((content.height - viewArea.height) * yScale);
+    float visRatio = viewArea.height / content.height;
+    float vSliderH = viewArea.height * visRatio;
+    if (vSliderH < 10.0f) {
+        vSliderH = 10.0f;
+    }
 
-    //	float vThumbHeight = (viewArea.height / content.height) *
-    //lb->vScrollRect.height;
-    float hThumbWidth =
-        (viewArea.width / content.width) * lb->hScrollRect.width;
+    if (vSliderH < MIN_SLIDER) {
+        vSliderH = MIN_SLIDER;
+    }
 
-    float minVThumb = lb->vScrollRect.y;
-    float maxVThumb = lb->vScrollRect.y - vThumbHeight;
-
-    TraceVector(lb->scroll, "Scroll ->");
-    TraceLog(LOG_ERROR, "YS -> %f | XS -> %f", yScale, xScale);
+    float vSliderTravel = viewArea.height - vSliderH;
+    float vScrollNorm = (maxScrollY > 0.0f) ? lb->scroll.y / maxScrollY : 0.0f;
+    float sliderY = lb->vScrollRect.y + vScrollNorm * vSliderTravel;
 
     Rectangle vThumb = {
         lb->vScrollRect.x,
-        vThumbY,
+        sliderY,
         SCROLLT,
-        vThumbHeight,
+        vSliderH,
     };
+
+    Rectangle hThumb = {lb->hScrollRect.x, lb->hScrollRect.y, 20, SCROLLT};
 
     if (CheckCollisionPointRec(mpos, vThumb) &&
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !lb->vScrollDragging) {
@@ -300,14 +305,15 @@ void DrawScrollBars(LayerBarState *lb, Rectangle content) {
         lb->scroll.y += delta;
     }
 
-    Rectangle hThumb = {lb->hScrollRect.x, lb->hScrollRect.y, 20, SCROLLT};
+    lb->scroll.y = Clamp(lb->scroll.y, 0.0f, maxScrollY);
 
     if (hasVerticalScroll) {
-        lb->scroll.y =
-            Clamp(lb->scroll.y, 0, lb->vScrollRect.height - vThumbHeight);
         DrawRectangleRounded(vThumb, 0.9, 0, ColorVGreen);
     }
-    DrawRectangleRounded(hThumb, 0.9, 0, ColorVGreen);
+
+    if (hasHorizontalScroll) {
+        DrawRectangleRounded(hThumb, 0.9, 0, ColorVGreen);
+    }
 }
 
 int LayerBarDraw(LayerBarState *lb) {
@@ -336,7 +342,11 @@ int LayerBarDraw(LayerBarState *lb) {
             layersBounds.x, layersBounds.y, layersBounds.width, layersBounds.y
         };
 
-        BpDummyFlatPanel(layersBounds, 2, (Vector4){0});
+        BpDummyFlatPanel(
+            (Rectangle){layersBounds.x - 1, layersBounds.y - 1,
+                        layersBounds.width + 4, layersBounds.height + 4},
+            2, (Vector4){0}
+        );
 
         float px = layersBounds.x;
         float py = layersBounds.y;
