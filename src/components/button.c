@@ -1,6 +1,7 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../external/raymath.h"
+#include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
 #include "../include/options.h"
@@ -8,6 +9,135 @@
 
 #define ICON_WIDTH 32
 
+bool BpSimpleButton(Rectangle bounds) {
+    float thick = 10;
+    Color brdr = ColorVWhite;
+    // DrawRectangleRec(bounds, ColorGrayDarker);
+    // DrawRectangleRoundedLinesEx(bounds, 0.007, 4, thick , ColorVWhite);
+    DrawRectangleRec(
+        (Rectangle){bounds.x + thick, bounds.y, bounds.width - thick * 2,
+                    thick},
+        brdr
+    ); // Top Border
+
+    DrawRectangleRec(
+        (Rectangle){bounds.x, bounds.y + thick, thick,
+                    bounds.height - thick * 2},
+        brdr
+    ); // Left Border
+
+    DrawRectangleRec(
+        (Rectangle){bounds.x + bounds.width - thick, bounds.y + thick, thick,
+                    bounds.height - thick * 2},
+        brdr
+    ); // Right Border
+
+    DrawRectangleRec(
+        (Rectangle){bounds.x + thick, bounds.y + bounds.height - thick,
+                    bounds.width - thick * 2, thick},
+        brdr
+    ); // Bottom Border
+
+    DrawRectangleRec(
+        (Rectangle){
+            bounds.x + thick, bounds.y + thick, bounds.width - thick * 2,
+            bounds.height - thick * 2
+
+        },
+        ColorGrayDarker
+    );
+
+    DrawRectangleLinesEx(
+        (Rectangle){
+            bounds.x + thick * 2, bounds.y + thick * 2,
+            bounds.width - thick * 4, bounds.height - thick * 4
+
+        },
+        thick, ColorCPanel
+    );
+
+    DrawRectangleRec(
+        (Rectangle){
+            bounds.x + thick,
+            bounds.y + thick,
+            thick,
+            thick,
+        },
+        brdr
+    ); // TL Dot
+
+    DrawRectangleRec(
+        (Rectangle){
+            bounds.x + bounds.width - thick * 2,
+            bounds.y + thick,
+            thick,
+            thick,
+        },
+        brdr
+    ); // TR Dot
+
+    DrawRectangleRec(
+        (Rectangle){bounds.x + thick, bounds.y + bounds.height - thick * 2,
+                    thick, thick},
+        brdr
+    ); // BL Dot
+
+    DrawRectangleRec(
+        (Rectangle){bounds.x + bounds.width - thick * 2,
+                    bounds.y + bounds.height - thick * 2, thick, thick},
+        brdr
+    ); // BR Dot
+
+    // Shadows
+
+    DrawRectangleRec(
+        (Rectangle){bounds.x, bounds.y - thick, bounds.width, thick},
+        ColorBlack
+    ); // Top Border Shadow
+
+    DrawRectangleRec(
+        (Rectangle){bounds.x - thick, bounds.y, thick, bounds.height},
+        ColorBlack
+    ); // Left Border Shadow
+    DrawRectangleRec(
+        (Rectangle){bounds.x + bounds.width, bounds.y, thick, bounds.height},
+        ColorBlack
+    ); // Right Border Shadow
+    DrawRectangleRec(
+        (Rectangle){bounds.x, bounds.y + bounds.height, bounds.width, thick},
+        ColorBlack
+    ); // Bottom Border Shadow
+    DrawRectangleRec(
+        (Rectangle){
+            bounds.x,
+            bounds.y,
+            thick,
+            thick,
+        },
+        ColorBlack
+    ); // TL Dot Shadow
+    DrawRectangleRec(
+        (Rectangle){
+            bounds.x + bounds.width - thick,
+            bounds.y,
+            thick,
+            thick,
+        },
+        ColorBlack
+    ); // TR Dot Shadow
+    DrawRectangleRec(
+        (Rectangle){bounds.x, bounds.y + bounds.height - thick, thick, thick},
+        ColorBlack
+    ); // BL Dot Shadow
+
+    DrawRectangleRec(
+        (Rectangle){bounds.x + bounds.width - thick,
+                    bounds.y + bounds.height - thick, thick, thick},
+        ColorBlack
+    ); // BR Dot Shadow
+
+    return false;
+}
 void BpBrushShapeButton(
     Rectangle bounds, BrushShape *shape, const DToolInfo *tools
 ) {

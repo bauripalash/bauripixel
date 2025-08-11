@@ -28,6 +28,7 @@ DrawTool BpToolButton(
 
 bool BpDummyToggleButton(Rectangle bounds, bool active);
 bool BpDummyFlatButton(Rectangle bounds);
+bool BpSimpleButton(Rectangle bounds);
 
 int BpTabItem(
     Rectangle bounds, const char *name, int index, float tabWidth, bool active

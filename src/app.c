@@ -62,7 +62,7 @@ int RunApp() {
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
-    SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
+    // SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
     while (!WindowShouldClose()) {
 
         // TraceLog(LOG_ERROR, "==> F %d <==", frameCounter);
@@ -194,7 +194,7 @@ void LayoutDraw(Gui *gui) {
 
     // BpDummyToggleButton((Rectangle){200, 100, 40, 40}, false);
     // BpDummyFlatPanel((Rectangle){200,100,40,40}, 2, (Vector4){0,0});
-    // BpDummyFlatButton((Rectangle){200,100, 40, 40});
+    BpSimpleButton((Rectangle){200, 100, 500, 500});
 
     // DrawText(TextFormat("F %d", frameCounter), 500, 500, 16, RED);
 
