@@ -3,10 +3,84 @@
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/options.h"
+#include "../include/utils.h"
 #include <stdbool.h>
 #include <stdio.h>
 
 #define SHADOW_SIZE 3
+
+void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow) {
+    Color brdr = ColorVWhite;
+    Color bg = ColorGrayDarker;
+    bool locked = GuiIsLocked();
+    Vector2 mpos = GetMousePosition();
+    Rectangle rect = bounds;
+
+    if (border.t != -1) {
+        DrawRectangle(
+            rect.x + thick, rect.y, rect.width - thick * 2, thick, brdr
+        );
+    }
+
+    if (border.l != -1) {
+        DrawRectangle(
+            rect.x, rect.y + thick, thick, rect.height - thick * 2, brdr
+        );
+    }
+
+    if (border.r != -1) {
+        DrawRectangle(
+            rect.x + rect.width - thick, rect.y + thick, thick,
+            rect.height - thick * 2, brdr
+        );
+    }
+
+    if (border.b != -1) {
+        DrawRectangle(
+            rect.x + thick, rect.y + rect.height - thick,
+            rect.width - thick * 1, thick, brdr
+        );
+    }
+
+    DrawRectangle(
+        rect.x + thick, rect.y + thick, rect.width - thick * 2,
+        rect.height - thick * 2, bg
+    );
+
+    DrawRectangleRec(
+        (Rectangle){
+            rect.x + thick,
+            rect.y + thick,
+            thick,
+            thick,
+        },
+        brdr
+    ); // TL Dot
+
+    DrawRectangleRec(
+        (Rectangle){
+            rect.x + rect.width - thick * 2,
+            rect.y + thick,
+            thick,
+            thick,
+        },
+        brdr
+    ); // TR Dot
+
+    DrawRectangleRec(
+        (Rectangle){rect.x + thick, rect.y + rect.height - thick * 2, thick,
+                    thick},
+        brdr
+    ); // BL Dot
+
+    DrawRectangleRec(
+        (Rectangle){rect.x + rect.width - thick * 2,
+                    rect.y + rect.height - thick * 2, thick, thick},
+        brdr
+    ); // BR Dot
+
+    DrawRectangleLinesEx(rect, 1, MAGENTA);
+}
 
 void BpDummyPanel(
     Rectangle bounds, float thick, float roundness, bool shadow, Vector4 borders

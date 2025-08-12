@@ -3,6 +3,24 @@
 
 #include "../external/raylib.h"
 
+typedef struct Side {
+    int t;
+    int b;
+    int l;
+    int r;
+} Side;
+
+// Create New Side(Top, Bottom, Left, Right)
+#define NewSide(tp, bt, lf, rt)                                                \
+    (Side) { .t = tp, .b = bt, .l = lf, .r = rt }
+
+// Vector4(x = Top, y = Left, z = Right, w = Bottom)
+#define SideToVector4(sd)                                                      \
+    (Vector4) { .x = sd.t, .y = sd.l, .z = sd.r, .w = sd.b }
+
+#define Vector4ToSide(vec)                                                     \
+    (Side) { .t = vec.x, .b = vec.w, .l = vec.y, .r = vec.z }
+
 #define ArrCount(arr) (sizeof(arr) / sizeof(arr[0]))
 
 #define TraceVector(vec, msg)                                                  \

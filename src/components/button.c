@@ -9,26 +9,31 @@
 
 #define ICON_WIDTH 32
 
-bool BpSimpleButton(Rectangle bounds) {
-    float thick = 10;
+bool BpSimpleButton(Rectangle bounds, int thick) {
     Color brdr = ColorVWhite;
-    // DrawRectangleRec(bounds, ColorGrayDarker);
-    // DrawRectangleRoundedLinesEx(bounds, 0.007, 4, thick , ColorVWhite);
+    bool locked = GuiIsLocked();
+    Vector2 mpos = GetMousePosition();
+    bool hover = !locked && CheckCollisionPointRec(mpos, bounds);
+    bool clicked = hover && IsMouseButtonReleased(MOUSE_BUTTON_LEFT);
+    Rectangle rect = {bounds.x, bounds.y, bounds.width, bounds.height};
+
+    if (clicked) {
+        rect.y += thick;
+    }
+
     DrawRectangleRec(
-        (Rectangle){bounds.x + thick, bounds.y, bounds.width - thick * 2,
-                    thick},
+        (Rectangle){rect.x + thick, rect.y, rect.width - thick * 2, thick},
         brdr
     ); // Top Border
 
     DrawRectangleRec(
-        (Rectangle){bounds.x, bounds.y + thick, thick,
-                    bounds.height - thick * 2},
+        (Rectangle){rect.x, rect.y + thick, thick, rect.height - thick * 2},
         brdr
     ); // Left Border
 
     DrawRectangleRec(
-        (Rectangle){bounds.x + bounds.width - thick, bounds.y + thick, thick,
-                    bounds.height - thick * 2},
+        (Rectangle){rect.x + rect.width - thick, rect.y + thick, thick,
+                    rect.height - thick * 2},
         brdr
     ); // Right Border
 
@@ -40,8 +45,8 @@ bool BpSimpleButton(Rectangle bounds) {
 
     DrawRectangleRec(
         (Rectangle){
-            bounds.x + thick, bounds.y + thick, bounds.width - thick * 2,
-            bounds.height - thick * 2
+            rect.x + thick, rect.y + thick, rect.width - thick * 2,
+            rect.height - thick * 2
 
         },
         ColorGrayDarker
@@ -49,8 +54,8 @@ bool BpSimpleButton(Rectangle bounds) {
 
     DrawRectangleLinesEx(
         (Rectangle){
-            bounds.x + thick * 2, bounds.y + thick * 2,
-            bounds.width - thick * 4, bounds.height - thick * 4
+            rect.x + thick * 2, rect.y + thick * 2, rect.width - thick * 4,
+            rect.height - thick * 4
 
         },
         thick, ColorCPanel
@@ -58,8 +63,8 @@ bool BpSimpleButton(Rectangle bounds) {
 
     DrawRectangleRec(
         (Rectangle){
-            bounds.x + thick,
-            bounds.y + thick,
+            rect.x + thick,
+            rect.y + thick,
             thick,
             thick,
         },
@@ -68,8 +73,8 @@ bool BpSimpleButton(Rectangle bounds) {
 
     DrawRectangleRec(
         (Rectangle){
-            bounds.x + bounds.width - thick * 2,
-            bounds.y + thick,
+            rect.x + rect.width - thick * 2,
+            rect.y + thick,
             thick,
             thick,
         },
@@ -77,64 +82,82 @@ bool BpSimpleButton(Rectangle bounds) {
     ); // TR Dot
 
     DrawRectangleRec(
-        (Rectangle){bounds.x + thick, bounds.y + bounds.height - thick * 2,
-                    thick, thick},
+        (Rectangle){rect.x + thick, rect.y + rect.height - thick * 2, thick,
+                    thick},
         brdr
     ); // BL Dot
 
     DrawRectangleRec(
-        (Rectangle){bounds.x + bounds.width - thick * 2,
-                    bounds.y + bounds.height - thick * 2, thick, thick},
+        (Rectangle){rect.x + rect.width - thick * 2,
+                    rect.y + rect.height - thick * 2, thick, thick},
         brdr
     ); // BR Dot
+    if (!clicked) {
+        DrawRectangleRec(
+            (Rectangle){rect.x + thick, rect.y + rect.height,
+                        rect.width - thick * 2, thick},
+            ColorBlack
+        ); // Bottom Border Shadow
+        DrawRectangleRec(
+            (Rectangle){rect.x, rect.y + rect.height - thick, thick, thick},
+            ColorBlack
+        ); // BL Dot Shadow
 
+        DrawRectangleRec(
+            (Rectangle){rect.x + rect.width - thick,
+                        rect.y + rect.height - thick, thick, thick},
+            ColorBlack
+        ); // BR Dot Shadow
+    }
     // Shadows
 
+    /*
     DrawRectangleRec(
-        (Rectangle){bounds.x, bounds.y - thick, bounds.width, thick},
-        ColorBlack
-    ); // Top Border Shadow
+    (Rectangle){bounds.x, bounds.y - thick, bounds.width, thick},
+    ColorBlack
+); // Top Border Shadow
 
-    DrawRectangleRec(
-        (Rectangle){bounds.x - thick, bounds.y, thick, bounds.height},
-        ColorBlack
-    ); // Left Border Shadow
-    DrawRectangleRec(
-        (Rectangle){bounds.x + bounds.width, bounds.y, thick, bounds.height},
-        ColorBlack
-    ); // Right Border Shadow
-    DrawRectangleRec(
-        (Rectangle){bounds.x, bounds.y + bounds.height, bounds.width, thick},
-        ColorBlack
-    ); // Bottom Border Shadow
-    DrawRectangleRec(
-        (Rectangle){
-            bounds.x,
-            bounds.y,
-            thick,
-            thick,
-        },
-        ColorBlack
-    ); // TL Dot Shadow
-    DrawRectangleRec(
-        (Rectangle){
-            bounds.x + bounds.width - thick,
-            bounds.y,
-            thick,
-            thick,
-        },
-        ColorBlack
-    ); // TR Dot Shadow
-    DrawRectangleRec(
-        (Rectangle){bounds.x, bounds.y + bounds.height - thick, thick, thick},
-        ColorBlack
-    ); // BL Dot Shadow
+DrawRectangleRec(
+    (Rectangle){bounds.x - thick, bounds.y, thick, bounds.height},
+    ColorBlack
+); // Left Border Shadow
+DrawRectangleRec(
+    (Rectangle){bounds.x + bounds.width, bounds.y, thick, bounds.height},
+    ColorBlack
+); // Right Border Shadow
+DrawRectangleRec(
+    (Rectangle){bounds.x, bounds.y + bounds.height, bounds.width, thick},
+    ColorBlack
+); // Bottom Border Shadow
+DrawRectangleRec(
+    (Rectangle){
+        bounds.x,
+        bounds.y,
+        thick,
+        thick,
+    },
+    ColorBlack
+); // TL Dot Shadow
+DrawRectangleRec(
+    (Rectangle){
+        bounds.x + bounds.width - thick,
+        bounds.y,
+        thick,
+        thick,
+    },
+    ColorBlack
+); // TR Dot Shadow
+DrawRectangleRec(
+    (Rectangle){bounds.x, bounds.y + bounds.height - thick, thick, thick},
+    ColorBlack
+); // BL Dot Shadow
 
-    DrawRectangleRec(
-        (Rectangle){bounds.x + bounds.width - thick,
-                    bounds.y + bounds.height - thick, thick, thick},
-        ColorBlack
-    ); // BR Dot Shadow
+DrawRectangleRec(
+    (Rectangle){bounds.x + bounds.width - thick,
+                bounds.y + bounds.height - thick, thick, thick},
+    ColorBlack
+); // BR Dot Shadow
+    */
 
     return false;
 }

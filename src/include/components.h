@@ -4,6 +4,7 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../include/drawtools.h"
+#include "../include/utils.h"
 #include <stdbool.h>
 
 bool BpInputSliderInt(
@@ -28,7 +29,7 @@ DrawTool BpToolButton(
 
 bool BpDummyToggleButton(Rectangle bounds, bool active);
 bool BpDummyFlatButton(Rectangle bounds);
-bool BpSimpleButton(Rectangle bounds);
+bool BpSimpleButton(Rectangle bounds, int thick);
 
 int BpTabItem(
     Rectangle bounds, const char *name, int index, float tabWidth, bool active
@@ -39,6 +40,7 @@ void BpBrushShapeButton(
     Rectangle bounds, BrushShape *shape, const DToolInfo *tools
 );
 
+void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow);
 void BpRoundedPanel(Rectangle bounds, float thick, float shadowr, bool shadow);
 void BpRoundedFlatPanel(Rectangle bounds, float roundness);
 void BpMenuBarPanel(Vector2 position, float width, int items, float roundness);
