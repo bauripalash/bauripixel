@@ -11,6 +11,8 @@
 
 bool BpSimpleButton(Rectangle bounds, int thick) {
     Color brdr = ColorVWhite;
+    Color bg = GetColor(0x292831ff);
+    Color shadow = GetColor(0x270022ff);
     bool locked = GuiIsLocked();
     Vector2 mpos = GetMousePosition();
     bool hover = !locked && CheckCollisionPointRec(mpos, bounds);
@@ -49,7 +51,7 @@ bool BpSimpleButton(Rectangle bounds, int thick) {
             rect.height - thick * 2
 
         },
-        ColorGrayDarker
+        bg
     );
 
     DrawRectangleLinesEx(
@@ -96,17 +98,17 @@ bool BpSimpleButton(Rectangle bounds, int thick) {
         DrawRectangleRec(
             (Rectangle){rect.x + thick, rect.y + rect.height,
                         rect.width - thick * 2, thick},
-            ColorBlack
+            shadow
         ); // Bottom Border Shadow
         DrawRectangleRec(
             (Rectangle){rect.x, rect.y + rect.height - thick, thick, thick},
-            ColorBlack
+            shadow
         ); // BL Dot Shadow
 
         DrawRectangleRec(
             (Rectangle){rect.x + rect.width - thick,
                         rect.y + rect.height - thick, thick, thick},
-            ColorBlack
+            shadow
         ); // BR Dot Shadow
     }
     // Shadows

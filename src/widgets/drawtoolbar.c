@@ -8,7 +8,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-#define OPTBAR_HEIGHT 50
+#define OPTBAR_HEIGHT 40
 
 static DToolInfo NewTool(DrawTool tool, const unsigned char *img, int size) {
 
@@ -224,12 +224,12 @@ static int DrawOptToolbar(DrawToolBarState *state) {
     Rectangle bounds = state->optRect;
 
     Rectangle drawBounds = {
-        bounds.x + DTBAR_MARGIN_L, bounds.y + DTBAR_MARGIN_TB,
-        bounds.width - DTBAR_MARGIN_L - DTBAR_MARGIN_R,
-        bounds.height - DTBAR_MARGIN_TB * 2
+        bounds.x + DTBAR_MARGIN_L, bounds.y + 5,
+        bounds.width - DTBAR_MARGIN_L - DTBAR_MARGIN_R, bounds.height - 5 * 2
     };
 
-    BpRoundedPanel(bounds, 2, 0.125, true);
+    // BpRoundedPanel(bounds, 2, 0.125, true);
+    BpPanelBorder(bounds, 3);
     OptToolsPencil(state, drawBounds);
     return -1;
 }
@@ -261,7 +261,8 @@ int DrawToolbar(DrawToolBarState *state) {
 
         toolsRect.height = state->bottom.y - toolsRect.y - DTBAR_MARGIN_TB * 2;
 
-        BpRoundedPanel(toolsRect, 2, 0.125, true);
+        // BpRoundedPanel(toolsRect, 2, 0.125, true);
+        BpPanelBorder(toolsRect, 3);
 
         float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
         Rectangle btnRect = {

@@ -9,7 +9,7 @@
 
 #define LB_INIT_HEIGHT 120
 #define LB_MIN_HEIGHT  50
-#define LB_MARGIN_LR   5
+#define LB_MARGIN_LR   10
 #define LB_MARGIN_TB   10
 #define LB_PADDING_LR  10
 #define LB_PADDING_TB  10
@@ -327,7 +327,8 @@ int LayerBarDraw(LayerBarState *lb) {
 
         Rectangle layersBounds = lb->layersRect;
 
-        BpRoundedPanel(bounds, 2, 0.125, true);
+        // BpRoundedPanel(bounds, 2, 0.125, true);
+        BpPanelBorder(bounds, 3);
 
         /*
 if (BpDummyButton((Rectangle){toolBarBounds.x, toolBarBounds.y,

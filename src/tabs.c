@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 #define TOP_WIN_MARGIN    80
-#define TAB_PANEL_MARGIN  5
+#define TAB_PANEL_MARGIN  8
 #define TAB_HEADER_WIDTH  80
 #define TAB_HEADER_HEIGHT 30
 
@@ -89,7 +89,7 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
                     GetScreenWidth() - TAB_PANEL_MARGIN * 2, 0};
 
     float statusHeight = DEF_STATUSBAR_HEIGHT;
-    float statusY = GetScreenHeight() - statusHeight;
+    float statusY = GetScreenHeight() - statusHeight - TAB_PANEL_MARGIN;
 
     tab->tabPanel.height = statusY - tab->tabPanel.y - TAB_PANEL_MARGIN;
 

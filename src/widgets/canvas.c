@@ -526,7 +526,8 @@ bool CanvasDraw(CanvasState *state) {
             state->drawArea.height
         };
         Rectangle bounds = state->prop.bounds;
-        BpRoundedPanel(bounds, 4, 0.02, false);
+        // BpRoundedPanel(bounds, 4, 0.02, false);
+        BpPanelBorder(bounds, 3);
         CanvasScrollBarsDraw(state);
 
         BeginScissorMode(

@@ -98,52 +98,6 @@
 #define ColorTGrayDarker      BpSolidColor(0x29, 0x28, 0x31)
 
 /*
- * Winter Wonderland Palette by Jimison3
- * https://lospec.com/palette-list/winter-wonderland
- */
-
-#define HexColorWBlueDarkest  BpHexColor(20284e)
-#define HexColorWBlueDarker   BpHexColor(2c4a78)
-#define HexColorWBlueLighter  BpHexColor(3875a1)
-#define HexColorWBlueLightest BpHexColor(8bcadd)
-#define HexColorWWhite        BpHexColor(ffffff)
-#define HexColorWGrayLightest BpHexColor(d6e1e9)
-#define HexColorWGrayLighter  BpHexColor(a7bcc9)
-#define HexColorWGrayDarker   BpHexColor(738d9d)
-
-#define ColorWBlueDarkest     BpSolidColor(0x20, 0x28, 0x4e)
-#define ColorWBlueDarker      BpSolidColor(0x2c, 0x4a, 0x78)
-#define ColorWBlueLighter     BpSolidColor(0x38, 0x75, 0xa1)
-#define ColorWBlueLightest    BpSolidColor(0x8b, 0xca, 0xdd)
-#define ColorWWhite           BpSolidColor(0xff, 0xff, 0xff)
-#define ColorWGrayLightest    BpSolidColor(0xd6, 0xe1, 0xe9)
-#define ColorWGrayLighter     BpSolidColor(0xa7, 0xbc, 0xc9)
-#define ColorWGrayDarker      BpSolidColor(0x73, 0x8d, 0x9d)
-
-/*
- * Seafoam Palette by Jimison3
- * https://lospec.com/palette-list/seafoam
- */
-
-#define HexColorSGray          BpHexColor(37364e)
-#define HexColorSGreenDarker   BpHexColor(355d69)
-#define HexColorSGreenLighter  BpHexColor(6aae9d)
-#define HexColorSGreenLightest BpHexColor(b9d4b4)
-#define HexColorSWhite         BpHexColor(f4e9d4)
-#define HexColorSWhiteDarker   BpHexColor(d0baa9)
-#define HexColorSPurpleLight   BpHexColor(9e8e91)
-#define HexColorSpurpleDark    BpHexColor(5b4a68)
-
-#define ColorSGray             BpSolidColor(0x37, 0x36, 0x4e)
-#define ColorSGreenDarker      BpSolidColor(0x35, 0x5d, 0x69)
-#define ColorSGreenLighter     BpSolidColor(0x6a, 0xae, 0x9d)
-#define ColorSGreenLightest    BpSolidColor(0xb9, 0xd4, 0xb4)
-#define ColorSWhite            BpSolidColor(0xf4, 0xe9, 0xd4)
-#define ColorSWhiteDarker      BpSolidColor(0xd0, 0xba, 0xa9)
-#define ColorSPurpleLight      BpSolidColor(0x9e, 0x8e, 0x91)
-#define ColorSpurpleDark       BpSolidColor(0x5b, 0x4a, 0x68)
-
-/*
  * Neon Night Sky Palette by SoundsDotZip
  * https://lospec.com/palette-list/neon-night-sky
  */
@@ -157,5 +111,18 @@
 #define ColorNGray            BpSolidColor(0x4d, 0x4d, 0x80)
 #define ColorNMagentaLight    BpSolidColor(0xe6, 0xa1, 0xcf)
 #define ColorNPinkLight       BpSolidColor(0xff, 0xe6, 0xea)
+
+/*
+ * Custom Color
+ *
+ */
+
+// Based on Twilight 5 Darkest Grey
+#define HexColorAppBG BpHexColor(17171c)
+#define ColorAppBG    BpSolidColor(0x17, 0x17, 0x1c)
+
+// Based on Twilight 5 Darkest Grey
+#define HexColorStatus BpHexColor(1d1c23)
+#define ColorStatus    BpSolidColor(0x1d, 0x1c, 0x23)
 
 #endif

@@ -9,12 +9,27 @@
 
 #define SHADOW_SIZE 3
 
+void BpPanelNoBorderShadow(Rectangle bounds, int thick) {}
+
+void BpPanelBorderShadow(Rectangle bounds, int thick) {}
+
+void BpPanelNoBorder(Rectangle bounds, int thick) {}
+
+void BpPanelBorder(Rectangle bounds, int thick) {
+    BpSimplePanel(bounds, thick, SideAll(), SideNone());
+}
+
 void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow) {
-    Color brdr = ColorVWhite;
-    Color bg = ColorGrayDarker;
+    Color brdr = GetColor(OptThemeGet(T_PANEL_BORDER));
+    // ColorVWhite;//GetColor(0xfbbbadff) ;//ColorVWhite;
+    Color bg = GetColor(OptThemeGet(T_PANEL_BG));
+    // GetColor(0x292831ff);//ColorGrayDarker;
     bool locked = GuiIsLocked();
     Vector2 mpos = GetMousePosition();
-    Rectangle rect = bounds;
+    Rectangle rect = {
+        bounds.x - thick, bounds.y - thick, bounds.width + thick * 2,
+        bounds.height + thick * 2
+    };
 
     if (border.t != -1) {
         DrawRectangle(
@@ -38,14 +53,11 @@ void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow) {
     if (border.b != -1) {
         DrawRectangle(
             rect.x + thick, rect.y + rect.height - thick,
-            rect.width - thick * 1, thick, brdr
+            rect.width - thick * 2, thick, brdr
         );
     }
 
-    DrawRectangle(
-        rect.x + thick, rect.y + thick, rect.width - thick * 2,
-        rect.height - thick * 2, bg
-    );
+    DrawRectangleRec(bounds, bg);
 
     DrawRectangleRec(
         (Rectangle){
@@ -67,19 +79,22 @@ void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow) {
         brdr
     ); // TR Dot
 
-    DrawRectangleRec(
-        (Rectangle){rect.x + thick, rect.y + rect.height - thick * 2, thick,
-                    thick},
-        brdr
-    ); // BL Dot
+    if (border.b != -1) {
 
-    DrawRectangleRec(
-        (Rectangle){rect.x + rect.width - thick * 2,
-                    rect.y + rect.height - thick * 2, thick, thick},
-        brdr
-    ); // BR Dot
+        DrawRectangleRec(
+            (Rectangle){rect.x + thick, rect.y + rect.height - thick * 2, thick,
+                        thick},
+            brdr
+        ); // BL Dot
 
-    DrawRectangleLinesEx(rect, 1, MAGENTA);
+        DrawRectangleRec(
+            (Rectangle){rect.x + rect.width - thick * 2,
+                        rect.y + rect.height - thick * 2, thick, thick},
+            brdr
+        ); // BR Dot
+    }
+
+    // DrawRectangleLinesEx(bounds, 1, MAGENTA);
 }
 
 void BpDummyPanel(
@@ -121,16 +136,17 @@ int BpTabItem(
     // End X position
     float tabX1 = tabRect.x + tabRect.width;
 
-    BpDummyPanel(tabRect, 2, 0.0f, false, (Vector4){.w = -1});
+    // BpDummyPanel(tabRect, 2, 0.0f, false, (Vector4){.w = -1});
+    BpSimplePanel(tabRect, 3, (Side){.b = -1}, (Side){});
     if (active) {
-        DrawRectangleRec(innerRect, panelBg);
+        // DrawRectangleRec(innerRect, panelBg);
     }
     if (tabX0 == bounds.x) {
-        DrawRectangleRec(
-            (Rectangle){tabX0 + tabThick, tabRect.y + tabThick * 2, tabThick,
-                        tabRect.height + 5},
-            panelBorder
-        );
+        // DrawRectangleRec(
+        //     (Rectangle){tabX0 + tabThick, tabRect.y + tabThick * 2, tabThick,
+        //                 tabRect.height + 5},
+        //     panelBorder
+        //);
     }
 
     if (tabX1 == bounds.x + bounds.width) {

@@ -21,6 +21,9 @@ typedef struct Side {
 #define Vector4ToSide(vec)                                                     \
     (Side) { .t = vec.x, .b = vec.w, .l = vec.y, .r = vec.z }
 
+#define SideAll()     (Side){0}
+#define SideNone()    (Side){-1, -1, -1, -1}
+
 #define ArrCount(arr) (sizeof(arr) / sizeof(arr[0]))
 
 #define TraceVector(vec, msg)                                                  \

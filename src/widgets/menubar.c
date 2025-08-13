@@ -122,7 +122,8 @@ MenuAction MenuBar(MenuBarState *state) {
 
     MenuAction resultAction = MACTION_COUNT;
 
-    BpRoundedPanel(bounds, 2, 0.125, false);
+    // BpRoundedPanel(bounds, 2, 0.125, false);
+    // BpSimplePanel(bounds, 2, (Side){}, (Side){});
     Font font = state->font;
     int fontSize = font.baseSize;
     Rectangle rect = {

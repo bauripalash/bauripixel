@@ -8,8 +8,8 @@
 #include <stdbool.h>
 
 #define DEFAULT_DT_BTN_SIZE 40
-#define DEFAULT_DTBAR_WIDTH 60
-#define DTBAR_MARGIN_L      10
+#define DEFAULT_DTBAR_WIDTH 50
+#define DTBAR_MARGIN_L      8
 #define DTBAR_MARGIN_R      DTBAR_MARGIN_L
 #define DTBAR_MARGIN_TB     10
 

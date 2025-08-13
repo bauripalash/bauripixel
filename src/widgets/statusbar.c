@@ -6,7 +6,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define STATUSBAR_MARGIN  2
+#define SB_MARGIN_TB      5
+#define SB_MARGIN_LR      5
 #define STATUSBAR_PADDING 5
 
 StatusBarState NewStatusBar() {
@@ -22,10 +23,10 @@ StatusBarState NewStatusBar() {
 }
 
 static void updateBounds(StatusBarState *state) {
-    state->prop.bounds.x = STATUSBAR_MARGIN;
-    state->prop.bounds.width = GetScreenWidth() - STATUSBAR_MARGIN * 2;
+    state->prop.bounds.x = SB_MARGIN_LR;
+    state->prop.bounds.width = GetScreenWidth() - SB_MARGIN_LR * 2;
     state->prop.bounds.y =
-        GetScreenHeight() - state->prop.bounds.height - STATUSBAR_MARGIN;
+        GetScreenHeight() - state->prop.bounds.height - SB_MARGIN_TB;
 }
 
 void SetStatusBarPosition(StatusBarState *state, float x, float height) {
@@ -52,7 +53,9 @@ bool StatusBar(StatusBarState *state) {
 
         updateBounds(state);
 
-        BpRoundedPanel(state->prop.bounds, 2, 0.125, false);
+        // BpRoundedPanel(state->prop.bounds, 2, 0.125, false);
+        // BpSimplePanel(state->prop.bounds, 2, SideAll(), SideNone());
+        BpPanelBorder(state->prop.bounds, 2);
         Font font = GuiGetFont();
         float fontSize = font.baseSize;
         Color textClr = ColorGrayLightest;

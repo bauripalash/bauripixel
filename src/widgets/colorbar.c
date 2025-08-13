@@ -190,7 +190,8 @@ int ColorBarDraw(ColorBarState *state) {
         float colorBoxSize = state->boxSize;
         float halfBoxSize = colorBoxSize / 2.0f;
         int colorCount = state->colorCount;
-        BpRoundedPanel(bounds, 2, 0.125, true);
+        // BpRoundedPanel(bounds, 2, 0.125, true);
+        BpPanelBorder(bounds, 3);
 
         Rectangle usableRect = state->usableRect;
 

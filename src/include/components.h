@@ -40,6 +40,7 @@ void BpBrushShapeButton(
     Rectangle bounds, BrushShape *shape, const DToolInfo *tools
 );
 
+void BpPanelBorder(Rectangle bounds, int thick);
 void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow);
 void BpRoundedPanel(Rectangle bounds, float thick, float shadowr, bool shadow);
 void BpRoundedFlatPanel(Rectangle bounds, float roundness);

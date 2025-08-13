@@ -11,7 +11,7 @@
 #define CBAR_MARGIN_RIGHT     CBAR_MARGIN_LEFT
 
 #define CBAR_BOX_SIZE         30.0f
-#define CBAR_INIT_WIDTH       130.0f
+#define CBAR_INIT_WIDTH       92.0f
 #define CBAR_MIN_WIDTH        70.0f
 #define CBAR_INIT_HEIGHT      300.0f
 #define CBAR_HANDLE_THICKNESS 20.0f
