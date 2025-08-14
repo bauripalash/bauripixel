@@ -122,7 +122,9 @@
 #define ColorAppBG    BpSolidColor(0x17, 0x17, 0x1c)
 
 // Based on Twilight 5 Darkest Grey
-#define HexColorStatus BpHexColor(1d1c23)
-#define ColorStatus    BpSolidColor(0x1d, 0x1c, 0x23)
+#define HexColorStatus      BpHexColor(1d1c23)
+#define ColorStatus         BpSolidColor(0x1d, 0x1c, 0x23)
+
+#define HexColorPanelBorder HexColorTGrayLighter
 
 #endif

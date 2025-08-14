@@ -142,12 +142,11 @@ int BpTabItem(
 ) {
     int ogPanelBg = OptThemeGet(T_PANEL_BG);
     if (!active) {
-        OptThemeSet(T_PANEL_BG, HexColorGrayLighter);
+        OptThemeSet(T_PANEL_BG, OptThemeGet(T_TAB_ITEM_INACTIVE));
+    } else {
+        OptThemeSet(T_PANEL_BG, OptThemeGet(T_TAB_ITEM_ACTIVE));
     }
     Color panelBg = GetColor(OptThemeGet(T_TAB_ITEM_ACTIVE));
-    if (!active) {
-        OptThemeSet(T_PANEL_BG, OptThemeGet(T_TAB_ITEM_INACTIVE));
-    }
 
     Color panelBorder = GetColor(OptThemeGet(T_PANEL_BORDER));
     SetMouseCursor(MOUSE_CURSOR_DEFAULT);

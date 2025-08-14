@@ -229,7 +229,7 @@ static int DrawOptToolbar(DrawToolBarState *state) {
     };
 
     // BpRoundedPanel(bounds, 2, 0.125, true);
-    BpPanelBorder(bounds, 3);
+    BpPanelBorder(bounds, 2);
     OptToolsPencil(state, drawBounds);
     return -1;
 }
@@ -262,7 +262,7 @@ int DrawToolbar(DrawToolBarState *state) {
         toolsRect.height = state->bottom.y - toolsRect.y - DTBAR_MARGIN_TB * 2;
 
         // BpRoundedPanel(toolsRect, 2, 0.125, true);
-        BpPanelBorder(toolsRect, 3);
+        BpPanelBorder(toolsRect, 2);
 
         float yInc = state->toolbarPadding.y + DEFAULT_DT_BTN_SIZE;
         Rectangle btnRect = {

@@ -30,13 +30,13 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_SLIDER_TEXT_POST, HexColorVGray},
     {T_ISLIDER_BG, HexColorBlack},
     {T_ISLIDER_FG, HexColorWhite},
-    {T_PANEL_BG, HexColorTGrayDarker},
+    {T_PANEL_BG, HexColorStatus},
 
     {T_PANEL_SHADOW, HexColorBlack},
-    {T_PANEL_BORDER, HexColorVWhite},
+    {T_PANEL_BORDER, HexColorPanelBorder},
     {T_APP_BG, HexColorAppBG},
     {T_TAB_PANEL_BG, HexColorTGrayDarker},
-    {T_TAB_ITEM_ACTIVE, HexColorGrayLighter},
+    {T_TAB_ITEM_ACTIVE, HexColorTGrayDarker},
     {T_TAB_ITEM_INACTIVE, HexColorCPanel},
 
     {T_BTN_BG, HexColorGrayDarker},

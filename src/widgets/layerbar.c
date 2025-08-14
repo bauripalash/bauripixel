@@ -328,7 +328,7 @@ int LayerBarDraw(LayerBarState *lb) {
         Rectangle layersBounds = lb->layersRect;
 
         // BpRoundedPanel(bounds, 2, 0.125, true);
-        BpPanelBorder(bounds, 3);
+        BpPanelBorder(bounds, 2);
 
         /*
 if (BpDummyButton((Rectangle){toolBarBounds.x, toolBarBounds.y,
