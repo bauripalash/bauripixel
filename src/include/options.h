@@ -35,6 +35,9 @@ typedef enum OptThemeKey {
     T_BTN_SHADOW,
     T_BTN_BRDR_THICK,
 
+    T_DTOOL_ICON_FG,
+    T_DTOOL_ICON_BG,
+
     T_MAX_THEME_KEYS
 } OptThemeKey;
 

@@ -10,6 +10,18 @@
 #include <stdlib.h>
 #define OPTBAR_HEIGHT 40
 
+static const ToolInfo DrawingTools[] = {
+	{DT_PENCIL, ICON_PENCIL_BIG, ICON_PENCIL_BIG},
+	{DT_ERASER, ICON_RUBBER, ICON_RUBBER},
+	{DT_LINE, ICON_CROSSLINE, ICON_CROSSLINE},
+	{DT_CIRCLE, ICON_BREAKPOINT_OFF, ICON_BREAKPOINT_OFF},
+	{DT_CIRCLE_FILL, ICON_BREAKPOINT_ON, ICON_BREAKPOINT_ON},
+	{DT_RECT, ICON_PLAYER_STOP, ICON_PLAYER_STOP},
+	{DT_RECT_FILL, ICON_GRID_FILL, ICON_GRID_FILL},
+	{DT_BUCKET, ICON_COLOR_BUCKET, ICON_COLOR_BUCKET},
+	{DT_PAN, ICON_CURSOR_HAND, ICON_CURSOR_HAND}
+};
+
 static DToolInfo NewTool(DrawTool tool, const unsigned char *img, int size) {
 
     DToolInfo t = {.tool = tool, .img = LoadImageFromMemory(".png", img, size)};

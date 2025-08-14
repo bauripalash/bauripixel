@@ -1,5 +1,6 @@
 #ifndef DRAWTOOLS_H
 #define DRAWTOOLS_H
+#include "../external/raygui.h"
 
 // Draw Tools
 typedef enum DrawTool {
@@ -26,5 +27,11 @@ typedef enum BrushShape {
     // Custom Brush {NOT YET}
     BSP_CUSTOM,
 } BrushShape;
+
+typedef struct ToolInfo {
+    DrawTool tool;
+    GuiIconName iconTop;
+    GuiIconName iconBottom;
+} ToolInfo;
 
 #endif
