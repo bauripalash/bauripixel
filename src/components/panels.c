@@ -9,92 +9,121 @@
 
 #define SHADOW_SIZE 3
 
-void BpPanelNoBorderShadow(Rectangle bounds, int thick) {}
+static inline void DrawTLDot(Rectangle b, int tk, Color c) {
+    DrawRectangleRec(
+        (Rectangle){
+            b.x,
+            b.y,
+            tk,
+            tk,
+        },
+        c
+    ); // TL Dot
+}
+
+static inline void DrawTRDot(Rectangle b, int tk, Color c) {
+    DrawRectangleRec(
+        (Rectangle){
+            b.x + b.width - tk,
+            b.y,
+            tk,
+            tk,
+        },
+        c
+    ); // TR Dot
+}
+
+static inline void DrawBLDot(Rectangle b, int tk, Color c) {
+    DrawRectangleRec(
+        (Rectangle){b.x, b.y + b.height - tk, tk, tk},
+        c
+    ); // BL Dot
+}
+
+static inline void DrawBRDot(Rectangle b, int tk, Color c) {
+    DrawRectangleRec(
+        (Rectangle){b.x + b.width - tk, b.y + b.height - tk, tk, tk},
+        c
+    ); // BR Dot
+}
+
+void BpPanelNoBorderShadow(Rectangle bounds) {}
 
 void BpPanelBorderShadow(Rectangle bounds, int thick) {}
 
-void BpPanelNoBorder(Rectangle bounds, int thick) {}
+void BpPanelNoBorder(Rectangle bounds) {
+    DrawRectangleRec(bounds, GetColor(OptThemeGet(T_PANEL_BG)));
+}
 
 void BpPanelBorder(Rectangle bounds, int thick) {
     BpSimplePanel(bounds, thick, SideAll(), SideNone());
 }
 
+// Note: Only One Side Border Hiding Works for now
 void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow) {
     Color brdr = GetColor(OptThemeGet(T_PANEL_BORDER));
-    // ColorVWhite;//GetColor(0xfbbbadff) ;//ColorVWhite;
     Color bg = GetColor(OptThemeGet(T_PANEL_BG));
-    // GetColor(0x292831ff);//ColorGrayDarker;
-    bool locked = GuiIsLocked();
-    Vector2 mpos = GetMousePosition();
-    Rectangle rect = {
-        bounds.x - thick, bounds.y - thick, bounds.width + thick * 2,
-        bounds.height + thick * 2
-    };
 
-    if (border.t != -1) {
-        DrawRectangle(
-            rect.x + thick, rect.y, rect.width - thick * 2, thick, brdr
-        );
-    }
-
-    if (border.l != -1) {
-        DrawRectangle(
-            rect.x, rect.y + thick, thick, rect.height - thick * 2, brdr
-        );
-    }
-
-    if (border.r != -1) {
-        DrawRectangle(
-            rect.x + rect.width - thick, rect.y + thick, thick,
-            rect.height - thick * 2, brdr
-        );
-    }
-
-    if (border.b != -1) {
-        DrawRectangle(
-            rect.x + thick, rect.y + rect.height - thick,
-            rect.width - thick * 2, thick, brdr
-        );
-    }
-
-    DrawRectangleRec(bounds, bg);
-
-    DrawRectangleRec(
-        (Rectangle){
-            rect.x + thick,
-            rect.y + thick,
-            thick,
-            thick,
-        },
+    // Left + Right Borders
+    DrawRectangle(
+        bounds.x - thick, bounds.y, bounds.width + thick * 2, bounds.height,
         brdr
-    ); // TL Dot
-
-    DrawRectangleRec(
-        (Rectangle){
-            rect.x + rect.width - thick * 2,
-            rect.y + thick,
-            thick,
-            thick,
-        },
+    );
+    // Top + Bottom Borders;
+    DrawRectangle(
+        bounds.x, bounds.y - thick, bounds.width, bounds.height + thick * 2,
         brdr
-    ); // TR Dot
+    );
 
-    if (border.b != -1) {
+    // Left + Right Background
+    DrawRectangle(
+        bounds.x, bounds.y + thick, bounds.width, bounds.height - thick * 2, bg
+    );
+    // Top + Bottom Background
+    DrawRectangle(
+        bounds.x + thick, bounds.y, bounds.width - thick * 2, bounds.height, bg
+    );
 
-        DrawRectangleRec(
-            (Rectangle){rect.x + thick, rect.y + rect.height - thick * 2, thick,
-                        thick},
-            brdr
-        ); // BL Dot
+    if (!IsAllSide(border)) {
+        if (border.l == -1) {
+            DrawRectangle(
+                bounds.x - thick, bounds.y, bounds.width + thick, bounds.height,
+                bg
+            );
+            DrawTRDot(bounds, thick, brdr);
+            DrawBRDot(bounds, thick, brdr);
+        }
 
-        DrawRectangleRec(
-            (Rectangle){rect.x + rect.width - thick * 2,
-                        rect.y + rect.height - thick * 2, thick, thick},
-            brdr
-        ); // BR Dot
+        if (border.t == -1) {
+            DrawRectangle(
+                bounds.x, bounds.y - thick, bounds.width, bounds.height + thick,
+                bg
+            );
+            DrawBLDot(bounds, thick, brdr);
+            DrawBRDot(bounds, thick, brdr);
+        }
+
+        if (border.b == -1) {
+            DrawRectangle(
+                bounds.x, bounds.y, bounds.width, bounds.height + thick, bg
+            );
+            DrawTLDot(bounds, thick, brdr);
+            DrawTRDot(bounds, thick, brdr);
+        }
+
+        if (border.r == -1) {
+            DrawRectangle(
+                bounds.x, bounds.y, bounds.width + thick, bounds.height, bg
+            );
+
+            DrawTLDot(bounds, thick, brdr);
+            DrawBLDot(bounds, thick, brdr);
+        }
     }
 
-    // DrawRectangleLinesEx(bounds, 1, MAGENTA);
+    if (IsKeyDown(KEY_A)) {
+        DrawRectangleLinesEx(bounds, 1, MAGENTA);
+    }
 }
 
 void BpDummyPanel(

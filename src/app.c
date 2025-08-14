@@ -168,6 +168,7 @@ void LayoutDraw(Gui *gui) {
     // BpRoundedPanel(gui->curTab->tabPanel, 2, 0.0f, false);
     // BpSimplePanel(gui->curTab->tabPanel, 3, (Side){}, (Side){});
     BpPanelBorder(gui->curTab->tabPanel, 3);
+    // BpPanelNoBorder(gui->curTab->tabPanel);
 
     OptThemeSet(T_PANEL_BG, ogPanel);
     TabItemsDraw(gui);
@@ -199,7 +200,8 @@ void LayoutDraw(Gui *gui) {
     // BpDummyFlatPanel((Rectangle){200,100,40,40}, 2, (Vector4){0,0});
     // BpSimpleButton((Rectangle){200, 100, 100, 50}, 3);
 
-    // BpSimplePanel((Rectangle){200, 300, 200, 200}, 3, (Side){}, (Side){0});
+    // BpSimplePanel((Rectangle){200, 300, 200, 300}, 8, (Side){}, SideNone());
+    //
 
     // DrawText(TextFormat("F %d", frameCounter), 500, 500, 16, RED);
 
