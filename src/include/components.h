@@ -22,6 +22,11 @@ typedef struct DToolInfo {
     Texture txt;
 } DToolInfo;
 
+DrawTool BpDToolButton(
+    Rectangle bounds, DrawTool active, bool *showOther, int num,
+    const ToolInfo *tools
+);
+
 DrawTool BpToolButton(
     Rectangle bounds, DrawTool active, bool *showOther, int num,
     const DToolInfo *tools

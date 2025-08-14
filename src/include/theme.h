@@ -47,8 +47,8 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_BTN_SHADOW, HexColorBlack},
     {T_BTN_BRDR_THICK, 2},
 
-	{T_DTOOL_ICON_BG, HexColorVGreen},
-	{T_DTOOL_ICON_FG, HexColorVWhite},
+    {T_DTOOL_ICON_BG, HexColorVGreen},
+    {T_DTOOL_ICON_FG, HexColorVWhite},
 };
 
 static const OptThemeProp lightThemeOpts[] = {

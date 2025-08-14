@@ -6,11 +6,14 @@
 #include "../include/drawtools.h"
 #include "../include/options.h"
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define ICON_WIDTH 32
 
 bool BpSimpleButton(Rectangle bounds, int thick) {
-    Color brdr = ColorVWhite;
+    Color brdr = ColorTPinkLight;
+    // Fade(ColorVWhite, 0.5);
+    // GetColor(HexColorPanelBorder);//ColorVWhite;
     Color bg = GetColor(0x292831ff);
     Color shadow = GetColor(0x270022ff);
     bool locked = GuiIsLocked();
@@ -111,55 +114,6 @@ bool BpSimpleButton(Rectangle bounds, int thick) {
             shadow
         ); // BR Dot Shadow
     }
-    // Shadows
-
-    /*
-    DrawRectangleRec(
-    (Rectangle){bounds.x, bounds.y - thick, bounds.width, thick},
-    ColorBlack
-); // Top Border Shadow
-
-DrawRectangleRec(
-    (Rectangle){bounds.x - thick, bounds.y, thick, bounds.height},
-    ColorBlack
-); // Left Border Shadow
-DrawRectangleRec(
-    (Rectangle){bounds.x + bounds.width, bounds.y, thick, bounds.height},
-    ColorBlack
-); // Right Border Shadow
-DrawRectangleRec(
-    (Rectangle){bounds.x, bounds.y + bounds.height, bounds.width, thick},
-    ColorBlack
-); // Bottom Border Shadow
-DrawRectangleRec(
-    (Rectangle){
-        bounds.x,
-        bounds.y,
-        thick,
-        thick,
-    },
-    ColorBlack
-); // TL Dot Shadow
-DrawRectangleRec(
-    (Rectangle){
-        bounds.x + bounds.width - thick,
-        bounds.y,
-        thick,
-        thick,
-    },
-    ColorBlack
-); // TR Dot Shadow
-DrawRectangleRec(
-    (Rectangle){bounds.x, bounds.y + bounds.height - thick, thick, thick},
-    ColorBlack
-); // BL Dot Shadow
-
-DrawRectangleRec(
-    (Rectangle){bounds.x + bounds.width - thick,
-                bounds.y + bounds.height - thick, thick, thick},
-    ColorBlack
-); // BR Dot Shadow
-    */
 
     return false;
 }
@@ -288,6 +242,46 @@ DrawTool BpToolButton(
         !CheckCollisionPointRec(GetMousePosition(), bounds)) {
         *showOther = false;
     }
+
+    return clicked;
+}
+
+int GetActiveToolIndex(const ToolInfo *tools, DrawTool active, int num) {
+    for (int i = 0; i < num; i++) {
+        if (tools[i].tool == active) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+DrawTool BpDToolButton(
+    Rectangle bounds, DrawTool active, bool *showOther, int num,
+    const ToolInfo *tools
+) {
+    DrawTool clicked = active;
+
+    int activeIndex = GetActiveToolIndex(tools, active, num);
+    Color iconBg = GetColor(OptThemeGet(T_DTOOL_ICON_BG));
+    Color iconFg = GetColor(OptThemeGet(T_DTOOL_ICON_FG));
+
+    Rectangle btnRect = {bounds.x, bounds.y, bounds.width, bounds.height};
+    Vector2 iconCenter = {
+        ((btnRect.width - ICON_WIDTH) / 2.0f),
+        ((btnRect.height - ICON_WIDTH) / 2.0f)
+    };
+    ToolInfo first = tools[0];
+
+    if (activeIndex >= 0) {
+        ToolInfo tool = tools[activeIndex];
+    }
+
+    BpSimpleButton(btnRect, 3);
+    GuiDrawIcon(
+        first.iconBottom, btnRect.x + iconCenter.x, btnRect.y + iconCenter.y, 2,
+        iconBg
+    );
 
     return clicked;
 }
