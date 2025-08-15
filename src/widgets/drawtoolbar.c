@@ -3,8 +3,6 @@
 #include "../external/raylib.h"
 #include "../include/components.h"
 #include "../include/drawtools.h"
-#include "../include/exported/drawtoolicons.h"
-#include "../include/utils.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -46,21 +44,6 @@ static const int panTCount = 1;
 static const ToolInfo panTool[] = {
     {DT_PAN, ICON_CURSOR_HAND, ICON_CURSOR_HAND},
 };
-
-static DToolInfo NewTool(DrawTool tool, const unsigned char *img, int size) {
-
-    DToolInfo t = {.tool = tool, .img = LoadImageFromMemory(".png", img, size)};
-    t.txt = LoadTextureFromImage(t.img);
-    return t;
-}
-
-static void FreeTool(DToolInfo tool) {
-    if (tool.img.data != NULL) {
-        UnloadImage(tool.img);
-    }
-
-    UnloadTexture(tool.txt);
-}
 
 DrawToolBarState NewDrawToolBar() {
     DrawToolBarState dtb = {0};
@@ -202,10 +185,7 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
 
         Rectangle rect = {px, py, bounds.height, bounds.height};
 
-        DToolInfo shapes[] = {
-            state->tools.rectFillTool, state->tools.circleFillTool
-        };
-        BpBrushShapeButton(rect, &state->brushShape, shapes);
+        BpBrushShapeButton(rect, &state->brushShape, NULL);
 
         rect.x += rect.width + 10;
         int brushTextSize = TextLength(TextFormat("%dpx", state->brushSize)) *

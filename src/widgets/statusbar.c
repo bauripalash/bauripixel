@@ -33,32 +33,17 @@ void SetStatusBarPosition(StatusBarState *state, float x, float height) {
     state->prop.bounds.height = height;
     updateBounds(state);
 }
-static void drawBounds(Rectangle bounds) {
-    DrawRectangleRounded(bounds, 0.125, 0, ColorFDGrayLighter);
-    DrawRectangleRoundedLinesEx(bounds, 0.125, 0, 2, ColorBlack);
-
-    DrawRectangleRoundedLinesEx(
-        (Rectangle){
-            bounds.x + 2,
-            bounds.y + 2,
-            bounds.width - 4,
-            bounds.height - 4,
-        },
-        0.125, 0, 2, ColorGrayLightest
-    );
-}
+static void drawBounds(Rectangle bounds) { BpPanelBorder(bounds, 2); }
 
 bool StatusBar(StatusBarState *state) {
     if (state->prop.active) {
 
         updateBounds(state);
 
-        // BpRoundedPanel(state->prop.bounds, 2, 0.125, false);
-        // BpSimplePanel(state->prop.bounds, 2, SideAll(), SideNone());
         BpPanelBorder(state->prop.bounds, 2);
         Font font = GuiGetFont();
         float fontSize = font.baseSize;
-        Color textClr = ColorGrayLightest;
+        Color textClr = ColorVWhite;
         CanvasState *canvas = state->canvas;
         Rectangle rect = {
             state->prop.bounds.x + STATUSBAR_PADDING, state->prop.bounds.y, 32,

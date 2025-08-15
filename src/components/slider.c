@@ -126,7 +126,7 @@ bool BpInputSliderInt(
     }
 
     DrawRectangleRounded(bounds, 0.2, 0, Fade(inputBg, 0.8));
-    DrawRectangleRoundedLinesEx(bounds, 0.2, 0, 0, ColorGrayLightest);
+    DrawRectangleRoundedLinesEx(bounds, 0.2, 0, 0, ColorTGrayDarker);
 
     GuiValueBox(boxRect, NULL, value, min, max, *clicked);
 

@@ -13,20 +13,6 @@
 #define DTBAR_MARGIN_R      DTBAR_MARGIN_L
 #define DTBAR_MARGIN_TB     10
 
-typedef struct ToolBtnInfo {
-
-    DToolInfo pencilTool;
-    DToolInfo eraserTool;
-    DToolInfo lineTool;
-    DToolInfo circleTool;
-    DToolInfo circleFillTool;
-    DToolInfo rectTool;
-    DToolInfo rectFillTool;
-    DToolInfo bucketTool;
-    DToolInfo panTool;
-
-} ToolBtnInfo;
-
 typedef struct {
     WidgetProp prop;
     Vector2 anchor;
@@ -47,8 +33,6 @@ typedef struct {
     BrushShape brushShape;
 
     bool brushSizeEdit;
-
-    ToolBtnInfo tools;
 
 } DrawToolBarState;
 

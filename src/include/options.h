@@ -35,6 +35,10 @@ typedef enum OptThemeKey {
     T_BTN_SHADOW,
     T_BTN_BRDR_THICK,
 
+    T_TOGGLE_BG,
+    T_TOGGLE_BRDR,
+    T_TOGGLE_CLKD_BRDR,
+
     T_DTOOL_ICON_FG,
     T_DTOOL_ICON_BG,
 

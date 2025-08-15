@@ -44,7 +44,8 @@ static void updateBounds(MenuBarState *state) {
 
 MenuAction drawFileMenu(MenuBarState *state, Rectangle bounds) {
 
-    BpRoundedFlatPanel(bounds, 0.125);
+    // BpRoundedFlatPanel(bounds, 0.125);
+    BpPanelBorder(bounds, 2);
 
     float yInc = state->font.baseSize + ENTRY_MARGIN;
 
@@ -71,7 +72,7 @@ MenuAction drawFileMenu(MenuBarState *state, Rectangle bounds) {
 
 MenuAction drawHelpMenu(MenuBarState *state, Rectangle bounds) {
 
-    BpRoundedFlatPanel(bounds, 0.125);
+    BpPanelBorder(bounds, 2);
 
     return MACTION_COUNT;
 }
@@ -101,19 +102,7 @@ bool isMenuOpen(MenuBarState *state) {
 
 MenuAction MenuBar(MenuBarState *state) {
     updateBounds(state);
-
-    int ogLabelN = GuiGetStyle(LABEL, TEXT_COLOR_NORMAL);
-    int ogLabelF = GuiGetStyle(LABEL, TEXT_COLOR_FOCUSED);
-    int ogLabelP = GuiGetStyle(LABEL, TEXT_COLOR_PRESSED);
-    int ogLabelD = GuiGetStyle(LABEL, TEXT_COLOR_DISABLED);
     Vector2 mpos = GetMousePosition();
-
-    Color tClr = ColorWhite;
-
-    GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ColorToInt(ColorWhite));
-    GuiSetStyle(LABEL, TEXT_COLOR_FOCUSED, ColorToInt(ColorGrayLightest));
-    GuiSetStyle(LABEL, TEXT_COLOR_PRESSED, ColorToInt(ColorYellow));
-    GuiSetStyle(LABEL, TEXT_COLOR_DISABLED, ColorToInt(ColorGrayLightest));
 
     Rectangle bounds = state->prop.bounds;
     if (CheckCollisionPointRec(mpos, bounds)) {
@@ -122,8 +111,6 @@ MenuAction MenuBar(MenuBarState *state) {
 
     MenuAction resultAction = MACTION_COUNT;
 
-    // BpRoundedPanel(bounds, 2, 0.125, false);
-    // BpSimplePanel(bounds, 2, (Side){}, (Side){});
     Font font = state->font;
     int fontSize = font.baseSize;
     Rectangle rect = {
@@ -170,11 +157,6 @@ MenuAction MenuBar(MenuBarState *state) {
 
         posX += btnRect.width + MENUBAR_PADDING * 2;
     }
-
-    GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, ogLabelN);
-    GuiSetStyle(LABEL, TEXT_COLOR_FOCUSED, ogLabelF);
-    GuiSetStyle(LABEL, TEXT_COLOR_PRESSED, ogLabelP);
-    GuiSetStyle(LABEL, TEXT_COLOR_DISABLED, ogLabelD);
 
     state->menuOpen = isMenuOpen(state);
 

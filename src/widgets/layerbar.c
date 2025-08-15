@@ -112,11 +112,6 @@ bool LayerItemDraw(
     bool locked = GuiIsLocked();
     int fontSize = f.baseSize;
 
-    Color bg = ColorGrayDarker;
-    Color normalBrdr = ColorGrayLightest;
-    Color hoverBrdr = ColorGrayLighter;
-    Color activeBrdr = ColorWhite;
-    Color brdr = normalBrdr;
     Vector2 mpos = GetMousePosition();
 
     Rectangle bounds = {pos.x, pos.y, lb->layersRect.width, LAYER_ITEM_HEIGHT};
@@ -124,22 +119,16 @@ bool LayerItemDraw(
     bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
     bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
-    if (hover) {
-        brdr = hoverBrdr;
-    }
-
-    if (isCur) {
-        brdr = activeBrdr;
-    }
-
     Rectangle layerToolBounds = {
         bounds.x + 5, bounds.y, bounds.height * 3, bounds.height
     };
     Rectangle nameBounds = {
         bounds.x, bounds.y, LAYER_NAME_WIDTH, bounds.height
     };
-    BpDummyFlatPanel(bounds, 2, (Vector4){0});
-    BpDummyFlatPanel(nameBounds, 2, (Vector4){});
+    // BpDummyFlatPanel(bounds, 2, (Vector4){0});
+    // BpDummyFlatPanel(nameBounds, 2, (Vector4){});
+    BpPanelBorder(bounds, 2);
+    BpPanelBorder(bounds, 2);
 
     float btnSize = 25;
 
@@ -164,44 +153,6 @@ bool LayerItemDraw(
                     nameBounds.height},
         layer->name
     );
-    // GuiLabelButton(nameBounds, layer->name);
-
-    // DrawRectangleRounded(bounds, 0.125, 0, bg);
-    // DrawRectangleRoundedLinesEx(rect, 0.125, 0, 2, brdr);
-
-    /*
-Rectangle previewRect = {
-    rect.x + 5, rect.y + 5, rect.height - 10, rect.height - 10
-};
-
-Rectangle prevSrc = {
-    0,
-    0,
-    layer->img.width,
-    layer->img.height,
-};
-
-Vector2 origin = {0};
-
-DrawTexturePro(*lb->previewBg, prevSrc, previewRect, origin, 0, ColorWhite);
-DrawTexturePro(layer->txt, prevSrc, previewRect, origin, 0, ColorWhite);
-
-Vector2 textpos = {
-    rect.x + 5 + previewRect.width + 5,
-    rect.y + (rect.height / 2.0f) - f.baseSize / 2.0f
-};
-
-GuiDrawIcon(
-    layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, textpos.x, textpos.y, 1,
-    ColorWhite
-);
-textpos.x += 16;
-
-DrawTextEx(
-    f, TextFormat("Layer #%d", layer->index), textpos, f.baseSize, 0,
-    ColorWhite
-);
-    */
 
     return clicked;
 }
@@ -345,10 +296,10 @@ if (BpDummyButton((Rectangle){toolBarBounds.x, toolBarBounds.y,
             layersBounds.x, layersBounds.y, layersBounds.width, layersBounds.y
         };
 
-        BpDummyFlatPanel(
+        BpPanelBorder(
             (Rectangle){layersBounds.x - 1, layersBounds.y - 1,
                         layersBounds.width + 4, layersBounds.height + 4},
-            2, (Vector4){0}
+            2
         );
 
         float px = layersBounds.x;

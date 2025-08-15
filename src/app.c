@@ -6,7 +6,6 @@
 #include "include/options.h"
 #include "include/tabs.h"
 #include "include/theme.h"
-#include "include/utils.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
 #include <stdbool.h>
@@ -138,12 +137,10 @@ void TabItemsDraw(Gui *gui) {
     int tabCount = gui->tabList->count;
     for (int t = 0; t < tabCount; t++) {
         TabObj *tab = gui->tabList->tabs[t];
-        // SetupTabData(tab, &gui->state->menubar, &gui->state->statusbar);
         int result = BpTabItem(
             tab->tabPanel, TextFormat("Untitled %d", t), tab->index, 150,
             gui->curTab->index == tab->index
         );
-
         if (result == 0) {
             TraceLog(LOG_ERROR, "Open Tab %d", tab->index);
             gui->curTab = tab;
@@ -162,15 +159,11 @@ void LayoutDraw(Gui *gui) {
     if (menuOpen || sizeSliderHover) {
         GuiLock();
     }
-    int ogPanel = OptThemeGet(T_PANEL_BG);
-    OptThemeSet(T_PANEL_BG, OptThemeGet(T_TAB_PANEL_BG));
 
-    // BpRoundedPanel(gui->curTab->tabPanel, 2, 0.0f, false);
-    // BpSimplePanel(gui->curTab->tabPanel, 3, (Side){}, (Side){});
+    int ogPanel = OptThemeGetSet(T_PANEL_BG, OptThemeGet(T_TAB_PANEL_BG));
     BpPanelBorder(gui->curTab->tabPanel, 3);
-    // BpPanelNoBorder(gui->curTab->tabPanel);
-
     OptThemeSet(T_PANEL_BG, ogPanel);
+
     TabItemsDraw(gui);
 
     CanvasDraw(&gui->curTab->state->cvs);
@@ -196,17 +189,5 @@ void LayoutDraw(Gui *gui) {
         GuiLock();
     }
 
-    // BpDummyToggleButton((Rectangle){200, 100, 40, 40}, false);
-    // BpDummyFlatPanel((Rectangle){200,100,40,40}, 2, (Vector4){0,0});
-    // BpSimpleButton((Rectangle){200, 100, 100, 50}, 3);
-
-    // BpSimplePanel((Rectangle){200, 300, 200, 300}, 8, (Side){}, SideNone());
-    //
-
-    // BpSimplePanel((Rectangle){200, 200, 500,500}, 3, SideAll(), SideNone());
-    // BpToggleButton((Rectangle){300, 300, 50,50}, 2, true);
-
-    // DrawText(TextFormat("F %d", frameCounter), 500, 500, 16, RED);
-
-    // DrawFPS(200, 50);
+    DrawFPS(200, 50);
 }
