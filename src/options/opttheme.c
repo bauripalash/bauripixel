@@ -14,3 +14,9 @@ int OptThemeGet(OptThemeKey key) {
 
     return -9998;
 }
+
+int OptThemeGetSet(OptThemeKey key, int value) {
+    int og = OptThemeGet(key);
+    OptThemeSet(key, value);
+    return og;
+}

@@ -32,6 +32,8 @@ DrawTool BpToolButton(
     const DToolInfo *tools
 );
 
+bool BpToggleButton(Rectangle bounds, int thick, bool active);
+
 bool BpDummyToggleButton(Rectangle bounds, bool active);
 bool BpDummyFlatButton(Rectangle bounds);
 bool BpSimpleButton(Rectangle bounds, int thick);

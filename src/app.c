@@ -203,6 +203,9 @@ void LayoutDraw(Gui *gui) {
     // BpSimplePanel((Rectangle){200, 300, 200, 300}, 8, (Side){}, SideNone());
     //
 
+    // BpSimplePanel((Rectangle){200, 200, 500,500}, 3, SideAll(), SideNone());
+    // BpToggleButton((Rectangle){300, 300, 50,50}, 2, true);
+
     // DrawText(TextFormat("F %d", frameCounter), 500, 500, 16, RED);
 
     // DrawFPS(200, 50);

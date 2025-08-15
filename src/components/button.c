@@ -10,10 +10,61 @@
 
 #define ICON_WIDTH 32
 
+bool BpToggleButton(Rectangle bounds, int thick, bool active) {
+    Color brdr = ColorTGrayLightest;
+    Color bg = ColorTGrayDarker;
+    // ColorTGrayLightest;
+    Color shadow = ColorNGray;
+
+    bool locked = GuiIsLocked();
+    Vector2 mpos = GetMousePosition();
+    bool hover = !locked && CheckCollisionPointRec(mpos, bounds);
+    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    if (clicked || active) {
+        brdr = ColorVGreen;
+    }
+    Rectangle innerRect = {
+        bounds.x + thick * 2,
+        bounds.y + thick * 2,
+        bounds.width - thick * 4,
+        bounds.height - thick * 4,
+    };
+
+    int ogBrdr = OptThemeGetSet(T_PANEL_BORDER, ColorToInt(shadow));
+    int ogBg = OptThemeGetSet(T_PANEL_BG, OptThemeGet(T_TAB_PANEL_BG));
+    if (clicked || active) {
+        innerRect.x -= thick;
+        innerRect.y -= thick;
+        innerRect.width += thick * 2;
+        innerRect.height += thick * 2;
+    }
+
+    Rectangle safeRect = {
+        innerRect.x + thick, innerRect.y + thick, innerRect.width - thick * 2,
+        innerRect.height - thick * 2
+    };
+
+    Vector2 iconCenter = {
+        ((safeRect.width - ICON_WIDTH) / 2.0f),
+        ((safeRect.height - ICON_WIDTH) / 2.0f)
+    };
+
+    OptThemeGetSet(T_PANEL_BORDER, ColorToInt(brdr));
+
+    BpSimplePanel(innerRect, thick, SideAll(), SideNone());
+    DrawRectangleLinesEx(safeRect, 3, Fade(shadow, 0.2));
+
+    OptThemeSet(T_PANEL_BORDER, ogBrdr);
+    OptThemeSet(T_PANEL_BG, ogBg);
+
+    // GuiDrawIcon(ICON_PENCIL_BIG, safeRect.x + iconCenter.x, safeRect.y +
+    // iconCenter.y, 2, ColorVGreen);
+
+    return clicked;
+}
+
 bool BpSimpleButton(Rectangle bounds, int thick) {
     Color brdr = ColorTPinkLight;
-    // Fade(ColorVWhite, 0.5);
-    // GetColor(HexColorPanelBorder);//ColorVWhite;
     Color bg = GetColor(0x292831ff);
     Color shadow = GetColor(0x270022ff);
     bool locked = GuiIsLocked();
@@ -261,6 +312,7 @@ DrawTool BpDToolButton(
     const ToolInfo *tools
 ) {
     DrawTool clicked = active;
+    int thick = 3;
 
     int activeIndex = GetActiveToolIndex(tools, active, num);
     Color iconBg = GetColor(OptThemeGet(T_DTOOL_ICON_BG));
@@ -274,14 +326,76 @@ DrawTool BpDToolButton(
     ToolInfo first = tools[0];
 
     if (activeIndex >= 0) {
-        ToolInfo tool = tools[activeIndex];
+        first = tools[activeIndex];
     }
 
-    BpSimpleButton(btnRect, 3);
+    if (BpToggleButton(btnRect, 3, first.tool == active)) {
+
+        if (activeIndex == -1)
+            clicked = first.tool;
+        *showOther = false;
+    }
+
     GuiDrawIcon(
         first.iconBottom, btnRect.x + iconCenter.x, btnRect.y + iconCenter.y, 2,
         iconBg
     );
+
+    if (!GuiIsLocked() && CheckCollisionPointRec(GetMousePosition(), btnRect) &&
+        IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        *showOther = !*showOther;
+    }
+
+    if (num > 1) {
+        btnRect.x += (btnRect.width + 10);
+        int indexToSkip = (activeIndex >= 0) ? activeIndex : 0;
+        int otherNum = num - 1;
+        int list[otherNum];
+        int listIndex = 0;
+        Rectangle otherBtnRect = {
+            btnRect.x,
+            btnRect.y,
+            btnRect.width + thick * 2,
+            btnRect.height + thick * 2,
+        };
+
+        otherBtnRect.y += ((btnRect.height - otherBtnRect.height) / 2.0f);
+
+        iconCenter = (Vector2){((otherBtnRect.width - ICON_WIDTH) / 2.0f),
+                               ((otherBtnRect.height - ICON_WIDTH) / 2.0f)};
+
+        for (int n = 0; n < num; n++) {
+            if (n == indexToSkip) {
+                continue;
+            }
+
+            list[listIndex++] = n;
+        }
+
+        if (*showOther) {
+            for (int i = 0; i < otherNum; i++) {
+                otherBtnRect.x += (i * otherBtnRect.width) + 10 * i;
+                ToolInfo tool = tools[list[i]];
+
+                if (BpToggleButton(otherBtnRect, thick, false)) {
+                    clicked = tool.tool;
+                    *showOther = false;
+                }
+
+                GuiDrawIcon(
+                    tool.iconBottom, otherBtnRect.x + iconCenter.x,
+                    otherBtnRect.y + iconCenter.y, 2, iconBg
+                );
+            }
+        }
+    }
+
+    if (!GuiIsLocked() &&
+        (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) ||
+         IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) &&
+        !CheckCollisionPointRec(GetMousePosition(), bounds)) {
+        *showOther = false;
+    }
 
     return clicked;
 }

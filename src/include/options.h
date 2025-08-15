@@ -48,6 +48,7 @@ typedef struct OptThemeProp {
 
 #define ValidOptTheme(v) (v == T_INVALID_RETURN)
 void OptThemeSet(OptThemeKey key, int value);
+int OptThemeGetSet(OptThemeKey key, int value);
 int OptThemeGet(OptThemeKey key);
 
 #endif
