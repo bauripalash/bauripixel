@@ -1,6 +1,7 @@
 #include "include/tabs.h"
 #include "external/raylib.h"
 #include "external/stb/stb_ds.h"
+#include "include/colors.h"
 #include "include/defaults.h"
 #include "include/layers.h"
 #include "include/widgets/canvas.h"
@@ -17,6 +18,17 @@
 #define TAB_PANEL_MARGIN  8
 #define TAB_HEADER_WIDTH  80
 #define TAB_HEADER_HEIGHT 30
+
+#define PALETTE_COUNT     32
+// AxulArt 32 color Palette Palette by AxulArt
+// https://lospec.com/palette-list/axulart-32-color-palette
+static const int ColorPaletteDefault[32] = {
+    0x000000, 0xfcfcfc, 0xc4c7ee, 0x9a8fe0, 0x635d96, 0x292f65, 0x1b1d34,
+    0xffe3ae, 0xcdbbab, 0xa6858f, 0xcf5d8b, 0x964968, 0xffb482, 0xdd867d,
+    0xb2696f, 0xf6c65e, 0xe49057, 0xc46833, 0xb0d07e, 0x66aa5d, 0x52b5ab,
+    0x2a8379, 0x1c5659, 0x7be1f6, 0x589ffc, 0x5069e4, 0x2e44ae, 0x8056d4,
+    0x5a3b96, 0xffbae1, 0xe687c5, 0xa759b9,
+};
 
 TabStateObj *NewTabState(Rectangle panel, int w, int h) {
     TabStateObj *ts = malloc(sizeof(TabStateObj));
@@ -66,6 +78,10 @@ void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         (Vector2){tab->state->cb.prop.bounds.x, tab->state->lb.p.bounds.y}
     );
     CenterAlignCanvas(&tab->state->cvs);
+
+    for (int i = 0; i < PALETTE_COUNT; i++) {
+        AddColorToTab(tab, GetColor(BpRGB2SolidRGBA(ColorPaletteDefault[i])));
+    }
 
     tab->setupDone = true;
 }

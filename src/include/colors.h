@@ -1,9 +1,14 @@
 #ifndef COLORS_H
 #define COLORS_H
 
+// Convert RGB value to Color with Alpha of 0xff
 #define BpSolidColor(r, g, b) (Color){r, g, b, 0xff}
 
-#define BpHexColor(x)         (int)0x##x##ff
+// Convert RGB Color to RGBA Color with Alpha of 0xff
+#define BpHexColor(x)           (int)0x##x##ff
+
+#define BpRGB2SolidRGBA(rgb)    (((rgb) << 8) | 0xFFu)
+#define BpRGB2AlphaRGBA(rgb, a) (((rgb) << 8) | a)
 
 // Velstad-4-by-mainzero Palette by Arkzero87
 // https://lospec.com/palette-list/velstad-4-by-mainzero

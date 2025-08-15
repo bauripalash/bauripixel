@@ -33,7 +33,7 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_PANEL_BG, HexColorStatus},
 
     {T_PANEL_SHADOW, HexColorBlack},
-    {T_PANEL_BORDER, HexColorPanelBorder},
+    {T_PANEL_BORDER, HexColorBlack},
     {T_APP_BG, HexColorAppBG},
     {T_TAB_PANEL_BG, HexColorTGrayDarker},
     {T_TAB_ITEM_ACTIVE, HexColorTGrayDarker},

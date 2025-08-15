@@ -47,11 +47,6 @@ int RunApp() {
                                          // TD : Handle Error;
     initTab->index = 0;
 
-    AddColorToTab(initTab, ColorVGray);
-    AddColorToTab(initTab, ColorVGrayLight);
-    AddColorToTab(initTab, ColorVGreen);
-    AddColorToTab(initTab, ColorVWhite);
-
     AddToTabList(gui->tabList, initTab);
     gui->curTab = gui->tabList->tabs[0];
 
