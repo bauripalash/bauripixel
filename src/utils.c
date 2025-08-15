@@ -1,6 +1,8 @@
 #include "include/utils.h"
+#include "external/raygui.h"
 #include "external/raylib.h"
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 int ClampInt(int val, int min, int max) {

@@ -1,8 +1,12 @@
+
+
 #include "../include/widgets/drawtoolbar.h"
-#include "../external/raygui.h"
-#include "../external/raylib.h"
+
 #include "../include/components.h"
 #include "../include/drawtools.h"
+
+#include "../external/raygui.h"
+#include "../external/raylib.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
