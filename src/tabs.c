@@ -22,7 +22,7 @@
 #define PALETTE_COUNT     32
 // AxulArt 32 color Palette Palette by AxulArt
 // https://lospec.com/palette-list/axulart-32-color-palette
-static const int ColorPaletteDefault[32] = {
+static const int ColorPaletteDefault[PALETTE_COUNT] = {
     0x000000, 0xfcfcfc, 0xc4c7ee, 0x9a8fe0, 0x635d96, 0x292f65, 0x1b1d34,
     0xffe3ae, 0xcdbbab, 0xa6858f, 0xcf5d8b, 0x964968, 0xffb482, 0xdd867d,
     0xb2696f, 0xf6c65e, 0xe49057, 0xc46833, 0xb0d07e, 0x66aa5d, 0x52b5ab,
