@@ -28,10 +28,4 @@ typedef enum BrushShape {
     BSP_CUSTOM,
 } BrushShape;
 
-typedef struct ToolInfo {
-    DrawTool tool;
-    GuiIconName iconTop;
-    GuiIconName iconBottom;
-} ToolInfo;
-
 #endif

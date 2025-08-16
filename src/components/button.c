@@ -178,9 +178,9 @@ void BpBrushShapeButton(
     }
 }
 
-int GetActiveToolIndex(const ToolInfo *tools, DrawTool active, int num) {
+int GetActiveToolIndex(const DrawTool *tools, DrawTool active, int num) {
     for (int i = 0; i < num; i++) {
-        if (tools[i].tool == active) {
+        if (tools[i] == active) {
             return i;
         }
     }
@@ -188,14 +188,19 @@ int GetActiveToolIndex(const ToolInfo *tools, DrawTool active, int num) {
     return -1;
 }
 
-DrawTool BpDToolButton(
-    Rectangle bounds, DrawTool active, bool *showOther, int num,
-    const ToolInfo *tools
+float GetDToolIconPos(DrawTool tool, int size) {
+    int index = (int)tool;
+    return index * size;
+}
+
+bool BpDToolButton(
+    Rectangle bounds, DrawTool *active, bool *showOther, int num,
+    const DrawTool *tools, Texture2D *icons
 ) {
-    DrawTool clicked = active;
+	TraceLog(LOG_ERROR, "%f | Current Tool -> %d" , GetTime(), *active);
     int thick = 2;
 
-    int activeIndex = GetActiveToolIndex(tools, active, num);
+    int activeIndex = GetActiveToolIndex(tools, *active, num);
     Color iconBg = GetColor(OptThemeGet(T_DTOOL_ICON_BG));
     Color iconFg = GetColor(OptThemeGet(T_DTOOL_ICON_FG));
 
@@ -204,40 +209,31 @@ DrawTool BpDToolButton(
         ((btnRect.width - ICON_WIDTH) / 2.0f),
         ((btnRect.height - ICON_WIDTH) / 2.0f)
     };
-    ToolInfo first = tools[0];
+    DrawTool first = tools[0];
 
     if (activeIndex >= 0) {
         first = tools[activeIndex];
     }
 
-    if (BpToggleButton(btnRect, thick, first.tool == active)) {
-
-        if (activeIndex == -1)
-            clicked = first.tool;
+    if (BpToggleButton(btnRect, thick, first == *active) && *active != first) {
+		TraceLog(LOG_ERROR, "%f [F] Selected -> %d", GetTime(), first);
+        *active = first;
         *showOther = false;
     }
-
-    GuiDrawIcon(
-        first.iconBottom, btnRect.x + iconCenter.x, btnRect.y + iconCenter.y, 2,
-        iconBg
-    );
-
-    GuiDrawIcon(
-        first.iconTop, btnRect.x + iconCenter.x, btnRect.y + iconCenter.y, 2,
-        iconFg
+    DrawTexturePro(
+        *icons, (Rectangle){GetDToolIconPos(first, 16), 0, 16, 16},
+        (Rectangle){btnRect.x + iconCenter.x, btnRect.y + iconCenter.y, 32, 32},
+        (Vector2){0, 0}, 0, ColorWhite
     );
 
     if (!GuiIsLocked() && CheckCollisionPointRec(GetMousePosition(), btnRect) &&
-        IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-        *showOther = !*showOther;
+        IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && num > 1) {
+        *showOther = true;
     }
 
     if (num > 1) {
         btnRect.x += (btnRect.width + 10);
-        int indexToSkip = (activeIndex >= 0) ? activeIndex : 0;
-        int otherNum = num - 1;
-        int list[otherNum];
-        int listIndex = 0;
+        int indexToSkip = (activeIndex != -1) ? activeIndex : 0;
         Rectangle otherBtnRect = {
             btnRect.x,
             btnRect.y,
@@ -250,31 +246,33 @@ DrawTool BpDToolButton(
         iconCenter = (Vector2){((otherBtnRect.width - ICON_WIDTH) / 2.0f),
                                ((otherBtnRect.height - ICON_WIDTH) / 2.0f)};
 
-        for (int n = 0; n < num; n++) {
-            if (n == indexToSkip) {
-                continue;
-            }
-
-            list[listIndex++] = n;
-        }
+      
 
         if (*showOther) {
-            for (int i = 0; i < otherNum; i++) {
-                otherBtnRect.x += (i * otherBtnRect.width) + 10 * i;
-                ToolInfo tool = tools[list[i]];
+			int idx = 0;
+            for (int i = 0; i < (num); i++) {
+				if (i == indexToSkip) {
+					continue;
+				}
 
-                if (BpToggleButton(otherBtnRect, thick, false)) {
-                    clicked = tool.tool;
+                otherBtnRect.x += (idx * otherBtnRect.width) + 10 * idx;
+                DrawTool tool = tools[i];
+
+                if (BpToggleButton(otherBtnRect, thick, false) && *active != tool) {
+
+					TraceLog(LOG_ERROR, "%f [O] Selected -> %d", GetTime(), tool);
+                    *active = tool;
                     *showOther = false;
                 }
-                GuiDrawIcon(
-                    tool.iconBottom, otherBtnRect.x + iconCenter.x,
-                    otherBtnRect.y + iconCenter.y, 2, iconBg
+
+                DrawTexturePro(
+                    *icons, (Rectangle){GetDToolIconPos(tool, 16), 0, 16, 16},
+                    (Rectangle){otherBtnRect.x + iconCenter.x,
+                                otherBtnRect.y + iconCenter.y, 32, 32},
+                    (Vector2){0, 0}, 0, ColorWhite
                 );
-                GuiDrawIcon(
-                    tool.iconTop, otherBtnRect.x + iconCenter.x,
-                    otherBtnRect.y + iconCenter.y, 2, iconFg
-                );
+
+				idx++;
             }
         }
     }
@@ -286,5 +284,5 @@ DrawTool BpDToolButton(
         *showOther = false;
     }
 
-    return clicked;
+    return false;
 }

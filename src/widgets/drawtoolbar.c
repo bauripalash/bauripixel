@@ -1,5 +1,3 @@
-
-
 #include "../include/widgets/drawtoolbar.h"
 
 #include "../include/components.h"
@@ -7,46 +5,43 @@
 
 #include "../external/raygui.h"
 #include "../external/raylib.h"
+#include "../include/exported/drawtoolicons.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
 #define OPTBAR_HEIGHT 40
 
 static const int pencilTCount = 1;
-static const ToolInfo pencilTool[] = {
-    {DT_PENCIL, ICON_PENCIL, ICON_PENCIL},
-};
+static const DrawTool pencilTool[] = {DT_PENCIL};
 
 static const int eraserTCount = 1;
-static const ToolInfo eraserTool[] = {
-    {DT_ERASER, ICON_RUBBER, ICON_RUBBER},
+static const DrawTool eraserTool[] = {
+    DT_ERASER,
 };
 
 static const int lineTCount = 1;
-static const ToolInfo lineTool[] = {
-    {DT_LINE, ICON_CROSSLINE, ICON_CROSSLINE},
+static const DrawTool lineTool[] = {
+    DT_LINE,
 };
 
 static const int circleTCount = 2;
-static const ToolInfo circleTool[] = {
-    {DT_CIRCLE, ICON_BREAKPOINT_OFF, ICON_BREAKPOINT_OFF},
-    {DT_CIRCLE_FILL, ICON_BREAKPOINT_ON, ICON_BREAKPOINT_ON},
+static const DrawTool circleTool[] = {
+    DT_CIRCLE,
+    DT_CIRCLE_FILL,
 };
 
 static const int rectTCount = 2;
-static const ToolInfo rectTool[] = {
-    {DT_RECT, ICON_PLAYER_STOP, ICON_PLAYER_STOP},
-    {DT_RECT_FILL, ICON_GRID_FILL, ICON_GRID_FILL},
+static const DrawTool rectTool[] = {
+    DT_RECT,
+    DT_RECT_FILL,
 };
 
 static const int fillTCount = 1;
-static const ToolInfo fillTool[] = {
-    {DT_BUCKET, ICON_COLOR_BUCKET, ICON_COLOR_BUCKET},
-};
+static const DrawTool fillTool[] = {DT_BUCKET};
 
 static const int panTCount = 1;
-static const ToolInfo panTool[] = {
-    {DT_PAN, ICON_CURSOR_HAND, ICON_CURSOR_HAND},
+static const DrawTool panTool[] = {
+    DT_PAN,
 };
 
 DrawToolBarState NewDrawToolBar() {
@@ -72,10 +67,25 @@ DrawToolBarState NewDrawToolBar() {
 
     dtb.sliderHover = false;
 
+    dtb.iconsImg = LoadImageFromMemory(
+        ".png", DRAWTOOLS_ICON_MINIMAL_PNG_DATA, DRAWTOOLS_ICON_MINIMAL_PNG_SIZE
+    );
+    dtb.iconsTxt = LoadTextureFromImage(dtb.iconsImg);
+
     return dtb;
 }
 
-void FreeDrawToolBar(DrawToolBarState *state) {}
+void FreeDrawToolBar(DrawToolBarState *state) {
+    if (state == NULL) {
+        return;
+    }
+
+    if (state->iconsImg.data != NULL) {
+        UnloadImage(state->iconsImg);
+    }
+
+    UnloadTexture(state->iconsTxt);
+}
 
 static void updateBounds(DrawToolBarState *dtb) {
     dtb->prop.bounds.x = dtb->anchor.x + DTBAR_MARGIN_L;
@@ -255,40 +265,53 @@ int DrawToolbar(DrawToolBarState *state) {
             DEFAULT_DT_BTN_SIZE,
         };
 
-        state->currentTool = BpDToolButton(
-            btnRect, state->currentTool, &otherPen, pencilTCount, pencilTool
+        BpDToolButton(
+            btnRect, &state->currentTool, &otherPen, pencilTCount, pencilTool,
+            &state->iconsTxt
         );
 
         btnRect.y += yInc;
 
-        state->currentTool = BpDToolButton(
-            btnRect, state->currentTool, &otherEraser, eraserTCount, eraserTool
+        BpDToolButton(
+            btnRect, &state->currentTool, &otherEraser, eraserTCount,
+            eraserTool, &state->iconsTxt
+
         );
 
         btnRect.y += yInc;
 
-        state->currentTool = BpDToolButton(
-            btnRect, state->currentTool, &otherLine, lineTCount, lineTool
+        BpDToolButton(
+            btnRect, &state->currentTool, &otherLine, lineTCount, lineTool,
+            &state->iconsTxt
+
         );
 
         btnRect.y += yInc;
-        state->currentTool = BpDToolButton(
-            btnRect, state->currentTool, &otherRect, rectTCount, rectTool
+        BpDToolButton(
+            btnRect, &state->currentTool, &otherRect, rectTCount, rectTool,
+            &state->iconsTxt
+
         );
 
         btnRect.y += yInc;
-        state->currentTool = BpDToolButton(
-            btnRect, state->currentTool, &otherCircle, circleTCount, circleTool
+        BpDToolButton(
+            btnRect, &state->currentTool, &otherCircle, circleTCount,
+            circleTool, &state->iconsTxt
+
         );
 
         btnRect.y += yInc;
-        state->currentTool = BpDToolButton(
-            btnRect, state->currentTool, &otherFill, fillTCount, fillTool
+        BpDToolButton(
+            btnRect, &state->currentTool, &otherFill, fillTCount, fillTool,
+            &state->iconsTxt
+
         );
 
         btnRect.y += yInc;
-        state->currentTool = BpDToolButton(
-            btnRect, state->currentTool, &otherPan, panTCount, panTool
+        BpDToolButton(
+            btnRect, &state->currentTool, &otherPan, panTCount, panTool,
+            &state->iconsTxt
+
         );
     }
     return -1;

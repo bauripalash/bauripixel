@@ -34,6 +34,9 @@ typedef struct {
 
     bool brushSizeEdit;
 
+    Image iconsImg;
+    Texture2D iconsTxt;
+
 } DrawToolBarState;
 
 DrawTool HandleDToolsShortcuts(DrawToolBarState *state);

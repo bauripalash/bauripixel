@@ -480,7 +480,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
             break;
         }
         case DT_BUCKET: {
-            if (leftPressed) {
+            if (leftPressed && atCanvas) {
                 BpFill(state, &layer->img, curPx, curPy, dClr);
                 SyncImgLayerObj(state->curLayer);
             }

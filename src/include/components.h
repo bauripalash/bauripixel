@@ -16,9 +16,9 @@ bool BpSliderInt(
     bool *sliderHover
 );
 
-DrawTool BpDToolButton(
-    Rectangle bounds, DrawTool active, bool *showOther, int num,
-    const ToolInfo *tools
+bool BpDToolButton(
+    Rectangle bounds, DrawTool *active, bool *showOther, int num,
+    const DrawTool *tools, Texture2D *icons
 );
 
 bool BpToggleButton(Rectangle bounds, int thick, bool active);
