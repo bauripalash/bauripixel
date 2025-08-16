@@ -280,18 +280,14 @@ int LayerBarDraw(LayerBarState *lb) {
 
         // BpRoundedPanel(bounds, 2, 0.125, true);
         BpPanelBorder(bounds, 2);
+		if (BpToggleButton((Rectangle){toolBarBounds.x, toolBarBounds.y, toolBarBounds.height, toolBarBounds.height}, 2, false)) {
+			LayerObj * newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
+			newLayer->index = lb->list->count;
+			newLayer->name = MakeString(TextFormat("Layer %d", newLayer->index));
+			AddToLayerList(lb->list, newLayer);
+		}
 
-        /*
-if (BpDummyButton((Rectangle){toolBarBounds.x, toolBarBounds.y,
-                              toolBarBounds.height,
-                              toolBarBounds.height}, true)) {
-    LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
-    newLayer->index = lb->list->count;
-    newLayer->name =
-        MakeString(TextFormat("Layer %d", newLayer->index));
-    AddToLayerList(lb->list, newLayer);
-}
-        */
+		GuiDrawIcon(ICON_TARGET_SMALL_FILL, toolBarBounds.x + 6, toolBarBounds.y + 6, 1, ColorWhite);
         Rectangle layerContentRect = {
             layersBounds.x, layersBounds.y, layersBounds.width, layersBounds.y
         };
