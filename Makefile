@@ -3,6 +3,7 @@ CMAKE_OUTPUT:=build/$(BIN)/$(BIN)
 ZIG_OUTPUT:=zig-out/bin/$(BIN)
 HEADERS:= $(shell find src/include -path 'src/external' -prune -o -path 'src/include/exported' -prune -o -name '*.h' -print)
 SOURCES:= $(shell find src/ -path 'src/external' -prune -o -name '*.c' -print)
+PACKER:=./packer.py
 
 all: run
 
@@ -50,3 +51,9 @@ clean: cmake_clean
 	rm -rf .zig-cache
 	rm -rf .cache
 	rm -rf zig-out
+
+# Resource Packing
+
+.PHONE: rdtools
+rdtools:
+	$(PACKER) assets/media/drawtools/drawtools_icon_minimal.png -o src/include/exported/drawtoolicons.h

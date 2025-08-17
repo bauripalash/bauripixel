@@ -165,7 +165,6 @@ bool BpSimpleButton(Rectangle bounds, int thick) {
 }
 void BpBrushShapeButton(Rectangle bounds, BrushShape *shape, Texture2D *icons) {
     bool clicked = BpToggleButton(bounds, 2, false);
-    int shapeWidth = bounds.height - 4;
 
     if (*shape == BSP_SQAURE) {
         if (clicked)
