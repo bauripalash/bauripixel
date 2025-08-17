@@ -294,14 +294,6 @@ DrawBrush(CanvasState *state, Image *img, int posX, int posY, Color clr) {
 }
 
 static Color ImageGetPixel(Image *img, int posX, int posY) {
-    if (posX < 0 || posX >= img->width) {
-        return RED;
-    }
-
-    if (posY < 0 || posY >= img->height) {
-        return BLUE;
-    }
-
     return GetImageColor(*img, posX, posY);
 }
 
@@ -364,8 +356,8 @@ BpFill(CanvasState *state, Image *img, int posX, int posY, Color fillClr) {
 static const Color EraserColor = {.r = 0xff, .g = 0xff, .b = 0xff, .a = 100};
 
 void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
-
     bool locked = GuiIsLocked();
+
     Rectangle canvasRect = (Rectangle){state->drawArea.x, state->drawArea.y,
                                        state->gridSize.x, state->gridSize.y};
 
@@ -383,8 +375,16 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
     BrushShape shape = state->brushShape;
 
-    int curPx = shape == BSP_SQAURE ? posLeft : (rawCanvasPos.x);
-    int curPy = shape == BSP_SQAURE ? posTop : (rawCanvasPos.y);
+    int brushSize = state->brushSize;
+    DrawTool curtool = state->curTool;
+
+    int curPx = rawCanvasPos.x;
+    int curPy = rawCanvasPos.y;
+
+    if (curtool != DT_BUCKET && (shape == BSP_SQAURE)) {
+        curPx = posLeft;
+        curPy = posTop;
+    }
 
     if (atDrawArea) {
         state->hoverX = curPx;
@@ -393,12 +393,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
     // This is the actual current position accordingto brush size;
     Vector2 curPos = {curPx, curPy};
-
     Color dClr = state->curTool == DT_ERASER ? state->bgColor : state->current;
-
-    DrawTool curtool = state->curTool;
-
-    int brushSize = state->brushSize;
 
     bool leftDown = IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !locked;
     bool leftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked;
