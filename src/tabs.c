@@ -83,6 +83,9 @@ void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         AddColorToTab(tab, GetColor(BpRGB2SolidRGBA(ColorPaletteDefault[i])));
     }
 
+    tab->state->cb.currentColor = tab->colors[0];
+    tab->state->cb.currentIndex = 0;
+
     tab->setupDone = true;
 }
 
