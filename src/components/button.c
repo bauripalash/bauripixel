@@ -197,7 +197,6 @@ bool BpDToolButton(
     Rectangle bounds, DrawTool *active, bool *showOther, int num,
     const DrawTool *tools, Texture2D *icons
 ) {
-	TraceLog(LOG_ERROR, "%f | Current Tool -> %d" , GetTime(), *active);
     int thick = 2;
 
     int activeIndex = GetActiveToolIndex(tools, *active, num);
@@ -216,7 +215,6 @@ bool BpDToolButton(
     }
 
     if (BpToggleButton(btnRect, thick, first == *active) && *active != first) {
-		TraceLog(LOG_ERROR, "%f [F] Selected -> %d", GetTime(), first);
         *active = first;
         *showOther = false;
     }
@@ -260,7 +258,6 @@ bool BpDToolButton(
 
                 if (BpToggleButton(otherBtnRect, thick, false) && *active != tool) {
 
-					TraceLog(LOG_ERROR, "%f [O] Selected -> %d", GetTime(), tool);
                     *active = tool;
                     *showOther = false;
                 }

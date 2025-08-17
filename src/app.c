@@ -29,7 +29,7 @@ int RunApp() {
         FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE
     );
     InitWindow(DEF_WIN_WIDTH, DEF_WIN_HEIGHT, "BauriPixel");
-    //SetWindowState(FLAG_WINDOW_MAXIMIZED);
+    SetWindowState(FLAG_WINDOW_MAXIMIZED);
 
     SetWindowMinSize(DEF_MIN_WIN_WIDTH, DEF_MIN_WIN_HEIGHT);
     SetTargetFPS(60);

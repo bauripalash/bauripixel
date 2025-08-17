@@ -361,6 +361,8 @@ BpFill(CanvasState *state, Image *img, int posX, int posY, Color fillClr) {
     arrfree(stack);
 }
 
+static const Color EraserColor = {.r = 0xff, .g = 0xff, .b = 0xff, .a = 100};
+
 void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
     bool locked = GuiIsLocked();
@@ -503,7 +505,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
             break;
         }
         case DT_ERASER: {
-            DrawBrush(state, &state->previewImg, curPx, curPy, WHITE);
+            DrawBrush(state, &state->previewImg, curPx, curPy, EraserColor);
             break;
         }
         case DT_LINE: {
