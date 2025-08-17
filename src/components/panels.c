@@ -59,6 +59,29 @@ void BpPanelBorder(Rectangle bounds, int thick) {
     BpSimplePanel(bounds, thick, SideAll(), SideNone());
 }
 
+void BpPanelOnlyBorder(Rectangle bounds, int thick) {
+    Color brdr = GetColor(OptThemeGet(T_PANEL_BORDER));
+    Rectangle innerRect = {
+        bounds.x + thick, bounds.y + thick, bounds.width - thick * 2,
+        bounds.height - thick * 2
+    };
+
+    DrawRectangle(innerRect.x, bounds.y, innerRect.width, thick, brdr);
+    DrawRectangle(bounds.x, innerRect.y, thick, innerRect.height, brdr);
+    DrawRectangle(
+        bounds.x + bounds.width - thick, innerRect.y, thick, innerRect.height,
+        brdr
+    );
+    DrawRectangle(
+        innerRect.x, bounds.y + bounds.height - thick, innerRect.width, thick,
+        brdr
+    );
+    DrawTLDot(innerRect, thick, brdr);
+    DrawTRDot(innerRect, thick, brdr);
+    DrawBLDot(innerRect, thick, brdr);
+    DrawBRDot(innerRect, thick, brdr);
+}
+
 // Note: Only One Side Border Hiding Works for now
 void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow) {
     Color brdr = GetColor(OptThemeGet(T_PANEL_BORDER));
@@ -151,30 +174,6 @@ int BpTabItem(
     };
 
     BpSimplePanel(tabRect, 3, (Side){.b = -1}, (Side){});
-
-    // Note: Check if it is really needed?
-    /*
-    // Start X position
-float tabX0 = tabRect.x;
-// End X position
-float tabX1 = tabRect.x + tabRect.width;
-
-if (tabX0 == bounds.x) {
-    // DrawRectangleRec(
-    //     (Rectangle){tabX0 + tabThick, tabRect.y + tabThick * 2, tabThick,
-    //                 tabRect.height + 5},
-    //     panelBorder
-    //);
-}
-
-if (tabX1 == bounds.x + bounds.width) {
-    DrawRectangleRec(
-        (Rectangle){tabX1 - tabThick * 2, tabRect.y + tabThick * 2,
-                    tabThick, tabRect.height + 5},
-        GetColor(OptThemeGet(T_PANEL_BORDER))
-    );
-}
-    */
 
     Rectangle usableBounds = {
         innerRect.x + TABITEM_PADDING, tabRect.y + TABITEM_PADDING,

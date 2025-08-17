@@ -163,9 +163,7 @@ bool BpSimpleButton(Rectangle bounds, int thick) {
 
     return false;
 }
-void BpBrushShapeButton(
-    Rectangle bounds, BrushShape *shape, const void *tools
-) {
+void BpBrushShapeButton(Rectangle bounds, BrushShape *shape, Texture2D *icons) {
     bool clicked = BpToggleButton(bounds, 2, false);
     int shapeWidth = bounds.height - 4;
 
@@ -176,6 +174,17 @@ void BpBrushShapeButton(
         if (clicked)
             *shape = BSP_SQAURE;
     }
+    Rectangle iconRect = {
+        bounds.x + ((bounds.width - ICON_WIDTH) / 2.0f),
+        bounds.y + ((bounds.height - ICON_WIDTH) / 2.0f), ICON_WIDTH, ICON_WIDTH
+    };
+
+    int txtPos =
+        (*shape == BSP_SQAURE ? (int)DT_RECT_FILL : (int)DT_CIRCLE_FILL) * 16;
+    DrawTexturePro(
+        *icons, (Rectangle){txtPos, 0, 16, 16}, iconRect, (Vector2){}, 0,
+        ColorWhite
+    );
 }
 
 int GetActiveToolIndex(const DrawTool *tools, DrawTool active, int num) {
@@ -244,19 +253,18 @@ bool BpDToolButton(
         iconCenter = (Vector2){((otherBtnRect.width - ICON_WIDTH) / 2.0f),
                                ((otherBtnRect.height - ICON_WIDTH) / 2.0f)};
 
-      
-
         if (*showOther) {
-			int idx = 0;
+            int idx = 0;
             for (int i = 0; i < (num); i++) {
-				if (i == indexToSkip) {
-					continue;
-				}
+                if (i == indexToSkip) {
+                    continue;
+                }
 
                 otherBtnRect.x += (idx * otherBtnRect.width) + 10 * idx;
                 DrawTool tool = tools[i];
 
-                if (BpToggleButton(otherBtnRect, thick, false) && *active != tool) {
+                if (BpToggleButton(otherBtnRect, thick, false) &&
+                    *active != tool) {
 
                     *active = tool;
                     *showOther = false;
@@ -269,7 +277,7 @@ bool BpDToolButton(
                     (Vector2){0, 0}, 0, ColorWhite
                 );
 
-				idx++;
+                idx++;
             }
         }
     }

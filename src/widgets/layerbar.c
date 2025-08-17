@@ -2,8 +2,8 @@
 #include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/components.h"
+#include "../include/options.h"
 #include "../include/utils.h"
-#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -99,22 +99,27 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
     updateBounds(lb);
 }
 
-#define HANDLE_THICKNESS  10
+#define HANDLE_THICKNESS  20
 
 #define LAYER_ITEM_HEIGHT 35
 
 #define LAYER_NAME_WIDTH  200
 
+#define LAYER_ITEM_MARGIN 5
 bool LayerItemDraw(
     LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
 ) {
+    int ogBorder = OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_BRDR));
     Font f = GuiGetFont();
     bool locked = GuiIsLocked();
     int fontSize = f.baseSize;
 
     Vector2 mpos = GetMousePosition();
 
-    Rectangle bounds = {pos.x, pos.y, lb->layersRect.width, LAYER_ITEM_HEIGHT};
+    Rectangle bounds = {
+        pos.x, pos.y, lb->layersRect.width - LAYER_ITEM_MARGIN * 2,
+        LAYER_ITEM_HEIGHT
+    };
 
     bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
     bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -125,10 +130,9 @@ bool LayerItemDraw(
     Rectangle nameBounds = {
         bounds.x, bounds.y, LAYER_NAME_WIDTH, bounds.height
     };
-    // BpDummyFlatPanel(bounds, 2, (Vector4){0});
-    // BpDummyFlatPanel(nameBounds, 2, (Vector4){});
+
     BpPanelBorder(bounds, 2);
-    BpPanelBorder(bounds, 2);
+    BpPanelBorder(nameBounds, 2);
 
     float btnSize = 25;
 
@@ -153,6 +157,7 @@ bool LayerItemDraw(
                     nameBounds.height},
         layer->name
     );
+    OptThemeSet(T_PANEL_BORDER, ogBorder);
 
     return clicked;
 }
@@ -280,14 +285,22 @@ int LayerBarDraw(LayerBarState *lb) {
 
         // BpRoundedPanel(bounds, 2, 0.125, true);
         BpPanelBorder(bounds, 2);
-		if (BpToggleButton((Rectangle){toolBarBounds.x, toolBarBounds.y, toolBarBounds.height, toolBarBounds.height}, 2, false)) {
-			LayerObj * newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
-			newLayer->index = lb->list->count;
-			newLayer->name = MakeString(TextFormat("Layer %d", newLayer->index));
-			AddToLayerList(lb->list, newLayer);
-		}
+        if (BpToggleButton(
+                (Rectangle){toolBarBounds.x, toolBarBounds.y,
+                            toolBarBounds.height, toolBarBounds.height},
+                2, false
+            )) {
+            LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
+            newLayer->index = lb->list->count;
+            newLayer->name =
+                MakeString(TextFormat("Layer %d", newLayer->index));
+            AddToLayerList(lb->list, newLayer);
+        }
 
-		GuiDrawIcon(ICON_TARGET_SMALL_FILL, toolBarBounds.x + 6, toolBarBounds.y + 6, 1, ColorWhite);
+        GuiDrawIcon(
+            ICON_TARGET_SMALL_FILL, toolBarBounds.x + 6, toolBarBounds.y + 6, 1,
+            ColorWhite
+        );
         Rectangle layerContentRect = {
             layersBounds.x, layersBounds.y, layersBounds.width, layersBounds.y
         };
@@ -298,8 +311,8 @@ int LayerBarDraw(LayerBarState *lb) {
             2
         );
 
-        float px = layersBounds.x;
-        float py = layersBounds.y;
+        float px = layersBounds.x + LAYER_ITEM_MARGIN;
+        float py = layersBounds.y + LAYER_ITEM_MARGIN;
         float pyinc = LAYER_ITEM_HEIGHT - 1;
         // GuiScrollPanel(layersBounds, NULL, layerContentRect, &lb->scroll,
         // &lb->view);
@@ -309,6 +322,7 @@ int LayerBarDraw(LayerBarState *lb) {
             layersBounds.height
         );
 
+        Rectangle activeRect = {0};
         for (int i = 0; i < lb->list->count; i++) {
             LayerObj *lr = lb->list->layers[i];
             Rectangle layerBtn = {px, py, 300, LAYER_ITEM_HEIGHT};
@@ -321,8 +335,21 @@ int LayerBarDraw(LayerBarState *lb) {
                 lb->selLayer = lr;
             }
 
+            if (isCur) {
+                activeRect =
+                    (Rectangle){layerBtn.x - lb->scroll.x,
+                                layerBtn.y - lb->scroll.y,
+                                lb->layersRect.width - LAYER_ITEM_MARGIN * 2,
+                                LAYER_ITEM_HEIGHT};
+            }
+
             py += pyinc;
         }
+        int ogBorder =
+            OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_ACTIVE_BRDR));
+        BpPanelOnlyBorder(activeRect, 2);
+        OptThemeSet(T_PANEL_BORDER, ogBorder);
+
         EndScissorMode();
 
         layerContentRect.height = py - layerContentRect.height;

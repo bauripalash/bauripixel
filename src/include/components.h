@@ -29,8 +29,9 @@ int BpTabItem(
 );
 
 // FUTURE: Custom Brush | Using DToolInfo as for prototype
-void BpBrushShapeButton(Rectangle bounds, BrushShape *shape, const void *tools);
+void BpBrushShapeButton(Rectangle bounds, BrushShape *shape, Texture2D *icons);
 
+void BpPanelOnlyBorder(Rectangle bounds, int thick);
 void BpPanelBorder(Rectangle bounds, int thick);
 void BpPanelNoBorder(Rectangle bounds);
 

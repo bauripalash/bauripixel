@@ -42,6 +42,9 @@ typedef enum OptThemeKey {
     T_DTOOL_ICON_FG,
     T_DTOOL_ICON_BG,
 
+    T_LAYER_BRDR,
+    T_LAYER_ACTIVE_BRDR,
+
     T_MAX_THEME_KEYS
 } OptThemeKey;
 

@@ -184,5 +184,13 @@ void LayoutDraw(Gui *gui) {
         GuiLock();
     }
 
-    //DrawFPS(200, 50);
+    /*
+    Rectangle rect = {100,100,500,500};
+    int ogBorder = OptThemeGetSet(T_PANEL_BORDER, HexColorVWhite);
+    BpPanelOnlyBorder(rect, 8);
+    DrawRectangleLinesEx(rect, 1, MAROON);
+
+    OptThemeSet(T_PANEL_BORDER, ogBorder);
+    */
+    // DrawFPS(200, 50);
 }

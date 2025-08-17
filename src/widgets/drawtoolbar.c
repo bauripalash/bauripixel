@@ -199,7 +199,7 @@ static void OptToolsPencil(DrawToolBarState *state, Rectangle bounds) {
 
         Rectangle rect = {px, py, bounds.height, bounds.height};
 
-        BpBrushShapeButton(rect, &state->brushShape, NULL);
+        BpBrushShapeButton(rect, &state->brushShape, &state->iconsTxt);
 
         rect.x += rect.width + 10;
         int brushTextSize = TextLength(TextFormat("%dpx", state->brushSize)) *

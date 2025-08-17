@@ -53,6 +53,8 @@ static const OptThemeProp darkThemeOpts[] = {
 
     {T_DTOOL_ICON_BG, HexColorVGreen},
     {T_DTOOL_ICON_FG, HexColorVWhite},
+    {T_LAYER_BRDR, HexColorTGrayLighter},
+    {T_LAYER_ACTIVE_BRDR, HexColorVWhite},
 };
 
 static const OptThemeProp lightThemeOpts[] = {
@@ -66,13 +68,13 @@ static const GuiStyleProp RgDarkThemeProps[] = {
     {DEFAULT, TEXT_SIZE, 16},
     {DEFAULT, TEXT_SPACING, 0},
 
-    {VALUEBOX, TEXT_COLOR_NORMAL, HexColorWhite},
-    {TEXTBOX, TEXT_COLOR_NORMAL, HexColorWhite},
-    {TEXTBOX, TEXT_COLOR_FOCUSED, HexColorWhite},
-    {TEXTBOX, TEXT_COLOR_PRESSED, HexColorWhite},
-    {LABEL, TEXT_COLOR_NORMAL, HexColorWhite},
-    {LABEL, TEXT_COLOR_FOCUSED, HexColorWhite},
-    {LABEL, TEXT_COLOR_PRESSED, HexColorWhite},
+    {VALUEBOX, TEXT_COLOR_NORMAL, HexColorVWhite},
+    {TEXTBOX, TEXT_COLOR_NORMAL, HexColorVWhite},
+    {TEXTBOX, TEXT_COLOR_FOCUSED, HexColorVWhite},
+    {TEXTBOX, TEXT_COLOR_PRESSED, HexColorVWhite},
+    {LABEL, TEXT_COLOR_NORMAL, HexColorVWhite},
+    {LABEL, TEXT_COLOR_FOCUSED, HexColorVWhite},
+    {LABEL, TEXT_COLOR_PRESSED, HexColorVWhite},
 };
 
 // ============== RAGUI THEME END ==============
