@@ -136,10 +136,16 @@ bool LayerItemDraw(
 
     float btnSize = 25;
 
-    GuiLabelButton(
-        (Rectangle){layerToolBounds.x, bounds.y, btnSize, bounds.height},
-        GuiIconText(layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, NULL)
-    );
+    bool visibility =
+        GuiLabelButton(
+            (Rectangle){layerToolBounds.x, bounds.y, btnSize, bounds.height},
+            GuiIconText(layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, NULL)
+        ) != 0;
+
+    if (visibility) {
+        layer->visible = !layer->visible;
+    }
+
     GuiLabelButton(
         (Rectangle){layerToolBounds.x + btnSize, bounds.y, btnSize,
                     bounds.height},

@@ -1,4 +1,3 @@
-#include "include/colors.h"
 #include "include/components.h"
 #include "include/defaults.h"
 #include "include/gui.h"
