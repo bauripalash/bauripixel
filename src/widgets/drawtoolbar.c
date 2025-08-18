@@ -81,10 +81,9 @@ void FreeDrawToolBar(DrawToolBarState *state) {
     }
 
     if (state->iconsImg.data != NULL) {
+        UnloadTexture(state->iconsTxt);
         UnloadImage(state->iconsImg);
     }
-
-    UnloadTexture(state->iconsTxt);
 }
 
 static void updateBounds(DrawToolBarState *dtb) {

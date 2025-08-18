@@ -34,8 +34,9 @@ void FreeLayerObj(LayerObj *layer) {
     if (layer->img.data == NULL) {
         return;
     }
+
+    UnloadTexture(layer->txt);
     UnloadImage(layer->img);
-    UnloadTexture(layer->txt); // Do we need this?
     free(layer);
 }
 

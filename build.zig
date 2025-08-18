@@ -51,6 +51,7 @@ pub fn build(b: *std.Build) void {
             "src/widgets/menubar.c",
             "src/widgets/widget.c",
             "src/widgets/drawtoolbar.c",
+            "src/widgets/layerbar.c",
             "src/components/slider.c",
             "src/components/panels.c",
             "src/components/button.c",

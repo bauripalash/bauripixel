@@ -22,7 +22,7 @@
 #define PALETTE_COUNT     16
 // Sweetie 16 Palette by GrafxKid
 // https://lospec.com/palette-list/sweetie-16
-static const int ColorPaletteDefault[PALETTE_COUNT] = {
+static const unsigned int ColorPaletteDefault[PALETTE_COUNT] = {
     0x1a1c2c, 0x5d275d, 0xb13e53, 0xef7d57, 0xffcd75, 0xa7f070,
     0x38b764, 0x257179, 0x29366f, 0x3b5dc9, 0x41a6f6, 0x73eff7,
     0xf4f4f4, 0x94b0c2, 0x566c86, 0x333c57,

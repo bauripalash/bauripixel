@@ -87,13 +87,14 @@ void FreeCanvas(CanvasState *c) {
     }
 
     if (c->bgImg.data != NULL) {
-        UnloadImage(c->bgImg);
         UnloadTexture(c->bgTxt);
+        UnloadImage(c->bgImg);
     }
 
     if (c->previewImg.data != NULL) {
+
+        UnloadTexture(c->previewTxt); // Do we need this?
         UnloadImage(c->previewImg);
-        UnloadTexture(c->previewTxt);
     }
 }
 
