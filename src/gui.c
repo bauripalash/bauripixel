@@ -1,4 +1,5 @@
 #include "include/gui.h"
+#include "external/raylib.h"
 #include "include/tabs.h"
 #include "include/widgets/menubar.h"
 #include "include/widgets/statusbar.h"

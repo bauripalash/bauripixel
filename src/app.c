@@ -6,6 +6,7 @@
 #include "include/options.h"
 #include "include/tabs.h"
 #include "include/theme.h"
+#include "include/widgets/canvas.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
 #include <stdbool.h>
@@ -20,7 +21,7 @@
 void LayoutDraw(Gui *gui);
 void LayoutLogic(Gui *gui);
 
-static int frameCounter = 1;
+static int frameCounter = 0;
 
 int RunApp() {
 
@@ -60,17 +61,13 @@ int RunApp() {
     SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
     while (!WindowShouldClose()) {
 
-        // TraceLog(LOG_ERROR, "==> F %d <==", frameCounter);
-        Vector2 winSize = {
-            GetScreenWidth(),
-            GetScreenHeight(),
-        };
-
-        // TraceVector(winSize, "WinSIZE ->");
+        if (IsWindowResized()) {
+        }
 
         LayoutLogic(gui);
         BeginDrawing();
         {
+
             ClearBackground(GetColor(OptThemeGet(T_APP_BG)));
             LayoutDraw(gui);
         }
