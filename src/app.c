@@ -75,9 +75,8 @@ int RunApp() {
         frameCounter++;
     }
 
-    CloseWindow();
     FreeGui(gui);
-
+    CloseWindow();
     return 0;
 }
 
