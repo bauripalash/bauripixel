@@ -19,15 +19,13 @@
 #define TAB_HEADER_WIDTH  80
 #define TAB_HEADER_HEIGHT 30
 
-#define PALETTE_COUNT     32
-// AxulArt 32 color Palette Palette by AxulArt
-// https://lospec.com/palette-list/axulart-32-color-palette
+#define PALETTE_COUNT     16
+// Sweetie 16 Palette by GrafxKid
+// https://lospec.com/palette-list/sweetie-16
 static const int ColorPaletteDefault[PALETTE_COUNT] = {
-    0x000000, 0xfcfcfc, 0xc4c7ee, 0x9a8fe0, 0x635d96, 0x292f65, 0x1b1d34,
-    0xffe3ae, 0xcdbbab, 0xa6858f, 0xcf5d8b, 0x964968, 0xffb482, 0xdd867d,
-    0xb2696f, 0xf6c65e, 0xe49057, 0xc46833, 0xb0d07e, 0x66aa5d, 0x52b5ab,
-    0x2a8379, 0x1c5659, 0x7be1f6, 0x589ffc, 0x5069e4, 0x2e44ae, 0x8056d4,
-    0x5a3b96, 0xffbae1, 0xe687c5, 0xa759b9,
+    0x1a1c2c, 0x5d275d, 0xb13e53, 0xef7d57, 0xffcd75, 0xa7f070,
+    0x38b764, 0x257179, 0x29366f, 0x3b5dc9, 0x41a6f6, 0x73eff7,
+    0xf4f4f4, 0x94b0c2, 0x566c86, 0x333c57,
 };
 
 TabStateObj *NewTabState(Rectangle panel, int w, int h) {
