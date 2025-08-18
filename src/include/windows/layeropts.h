@@ -8,7 +8,7 @@ typedef struct WLayerOptsState {
     WinProp p;
     LayerObj *layer;
     bool editName;
-    char *name;
+    char name[256];
 } WLayerOptsState;
 
 WLayerOptsState NewWLayerOpts();

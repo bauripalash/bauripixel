@@ -9,7 +9,7 @@ WLayerOptsState NewWLayerOpts() {
     lo.p.b.width = 500;
     lo.p.b.height = 200;
     lo.layer = NULL;
-    lo.name = NULL;
+    strcpy(lo.name, "");
     lo.editName = false;
     return lo;
 }
@@ -24,12 +24,23 @@ static void updateBounds(WLayerOptsState *state) {
 void WLayerOpts(WLayerOptsState *state) {
     if (state->p.active && state->layer != NULL) {
         updateBounds(state);
+        Rectangle bounds = state->p.b;
+        if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        }
 
         if (BpSimpleWindow(
-                state->p.b, GuiIconText(ICON_LAYERS, "Layer Settings")
+                bounds, GuiIconText(ICON_LAYERS, "Layer Settings")
             )) {
             state->p.active = false;
         }
+
+        float px = bounds.x + 10;
+        float py = bounds.y + 30 + 5;
+
+        GuiLabel((Rectangle){px, py, 100, 30}, "Layer Name:");
+        px += 100 + 10;
+        GuiTextBox((Rectangle){px, py, 50, 30}, state->name, 100, true);
     }
 }
 

@@ -155,6 +155,7 @@ bool LayerItemDraw(
 
     if (openOpts) {
         lb->wLayerOpts.layer = layer;
+        TextCopy(lb->wLayerOpts.name, layer->name);
         lb->wLayerOpts.p.active = true;
     }
     GuiLabelButton(
