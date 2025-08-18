@@ -101,7 +101,8 @@ void LayoutLogic(Gui *gui) {
 
     bool menuBarOpen = gui->state->menubar.menuOpen;
     bool sliderHover = gui->curTab->state->dtb.sliderHover;
-    if (menuBarOpen || sliderHover) {
+    bool layerpopup = gui->curTab->state->lb.anypopup;
+    if (menuBarOpen || sliderHover || layerpopup) {
         GuiLock();
     }
     ColorBarLogic(&gui->curTab->state->cb);
@@ -114,7 +115,13 @@ void LayoutLogic(Gui *gui) {
     }
 
     CanvasLogic(&gui->curTab->state->cvs);
+    if (layerpopup) {
+        GuiUnlock();
+    }
     LayerBarLogic(&gui->curTab->state->lb);
+    if (layerpopup) {
+        GuiLock();
+    }
 }
 
 int tabActive = 0;
@@ -143,10 +150,11 @@ void TabItemsDraw(Gui *gui) {
 void LayoutDraw(Gui *gui) {
     bool menuOpen = gui->state->menubar.menuOpen;
     bool sizeSliderHover = gui->curTab->state->dtb.sliderHover;
+    bool layerpopup = gui->curTab->state->lb.anypopup;
 
     // SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
 
-    if (menuOpen || sizeSliderHover) {
+    if (menuOpen || sizeSliderHover || layerpopup) {
         GuiLock();
     }
 
@@ -170,7 +178,13 @@ void LayoutDraw(Gui *gui) {
         GuiLock();
     }
 
+    if (layerpopup) {
+        GuiUnlock();
+    }
     LayerBarDraw(&gui->curTab->state->lb);
+    if (layerpopup) {
+        GuiLock();
+    }
     if (menuOpen) {
         GuiUnlock();
     }

@@ -41,6 +41,7 @@ LayerBarState NewLayerBar() {
     lb.usableRect = (Rectangle){0};
     lb.toolsRect = (Rectangle){0};
     lb.layersRect = (Rectangle){0};
+    lb.wLayerOpts = NewWLayerOpts();
 
     return lb;
 }
@@ -146,11 +147,16 @@ bool LayerItemDraw(
         layer->visible = !layer->visible;
     }
 
-    GuiLabelButton(
-        (Rectangle){layerToolBounds.x + btnSize, bounds.y, btnSize,
-                    bounds.height},
-        GuiIconText(ICON_GEAR_BIG, NULL)
-    );
+    bool openOpts = GuiLabelButton(
+                        (Rectangle){layerToolBounds.x + btnSize, bounds.y,
+                                    btnSize, bounds.height},
+                        GuiIconText(ICON_GEAR_BIG, NULL)
+                    ) != 0;
+
+    if (openOpts) {
+        lb->wLayerOpts.layer = layer;
+        lb->wLayerOpts.p.active = true;
+    }
     GuiLabelButton(
         (Rectangle){layerToolBounds.x + btnSize * 2, bounds.y, btnSize,
                     bounds.height},
@@ -280,6 +286,7 @@ void DrawScrollBars(LayerBarState *lb, Rectangle content) {
 
 int LayerBarDraw(LayerBarState *lb) {
     if (lb->p.active) {
+        lb->anypopup = lb->wLayerOpts.p.active;
         bool locked = GuiIsLocked();
 
         Rectangle bounds = lb->p.bounds;
@@ -363,6 +370,10 @@ int LayerBarDraw(LayerBarState *lb) {
             lb, (Rectangle){0, 0, layersBounds.width,
                             (LAYER_ITEM_HEIGHT)*lb->list->count}
         );
+
+        if (lb->wLayerOpts.p.active) {
+            WLayerOpts(&lb->wLayerOpts);
+        }
     }
     return -1;
 }

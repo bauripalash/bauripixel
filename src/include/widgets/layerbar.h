@@ -3,6 +3,7 @@
 
 #include "../../external/raylib.h"
 #include "../layers.h"
+#include "../windows/layeropts.h"
 #include "widget.h"
 #include <stdbool.h>
 
@@ -31,6 +32,8 @@ typedef struct LayerBarState {
     Rectangle view;
 
     bool resizeDragging;
+    WLayerOptsState wLayerOpts;
+    bool anypopup;
 
 } LayerBarState;
 

@@ -37,4 +37,9 @@ void BpPanelNoBorder(Rectangle bounds);
 
 void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow);
 void BpMenuBarPanel(Vector2 position, float width, int items, float roundness);
+
+// Windows
+
+// Returns true on close
+bool BpSimpleWindow(Rectangle bounds, const char *title);
 #endif

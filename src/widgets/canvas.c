@@ -109,7 +109,7 @@ void UpdateCanvasLayers(
     state->curLayer = current;
 }
 
-void updateBounds(CanvasState *c) {
+static void updateBounds(CanvasState *c) {
     c->prop.bounds.x = c->anchor.x + CANVAS_MARGIN_L;
     c->prop.bounds.y = c->anchor.y + CANVAS_MARGIN_TB;
     c->prop.bounds.width =
