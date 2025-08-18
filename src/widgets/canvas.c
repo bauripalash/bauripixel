@@ -512,9 +512,7 @@ bool CanvasLogic(CanvasState *state) {
             state->hScrollDragging = false;
         }
 
-        if (state->curLayer->visible) {
-            DrawingCanvasLogic(state, canvasArea);
-        }
+        DrawingCanvasLogic(state, canvasArea);
 
         state->camera.target.x = state->point.x;
         state->camera.target.y = state->point.y;

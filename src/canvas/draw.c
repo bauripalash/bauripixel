@@ -390,7 +390,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
         state->hoverX = curPx;
         state->hoverY = curPy;
     }
-
+    bool isCurVisible = state->curLayer->visible;
     // This is the actual current position accordingto brush size;
     Vector2 curPos = {curPx, curPy};
     Color dClr = state->curTool == DT_ERASER ? state->bgColor : state->current;
@@ -404,7 +404,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
     LayerObj *layer = state->curLayer;
     Image *preview = &state->previewImg;
 
-    if (!locked && atDrawArea) {
+    if (!locked && atDrawArea && isCurVisible) {
         switch (curtool) {
         case DT_PENCIL: {
             if (leftDown) {
@@ -555,14 +555,20 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
 void DrawingCanvasDraw(CanvasState *state, Rectangle bounds) {
     DrawTexture(state->bgTxt, state->drawArea.x, state->drawArea.y, WHITE);
+    UpdateTexture(state->previewTxt, state->previewImg.data);
+    int curLayerIndex = state->curLayer->index;
 
     for (int i = state->layers->count - 1; i >= 0; i--) {
         LayerObj *lr = state->layers->layers[i];
+
         if (lr->visible) {
             DrawTexture(lr->txt, state->drawArea.x, state->drawArea.y, WHITE);
         }
-    }
 
-    UpdateTexture(state->previewTxt, state->previewImg.data);
-    DrawTexture(state->previewTxt, state->drawArea.x, state->drawArea.y, WHITE);
+        if (lr->index == curLayerIndex) {
+            DrawTexture(
+                state->previewTxt, state->drawArea.x, state->drawArea.y, WHITE
+            );
+        }
+    }
 }
