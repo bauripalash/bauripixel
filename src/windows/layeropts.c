@@ -23,6 +23,14 @@ static void updateBounds(WLayerOptsState *state) {
     state->p.b.y = (winH - state->p.b.height) / 2.0f;
 }
 
+void SetupWLayerOpts(WLayerOptsState *opts, LayerObj *layer) {
+    opts->layer = layer;
+    opts->ogOpacity = layer->opacity;
+    opts->opacityVal = layer->opacity * 100.0f;
+    TextCopy(opts->name, layer->name);
+    TextCopy(opts->ogName, layer->name);
+}
+
 #define LO_MARGIN_LR 10
 #define LO_MARGIN_TB 10
 #define LABEL_WIDTH  100

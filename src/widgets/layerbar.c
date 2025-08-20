@@ -154,10 +154,8 @@ bool LayerItemDraw(
                         GuiIconText(ICON_GEAR_BIG, NULL)
                     ) != 0;
 
-    if (openOpts) {
-        lb->wLayerOpts.layer = layer;
-        TextCopy(lb->wLayerOpts.name, layer->name);
-        lb->wLayerOpts.opacityVal = ((layer->opacity) * 100);
+    if (openOpts && !lb->wLayerOpts.p.active) {
+        SetupWLayerOpts(&lb->wLayerOpts, layer);
         lb->wLayerOpts.p.active = true;
     }
     GuiLabelButton(
@@ -384,8 +382,13 @@ int LayerBarDraw(LayerBarState *lb) {
                 }
                 lb->wLayerOpts.p.active = false;
             }
-            if (optStatus != WIN_NONE) {
+            if (optStatus == WIN_CANCEL || optStatus == WIN_CLOSE) {
                 lb->wLayerOpts.p.active = false;
+                lb->curLayer->opacity = lb->wLayerOpts.ogOpacity;
+            }
+
+            if (lb->wLayerOpts.opacityClicked) {
+                lb->curLayer->opacity = (lb->wLayerOpts.opacityVal / 100.0f);
             }
         }
     }

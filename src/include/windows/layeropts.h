@@ -11,9 +11,12 @@ typedef struct WLayerOptsState {
     char name[256];
     int opacityVal;
     bool opacityClicked;
+    float ogOpacity;
+    char ogName[256];
 } WLayerOptsState;
 
 WLayerOptsState NewWLayerOpts();
+void SetupWLayerOpts(WLayerOptsState *state, LayerObj *layer);
 WinStatus WLayerOpts(WLayerOptsState *state);
 void FreeWLayerOpts(WLayerOptsState *state);
 

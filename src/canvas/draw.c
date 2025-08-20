@@ -7,6 +7,7 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../external/stb/stb_ds.h"
+#include "../include/colors.h"
 #include "../include/utils.h"
 #include "../include/widgets/canvas.h"
 
@@ -561,13 +562,15 @@ void DrawingCanvasDraw(CanvasState *state, Rectangle bounds) {
     for (int i = state->layers->count - 1; i >= 0; i--) {
         LayerObj *lr = state->layers->layers[i];
 
+        int alpha = (int)(ceilf(lr->opacity * 255));
+        Color tint = BpColorSetAlpha(WHITE, alpha);
         if (lr->visible) {
-            DrawTexture(lr->txt, state->drawArea.x, state->drawArea.y, WHITE);
+            DrawTexture(lr->txt, state->drawArea.x, state->drawArea.y, tint);
         }
 
         if (lr->index == curLayerIndex) {
             DrawTexture(
-                state->previewTxt, state->drawArea.x, state->drawArea.y, WHITE
+                state->previewTxt, state->drawArea.x, state->drawArea.y, tint
             );
         }
     }

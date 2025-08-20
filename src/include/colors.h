@@ -9,6 +9,8 @@
 
 #define BpRGB2SolidRGBA(rgb)    (((rgb) << 8) | 0xFFu)
 #define BpRGB2AlphaRGBA(rgb, a) (((rgb) << 8) | a)
+#define BpColorSetAlpha(clr, alpha)                                            \
+    ((Color){.r = clr.r, .g = clr.g, .b = clr.b, .a = alpha})
 
 // Velstad-4-by-mainzero Palette by Arkzero87
 // https://lospec.com/palette-list/velstad-4-by-mainzero
