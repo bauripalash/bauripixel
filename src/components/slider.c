@@ -54,21 +54,23 @@ bool BpSliderInt(
 
     Font font = GuiGetFont();
     int fontSize = font.baseSize;
-    float textWidth = TextLength(TextFormat("%d%s", *value, unit));
-    float textX = ((rect.width + rect.x) / 2.0f) - (textWidth / 2.0f);
-    float textY = rect.y;
-    Color textColor = ((thumbRect.x + thumbRect.width) >= textX + textWidth)
-                          ? textPost
-                          : textPre;
+
+    float textWidth =
+        TextLength(TextFormat("%d%s", *value, unit)) * font.recs->width;
+    float textX = (rect.x + rect.width / 2.0f) - (textWidth / 2.0f);
+    float textY = (rect.y + rect.height / 2.0f) - (fontSize / 2.0f);
+    Color textClr = ColorWhite;
+
+    if ((rect.x + thumbW) > (textX + textWidth)) {
+        textClr = ColorBlack;
+    }
 
     DrawRectangleRounded(bounds, 0.1, 0, sliderBg);
     DrawRectangleRounded(thumbRect, 0.1, 0, sliderFg);
 
-    // DrawText(TextFormat("%d%s", *value, unit), textX, textY, fontH,
-    // textColor);
     DrawTextEx(
         font, TextFormat("%d%s", *value, unit), (Vector2){textX, textY},
-        fontSize, 0, textColor
+        fontSize, 0, textClr
     );
 
     return oldValue != *value;

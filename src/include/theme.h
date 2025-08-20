@@ -72,9 +72,16 @@ static const GuiStyleProp RgDarkThemeProps[] = {
     {TEXTBOX, TEXT_COLOR_NORMAL, HexColorVWhite},
     {TEXTBOX, TEXT_COLOR_FOCUSED, HexColorVWhite},
     {TEXTBOX, TEXT_COLOR_PRESSED, HexColorVWhite},
+    {TEXTBOX, BASE_COLOR_NORMAL, HexColorStatus},
+    {TEXTBOX, BASE_COLOR_PRESSED, HexColorStatus},
+    {TEXTBOX, BASE_COLOR_FOCUSED, HexColorStatus},
+    {TEXTBOX, BORDER_COLOR_NORMAL, HexColorTGrayLightest},
+    {TEXTBOX, BORDER_COLOR_FOCUSED, HexColorTGrayLighter},
+    {TEXTBOX, BORDER_COLOR_PRESSED, HexColorTGrayLightest},
     {LABEL, TEXT_COLOR_NORMAL, HexColorVWhite},
     {LABEL, TEXT_COLOR_FOCUSED, HexColorVWhite},
     {LABEL, TEXT_COLOR_PRESSED, HexColorVWhite},
+
 };
 
 // ============== RAGUI THEME END ==============

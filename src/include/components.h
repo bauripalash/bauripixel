@@ -7,6 +7,8 @@
 #include "../include/utils.h"
 #include <stdbool.h>
 
+#define WINDOW_TOP_HEIGHT 30
+
 bool BpInputSliderInt(
     Rectangle bounds, int *value, int min, int max, const char *unit,
     bool *clicked, bool *hover

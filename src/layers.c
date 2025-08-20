@@ -15,6 +15,7 @@ LayerObj *NewLayerObj(int w, int h) {
     l->mode = 0;
     l->name = NULL;
     l->visible = true;
+    l->opacity = 1.0f;
 
     l->img = GenImageColor(w, h, BLANK);
     l->txt = LoadTextureFromImage(l->img);

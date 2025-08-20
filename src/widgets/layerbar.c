@@ -4,6 +4,7 @@
 #include "../include/components.h"
 #include "../include/options.h"
 #include "../include/utils.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -156,6 +157,7 @@ bool LayerItemDraw(
     if (openOpts) {
         lb->wLayerOpts.layer = layer;
         TextCopy(lb->wLayerOpts.name, layer->name);
+        lb->wLayerOpts.opacityVal = ((layer->opacity) * 100);
         lb->wLayerOpts.p.active = true;
     }
     GuiLabelButton(
@@ -373,7 +375,18 @@ int LayerBarDraw(LayerBarState *lb) {
         );
 
         if (lb->wLayerOpts.p.active) {
-            WLayerOpts(&lb->wLayerOpts);
+            WinStatus optStatus = WLayerOpts(&lb->wLayerOpts);
+            if (optStatus == WIN_OK) {
+                lb->curLayer->opacity = (lb->wLayerOpts.opacityVal / 100.0f);
+                if (!TextIsEqual(lb->curLayer->name, lb->wLayerOpts.name)) {
+                    free(lb->curLayer->name);
+                    lb->curLayer->name = MakeString(lb->wLayerOpts.name);
+                }
+                lb->wLayerOpts.p.active = false;
+            }
+            if (optStatus != WIN_NONE) {
+                lb->wLayerOpts.p.active = false;
+            }
         }
     }
     return -1;

@@ -10,6 +10,7 @@ typedef struct LayerObj {
     int mode;
     char *name;
     bool visible;
+    float opacity;
 } LayerObj;
 
 LayerObj *NewLayerObj(int w, int h);
