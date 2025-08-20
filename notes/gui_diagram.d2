@@ -1,0 +1,57 @@
+vars: {
+  d2-config: {
+    theme-id: 3
+    sketch: true
+  }
+}
+
+BauriPixel: {
+  Gui
+
+  Canvas: {
+    Props
+    PreviewImage
+    DrawingImage
+
+    CurrentTool
+  }
+
+  DrawToolBar: {
+    Props
+    CurrentTool
+  }
+
+  LayerBar: {
+    LayerObject: {
+      Image
+    }
+  }
+
+  Widgets: {
+    Canvas
+    DrawToolBar
+    ColorBar
+    Menubar
+    StatusBar
+    LayerBar
+  }
+
+  Tab: {
+    Tab_States
+  }
+
+  Gui -> Tab
+  Gui -> Widgets.Menubar
+  Gui -> Widgets.StatusBar
+
+  Tab.Tab_States -> Widgets.Canvas
+  Tab.Tab_States -> Widgets.DrawToolBar
+  Tab.Tab_States -> Widgets.ColorBar
+  Tab.Tab_States -> Widgets.LayerBar
+
+  Widgets.Canvas -> Canvas
+  Widgets.LayerBar -> LayerBar
+  Widgets.DrawToolBar -> DrawToolBar
+  Canvas.DrawingImage -> LayerBar.LayerObject.Image
+  Canvas.CurrentTool -> DrawToolBar.CurrentTool
+}
