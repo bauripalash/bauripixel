@@ -152,9 +152,7 @@ bool LayerItemDraw(
             Rectangle upperBounds = {
                 bounds.x, bounds.y, bounds.width, halfHeight
             };
-            if (CheckCollisionPointRec(mpos, upperBounds)) {
-                dragAbove = true;
-            } else {
+            if (!CheckCollisionPointRec(mpos, upperBounds)) {
                 dragAbove = false;
             }
         } else {
@@ -191,7 +189,7 @@ bool LayerItemDraw(
         nameBounds.height
     };
 
-    GuiLabel(layerNameRect, layer->name);
+    GuiLabel(layerNameRect, TextFormat("#%d %s", layer->index, layer->name));
 
     if (CheckCollisionPointRec(mpos, layerNameRect) &&
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked) {
@@ -497,6 +495,7 @@ int LayerBarDraw(LayerBarState *lb) {
         EndScissorMode();
 
         if (lb->draggingLayer && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+
             lb->draggingLayer = false;
             lb->dragLayer = NULL;
         }

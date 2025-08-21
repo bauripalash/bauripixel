@@ -176,3 +176,22 @@ bool DuplicateIdxLayerList(LayerList *list, int index) {
 
     return true;
 }
+
+bool MoveIdxLayerList(LayerList *list, int from, int to) {
+    int len = arrlen(list->layers);
+    if (list == NULL || from < 0 || from >= len || to < 0) {
+        return false;
+    }
+
+    LayerObj *lr = list->layers[from];
+    arrdel(list->layers, from);
+    if (to >= len) {
+        arrput(list->layers, lr);
+    } else {
+        arrins(list->layers, to, lr);
+    }
+
+    syncLayerIndex(list);
+
+    return true;
+}
