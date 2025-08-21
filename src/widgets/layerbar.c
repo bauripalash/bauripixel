@@ -44,6 +44,10 @@ LayerBarState NewLayerBar() {
     lb.layersRect = (Rectangle){0};
     lb.wLayerOpts = NewWLayerOpts();
 
+    lb.menuSelLayer = NULL;
+    lb.menuOpen = false;
+    lb.menuPos = Vector2Zero();
+
     return lb;
 }
 
@@ -108,6 +112,7 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
 #define LAYER_NAME_WIDTH  200
 
 #define LAYER_ITEM_MARGIN 5
+
 bool LayerItemDraw(
     LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
 ) {
@@ -124,7 +129,11 @@ bool LayerItemDraw(
     };
 
     bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
-    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    bool clicked = hover && (IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+
+    if (hover && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        lb->menuSelLayer = layer;
+    }
 
     Rectangle layerToolBounds = {
         bounds.x + 5, bounds.y, bounds.height * 3, bounds.height
@@ -285,10 +294,49 @@ void DrawScrollBars(LayerBarState *lb, Rectangle content) {
     }
 }
 
+#define MENU_HEIGHT  200
+#define MENU_WIDTH   100
+#define MENU_PADDING 5
+int CtxMenu(LayerBarState *lb) {
+    bool locked = GuiIsLocked();
+    Vector2 mpos = GetMousePosition();
+    Rectangle rect = {lb->menuPos.x, lb->menuPos.y, MENU_WIDTH, MENU_HEIGHT};
+
+    float bottomPos = rect.y + rect.height;
+    float screenH = GetScreenHeight();
+    if (bottomPos >= screenH) {
+        float diff = bottomPos - screenH;
+        rect.y -= diff + LB_MARGIN_TB;
+        lb->menuPos.y = rect.y;
+    }
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+        !CheckCollisionPointRec(mpos, rect) && !locked) {
+        lb->menuOpen = false;
+        lb->menuSelLayer = NULL;
+    }
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && lb->menuOpen &&
+        !CheckCollisionPointRec(mpos, rect) && !locked) {
+        lb->menuOpen = false;
+        lb->menuSelLayer = NULL;
+    }
+
+    BpPanelBorder(rect, 2);
+    Rectangle labelRect = {
+        rect.x + MENU_PADDING, rect.y + MENU_PADDING, rect.width, 24
+    };
+    if (lb->menuSelLayer != NULL) {
+        GuiLabel(labelRect, TextFormat("%s", lb->menuSelLayer->name));
+    }
+    return -1;
+}
+
 int LayerBarDraw(LayerBarState *lb) {
     if (lb->p.active) {
         lb->anypopup = lb->wLayerOpts.p.active;
         bool locked = GuiIsLocked();
+        Vector2 mpos = GetMousePosition();
 
         Rectangle bounds = lb->p.bounds;
         Rectangle usableBounds = lb->usableRect;
@@ -371,6 +419,18 @@ int LayerBarDraw(LayerBarState *lb) {
             lb, (Rectangle){0, 0, layersBounds.width,
                             (LAYER_ITEM_HEIGHT)*lb->list->count}
         );
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !locked) {
+            lb->menuOpen = !lb->menuOpen;
+            if (lb->menuOpen) {
+                lb->menuPos.x = mpos.x;
+                lb->menuPos.y = mpos.y;
+            }
+        }
+
+        if (lb->menuOpen) {
+            CtxMenu(lb);
+        }
 
         if (lb->wLayerOpts.p.active) {
             WinStatus optStatus = WLayerOpts(&lb->wLayerOpts);

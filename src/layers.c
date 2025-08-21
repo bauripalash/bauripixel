@@ -49,6 +49,33 @@ void SyncImgLayerObj(LayerObj *layer) {
     UpdateTexture(layer->txt, layer->img.data);
 }
 
+LayerObj *DuplicateLayerObj(const LayerObj *layer) {
+    LayerObj *l = malloc(sizeof(LayerObj));
+    if (l == NULL) {
+        return NULL;
+    }
+    l->index = layer->index;
+    l->mode = layer->mode;
+    if (layer->name == NULL) {
+        l->name = MakeString("Duplicate Layer");
+    } else {
+        l->name = MakeString(TextFormat("%s (Copy)", layer->name));
+    }
+
+    if (l->name == NULL) {
+        free(l);
+        return NULL;
+    }
+
+    l->visible = layer->visible;
+    l->opacity = layer->opacity;
+
+    l->img = ImageCopy(layer->img);
+    l->txt = LoadTextureFromImage(l->img);
+
+    return l;
+}
+
 LayerList *NewLayerList(int w, int h) {
     LayerList *ll = malloc(sizeof(LayerList));
     if (ll == NULL) {

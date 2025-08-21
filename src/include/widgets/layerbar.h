@@ -35,6 +35,10 @@ typedef struct LayerBarState {
     WLayerOptsState wLayerOpts;
     bool anypopup;
 
+    LayerObj *menuSelLayer;
+    bool menuOpen;
+    Vector2 menuPos;
+
 } LayerBarState;
 
 LayerBarState NewLayerBar();

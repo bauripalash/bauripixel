@@ -16,6 +16,7 @@ typedef struct LayerObj {
 LayerObj *NewLayerObj(int w, int h);
 void FreeLayerObj(LayerObj *layer);
 void SyncImgLayerObj(LayerObj *layer);
+LayerObj *DuplicateLayerObj(const LayerObj *layer);
 
 typedef struct LayerList {
     LayerObj **layers;
