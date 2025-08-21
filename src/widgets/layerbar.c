@@ -4,7 +4,6 @@
 #include "../include/components.h"
 #include "../include/options.h"
 #include "../include/utils.h"
-#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -47,6 +46,9 @@ LayerBarState NewLayerBar() {
     lb.menuSelLayer = NULL;
     lb.menuOpen = false;
     lb.menuPos = Vector2Zero();
+
+    lb.draggingLayer = false;
+    lb.dragLayer = NULL;
 
     return lb;
 }
@@ -112,7 +114,8 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
 #define LAYER_NAME_WIDTH  200
 
 #define LAYER_ITEM_MARGIN 5
-
+static int dragTarget = 0;
+static bool dragAbove = true;
 bool LayerItemDraw(
     LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
 ) {
@@ -130,10 +133,7 @@ bool LayerItemDraw(
 
     bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
     bool clicked = hover && (IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
-
-    if (hover && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-        lb->menuSelLayer = layer;
-    }
+    float halfHeight = bounds.height / 2.0f;
 
     Rectangle layerToolBounds = {
         bounds.x + 5, bounds.y, bounds.height * 3, bounds.height
@@ -145,11 +145,36 @@ bool LayerItemDraw(
     BpPanelBorder(bounds, 2);
     BpPanelBorder(nameBounds, 2);
 
+    if (hover && (lb->draggingLayer)) {
+        dragTarget = layer->index;
+        if (layer->index + 1 ==
+            lb->list->count) { // Only make the upper lower for last layer
+            Rectangle upperBounds = {
+                bounds.x, bounds.y, bounds.width, halfHeight
+            };
+            if (CheckCollisionPointRec(mpos, upperBounds)) {
+                dragAbove = true;
+            } else {
+                dragAbove = false;
+            }
+        } else {
+            dragAbove = true;
+        }
+    }
+
+    if (hover && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+        lb->menuSelLayer = layer;
+    }
+
     float btnSize = 25;
+    Rectangle optsBtn = {
+        layerToolBounds.x, layerToolBounds.y, btnSize, layerToolBounds.height
+    };
+    float optsInc = btnSize + 2;
 
     bool visibility =
         GuiLabelButton(
-            (Rectangle){layerToolBounds.x, bounds.y, btnSize, bounds.height},
+            optsBtn,
             GuiIconText(layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, NULL)
         ) != 0;
 
@@ -157,28 +182,23 @@ bool LayerItemDraw(
         layer->visible = !layer->visible;
     }
 
-    bool openOpts = GuiLabelButton(
-                        (Rectangle){layerToolBounds.x + btnSize, bounds.y,
-                                    btnSize, bounds.height},
-                        GuiIconText(ICON_GEAR_BIG, NULL)
-                    ) != 0;
+    optsBtn.x += optsInc;
 
-    if (openOpts && !lb->wLayerOpts.p.active) {
-        SetupWLayerOpts(&lb->wLayerOpts, layer);
-        lb->wLayerOpts.p.active = true;
+    bool lock = GuiLabelButton(optsBtn, GuiIconText(ICON_LOCK_OPEN, NULL)) != 0;
+    optsBtn.x += optsInc;
+    Rectangle layerNameRect = {
+        optsBtn.x, optsBtn.y, nameBounds.width - (optsInc * 2),
+        nameBounds.height
+    };
+
+    GuiLabel(layerNameRect, layer->name);
+
+    if (CheckCollisionPointRec(mpos, layerNameRect) &&
+        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked) {
+        lb->draggingLayer = true;
+        lb->dragLayer = layer;
     }
-    GuiLabelButton(
-        (Rectangle){layerToolBounds.x + btnSize * 2, bounds.y, btnSize,
-                    bounds.height},
-        GuiIconText(ICON_BURGER_MENU, NULL)
-    );
 
-    GuiLabelButton(
-        (Rectangle){nameBounds.x + btnSize * 3, nameBounds.y,
-                    nameBounds.width - layerToolBounds.width,
-                    nameBounds.height},
-        layer->name
-    );
     OptThemeSet(T_PANEL_BORDER, ogBorder);
 
     return clicked;
@@ -294,13 +314,26 @@ void DrawScrollBars(LayerBarState *lb, Rectangle content) {
     }
 }
 
-#define MENU_HEIGHT  300
-#define MENU_WIDTH   150
-#define MENU_PADDING 5
-int CtxMenu(LayerBarState *lb) {
+#define MENU_HEIGHT_LAYER  120
+#define MENU_HEIGHT_GLOBAL 200
+#define MENU_WIDTH         150
+#define MENU_ITEM_HEIGHT   18
+#define MENU_PADDING       5
+
+typedef enum CtxMenuResult {
+    CMR_NONE = 0,
+    CMR_CLOSE = 1,
+} CtxMenuResult;
+
+CtxMenuResult CtxMenu(LayerBarState *lb) {
+    CtxMenuResult result = CMR_NONE;
     bool locked = GuiIsLocked();
     Vector2 mpos = GetMousePosition();
-    Rectangle rect = {lb->menuPos.x, lb->menuPos.y, MENU_WIDTH, MENU_HEIGHT};
+    bool hasLayer = lb->menuSelLayer != NULL;
+
+    float panelHeight = hasLayer ? MENU_HEIGHT_LAYER : MENU_HEIGHT_GLOBAL;
+
+    Rectangle rect = {lb->menuPos.x, lb->menuPos.y, MENU_WIDTH, panelHeight};
 
     float bottomPos = rect.y + rect.height;
     float screenH = GetScreenHeight();
@@ -312,25 +345,57 @@ int CtxMenu(LayerBarState *lb) {
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
         !CheckCollisionPointRec(mpos, rect) && !locked) {
-        lb->menuOpen = false;
-        lb->menuSelLayer = NULL;
+        result = CMR_CLOSE;
     }
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && lb->menuOpen &&
         !CheckCollisionPointRec(mpos, rect) && !locked) {
-        lb->menuOpen = false;
-        lb->menuSelLayer = NULL;
+        result = CMR_CLOSE;
     }
 
     BpPanelBorder(rect, 2);
     Rectangle labelRect = {
         rect.x + MENU_PADDING, rect.y + MENU_PADDING,
-        rect.width - MENU_PADDING * 2, 18
+        rect.width - MENU_PADDING * 2, MENU_ITEM_HEIGHT
     };
+    float yInc = MENU_ITEM_HEIGHT + MENU_PADDING;
     if (lb->menuSelLayer != NULL) {
-        BpLabelButton(labelRect, GuiIconText(ICON_LAYERS2, "Properties"));
+        if (BpLabelButton(labelRect, "Properties")) {
+            SetupWLayerOpts(&lb->wLayerOpts, lb->menuSelLayer);
+            lb->wLayerOpts.p.active = true;
+            result = CMR_CLOSE;
+        }
+
+        labelRect.y += yInc;
+
+        DrawLineEx(
+            (Vector2){rect.x, labelRect.y},
+            (Vector2){rect.x + rect.width, labelRect.y}, 2,
+            GetColor(OptThemeGet(T_PANEL_BORDER))
+        );
+        labelRect.y += MENU_PADDING;
+
+        if (BpLabelButton(labelRect, "New Layer")) {
+            // Create a new layer and push it to index after the selLayer
+            result = CMR_CLOSE;
+        }
+
+        labelRect.y += yInc;
+        if (BpLabelButton(labelRect, "Duplicate Layer")) {
+            // Duplicate and push it index after
+            DuplicateIdxLayerList(lb->list, lb->menuSelLayer->index);
+            result = CMR_CLOSE;
+        }
+        labelRect.y += yInc;
+        if (BpLabelButton(labelRect, "Delete Layer")) {
+            LayerObj *lr =
+                RemoveIdxLayerList(lb->list, lb->menuSelLayer->index);
+            TraceLog(LOG_ERROR, "count -> %d", lb->list->count);
+            FreeLayerObj(lr);
+            result = CMR_CLOSE;
+        }
     }
-    return -1;
+    return result;
 }
 
 int LayerBarDraw(LayerBarState *lb) {
@@ -377,8 +442,6 @@ int LayerBarDraw(LayerBarState *lb) {
         float px = layersBounds.x + LAYER_ITEM_MARGIN;
         float py = layersBounds.y + LAYER_ITEM_MARGIN;
         float pyinc = LAYER_ITEM_HEIGHT - 1;
-        // GuiScrollPanel(layersBounds, NULL, layerContentRect, &lb->scroll,
-        // &lb->view);
 
         BeginScissorMode(
             layersBounds.x, layersBounds.y, layersBounds.width,
@@ -406,6 +469,24 @@ int LayerBarDraw(LayerBarState *lb) {
                                 LAYER_ITEM_HEIGHT};
             }
 
+            // Drawing the drag mark
+            if (dragTarget == lr->index && lb->draggingLayer) {
+                float ypos =
+                    py -
+                    lb->scroll
+                        .y; // For drag above (every layer except the last one)
+                if (!dragAbove) {
+                    ypos = (py - lb->scroll.y) + LAYER_ITEM_HEIGHT - 8;
+                }
+
+                DrawRectangleRec(
+                    (Rectangle){px - lb->scroll.x, ypos,
+                                lb->layersRect.width - LAYER_ITEM_MARGIN * 2,
+                                8},
+                    BpColorSetAlpha(ColorVGreen, 200)
+                );
+            }
+
             py += pyinc;
         }
         int ogBorder =
@@ -414,6 +495,27 @@ int LayerBarDraw(LayerBarState *lb) {
         OptThemeSet(T_PANEL_BORDER, ogBorder);
 
         EndScissorMode();
+
+        if (lb->draggingLayer && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            lb->draggingLayer = false;
+            lb->dragLayer = NULL;
+        }
+
+        // AutoScrolling when dragging
+        if (lb->draggingLayer && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            if (mpos.y < lb->layersRect.y) {
+                lb->scroll.y -= 200 * GetFrameTime();
+            }
+            if (mpos.y > lb->layersRect.y + lb->layersRect.height) {
+                lb->scroll.y += 200 * GetFrameTime();
+            }
+
+            GuiLabel(
+                (Rectangle){mpos.x, mpos.y, LAYER_NAME_WIDTH,
+                            LAYER_ITEM_HEIGHT},
+                lb->dragLayer->name
+            );
+        }
 
         layerContentRect.height = py - layerContentRect.height;
         DrawScrollBars(
@@ -431,10 +533,21 @@ int LayerBarDraw(LayerBarState *lb) {
         }
 
         if (lb->menuOpen) {
-            CtxMenu(lb);
+            if (!locked && IsKeyPressed(KEY_ESCAPE)) {
+                lb->menuSelLayer = NULL;
+                lb->menuOpen = false;
+            }
+            CtxMenuResult ctxRes = CtxMenu(lb);
+            if (ctxRes == CMR_CLOSE) {
+                lb->menuSelLayer = NULL;
+                lb->menuOpen = false;
+            }
         }
 
         if (lb->wLayerOpts.p.active) {
+            if (!locked && IsKeyPressed(KEY_ESCAPE)) {
+                lb->wLayerOpts.p.active = false;
+            }
             WinStatus optStatus = WLayerOpts(&lb->wLayerOpts);
             if (optStatus == WIN_OK) {
                 lb->curLayer->opacity = (lb->wLayerOpts.opacityVal / 100.0f);

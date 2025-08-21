@@ -23,13 +23,13 @@ void LayoutLogic(Gui *gui);
 static int frameCounter = 0;
 
 int RunApp() {
-
     SetTraceLogLevel(LOG_WARNING);
     SetConfigFlags(
         FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE
     );
     InitWindow(DEF_WIN_WIDTH, DEF_WIN_HEIGHT, "BauriPixel");
-    SetWindowState(FLAG_WINDOW_MAXIMIZED);
+    // SetWindowState(FLAG_WINDOW_MAXIMIZED);
+    SetExitKey(KEY_NULL);
 
     SetWindowMinSize(DEF_MIN_WIN_WIDTH, DEF_MIN_WIN_HEIGHT);
     SetTargetFPS(60);

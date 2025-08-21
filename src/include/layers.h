@@ -26,6 +26,7 @@ typedef struct LayerList {
 LayerList *NewLayerList(int w, int h);
 void FreeLayerList(LayerList *list);
 void AddToLayerList(LayerList *list, LayerObj *layer);
-void RemoveIdxLayerList(LayerList *list, int index);
+LayerObj *RemoveIdxLayerList(LayerList *list, int index);
+bool DuplicateIdxLayerList(LayerList *list, int index);
 
 #endif // LAYERS_H

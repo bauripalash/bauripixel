@@ -46,7 +46,12 @@ WinStatus WLayerOpts(WLayerOptsState *state) {
         }
 
         if (BpSimpleWindow(
-                bounds, GuiIconText(ICON_LAYERS, "Layer Settings")
+                bounds, GuiIconText(
+                            ICON_LAYERS, TextFormat(
+                                             "Layer Settings #%d : %s",
+                                             state->layer->index, state->ogName
+                                         )
+                        )
             )) {
             result = WIN_CLOSE;
         }

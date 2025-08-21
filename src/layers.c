@@ -128,4 +128,51 @@ void AddToLayerList(LayerList *list, LayerObj *layer) {
     arrput(list->layers, layer);
     list->count++;
 }
-void RemoveIdxLayerList(LayerList *list, int index) { return; }
+
+void syncLayerIndex(LayerList *list) {
+    int len = arrlen(list->layers);
+    TraceLog(LOG_WARNING, "When Sync -> Count %d", len);
+    for (int i = 0; i < len; i++) {
+        LayerObj *lr = list->layers[i];
+        if (lr != NULL) {
+            lr->index = i;
+        }
+    }
+
+    list->count = len;
+}
+
+LayerObj *RemoveIdxLayerList(LayerList *list, int index) {
+    if (index < 0 || index >= list->count) {
+        return NULL;
+    }
+
+    LayerObj *lr = list->layers[index];
+    arrdel(list->layers, index);
+    syncLayerIndex(list);
+    return lr;
+}
+
+bool DuplicateIdxLayerList(LayerList *list, int index) {
+    if (index < 0 || index >= list->count) {
+        return false;
+    }
+
+    LayerObj *lr = list->layers[index];
+    LayerObj *dupLr = DuplicateLayerObj(lr);
+    dupLr->index += 1;
+
+    if (dupLr == NULL) {
+        return false;
+    }
+
+    if (index == (list->count - 1)) {
+        arrput(list->layers, dupLr);
+    } else {
+        arrins(list->layers, dupLr->index, dupLr);
+    }
+
+    syncLayerIndex(list);
+
+    return true;
+}

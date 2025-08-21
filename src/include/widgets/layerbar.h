@@ -39,6 +39,9 @@ typedef struct LayerBarState {
     bool menuOpen;
     Vector2 menuPos;
 
+    bool draggingLayer;
+    LayerObj *dragLayer;
+
 } LayerBarState;
 
 LayerBarState NewLayerBar();
