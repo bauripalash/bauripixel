@@ -25,6 +25,7 @@ bool BpDToolButton(
 
 bool BpToggleButton(Rectangle bounds, int thick, bool active);
 bool BpSimpleButton(Rectangle bounds, int thick);
+bool BpLabelButton(Rectangle bounds, const char *text);
 
 int BpTabItem(
     Rectangle bounds, const char *name, int index, float tabWidth, bool active

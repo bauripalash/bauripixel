@@ -6,6 +6,7 @@
 #include "../include/defaults.h"
 #include "../include/utils.h"
 #include <stdbool.h>
+#include <string.h>
 
 #define MENUBAR_PADDING 5
 
@@ -123,11 +124,10 @@ MenuAction MenuBar(MenuBarState *state) {
     for (int mi = 0; mi < menuCount; mi++) {
 
         const char *menuT = state->menus[mi].name;
-        Rectangle btnRect = {
-            posX, rect.y, MeasureTextEx(font, menuT, fontSize, 0).x, rect.height
-        };
+        float btnWidth = 38;
+        Rectangle btnRect = {posX, rect.y, btnWidth, 20};
 
-        bool clkd = GuiLabelButton(btnRect, menuT) != 0;
+        bool clkd = BpLabelButton(btnRect, menuT) != 0;
         if (clkd) {
             for (int i = 0; i < menuCount; i++) {
                 state->menus[i].active = false;

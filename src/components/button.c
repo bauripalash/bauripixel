@@ -8,6 +8,25 @@
 
 #define ICON_WIDTH 32
 
+bool BpLabelButton(Rectangle bounds, const char *text) {
+    bool locked = GuiIsLocked();
+    Vector2 mpos = GetMousePosition();
+    bool hover = !locked && CheckCollisionPointRec(mpos, bounds);
+    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    Color bg = BLANK;
+    int labelFG = GuiGetStyle(LABEL, TEXT_COLOR_NORMAL);
+    if (hover) {
+        bg = ColorVWhite;
+        GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, OptThemeGet(T_PANEL_BG));
+    }
+    DrawRectangleRec(bounds, bg);
+    GuiLabel(bounds, text);
+
+    GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, labelFG);
+
+    return clicked;
+}
+
 bool BpToggleButton(Rectangle bounds, int thick, bool active) {
     int clrBorder = OptThemeGet(T_TOGGLE_BRDR);
     int clrBg = OptThemeGet(T_TOGGLE_BG);

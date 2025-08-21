@@ -294,8 +294,8 @@ void DrawScrollBars(LayerBarState *lb, Rectangle content) {
     }
 }
 
-#define MENU_HEIGHT  200
-#define MENU_WIDTH   100
+#define MENU_HEIGHT  300
+#define MENU_WIDTH   150
 #define MENU_PADDING 5
 int CtxMenu(LayerBarState *lb) {
     bool locked = GuiIsLocked();
@@ -324,10 +324,11 @@ int CtxMenu(LayerBarState *lb) {
 
     BpPanelBorder(rect, 2);
     Rectangle labelRect = {
-        rect.x + MENU_PADDING, rect.y + MENU_PADDING, rect.width, 24
+        rect.x + MENU_PADDING, rect.y + MENU_PADDING,
+        rect.width - MENU_PADDING * 2, 18
     };
     if (lb->menuSelLayer != NULL) {
-        GuiLabel(labelRect, TextFormat("%s", lb->menuSelLayer->name));
+        BpLabelButton(labelRect, GuiIconText(ICON_LAYERS2, "Properties"));
     }
     return -1;
 }
@@ -420,7 +421,8 @@ int LayerBarDraw(LayerBarState *lb) {
                             (LAYER_ITEM_HEIGHT)*lb->list->count}
         );
 
-        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && !locked) {
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
+            CheckCollisionPointRec(mpos, bounds) && !locked) {
             lb->menuOpen = !lb->menuOpen;
             if (lb->menuOpen) {
                 lb->menuPos.x = mpos.x;
