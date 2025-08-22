@@ -5,6 +5,7 @@
 #include "../include/components.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define SB_MARGIN_TB      5
 #define SB_MARGIN_LR      5
@@ -84,7 +85,7 @@ bool StatusBar(StatusBarState *state) {
             textPos.x += 5 + MeasureTextEx(font, colorText, fontSize, 0).x;
         }
 
-        if (state->layerbar->draggingLayer) {
+        if (state->layerbar->draggingLayer && state->layerbar->dragLayer != NULL) {
             int targetIndex = state->layerbar->dragTarget;
             const char *targetLayer =
                 state->layerbar->list->layers[targetIndex]->name;
