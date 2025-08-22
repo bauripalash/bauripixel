@@ -18,6 +18,7 @@ StatusBarState NewStatusBar() {
     sb.anchor = (Vector2){0, 0};
     sb.canvas = NULL;
     sb.colorbar = NULL;
+    sb.layerbar = NULL;
 
     return sb;
 }
@@ -81,6 +82,20 @@ bool StatusBar(StatusBarState *state) {
 
             DrawTextEx(font, colorText, textPos, fontSize, 0, textClr);
             textPos.x += 5 + MeasureTextEx(font, colorText, fontSize, 0).x;
+        }
+
+        if (state->layerbar->draggingLayer) {
+            int targetIndex = state->layerbar->dragTarget;
+            const char *targetLayer =
+                state->layerbar->list->layers[targetIndex]->name;
+            int selectIndex = state->layerbar->dragLayer->index;
+            const char *selectLayer = state->layerbar->dragLayer->name;
+            bool below = state->layerbar->putDragAtEnd;
+            const char *text = TextFormat(
+                "Moving layer '%s' %s '%s'", selectLayer,
+                below ? "below" : "above", targetLayer
+            );
+            DrawTextEx(font, text, textPos, fontSize, 0, textClr);
         }
 
         // drawBounds(state->prop.bounds);

@@ -52,6 +52,7 @@ int RunApp() {
 
     gui->state->statusbar.colorbar = &gui->curTab->state->cb;
     gui->state->statusbar.canvas = &gui->curTab->state->cvs;
+    gui->state->statusbar.layerbar = &gui->curTab->state->lb;
 
     SetStatusBarPosition(&gui->state->statusbar, 0, DEF_STATUSBAR_HEIGHT);
 

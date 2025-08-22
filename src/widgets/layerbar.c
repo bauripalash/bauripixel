@@ -1,5 +1,6 @@
 #include "../include/widgets/layerbar.h"
 #include "../external/raymath.h"
+#include "../external/stb/stb_ds.h"
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/options.h"
@@ -114,8 +115,6 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
 #define LAYER_NAME_WIDTH  200
 
 #define LAYER_ITEM_MARGIN 5
-static int dragTarget = 0;
-static bool dragAbove = true;
 bool LayerItemDraw(
     LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
 ) {
@@ -146,17 +145,12 @@ bool LayerItemDraw(
     BpPanelBorder(nameBounds, 2);
 
     if (hover && (lb->draggingLayer)) {
-        dragTarget = layer->index;
-        if (layer->index + 1 ==
-            lb->list->count) { // Only make the upper lower for last layer
-            Rectangle upperBounds = {
-                bounds.x, bounds.y, bounds.width, halfHeight
-            };
-            if (!CheckCollisionPointRec(mpos, upperBounds)) {
-                dragAbove = false;
-            }
+        lb->dragTarget = layer->index;
+        Rectangle upperBounds = {bounds.x, bounds.y, bounds.width, halfHeight};
+        if (CheckCollisionPointRec(mpos, upperBounds)) {
+            lb->putDragAtEnd = false;
         } else {
-            dragAbove = true;
+            lb->putDragAtEnd = true;
         }
     }
 
@@ -468,12 +462,10 @@ int LayerBarDraw(LayerBarState *lb) {
             }
 
             // Drawing the drag mark
-            if (dragTarget == lr->index && lb->draggingLayer) {
-                float ypos =
-                    py -
-                    lb->scroll
-                        .y; // For drag above (every layer except the last one)
-                if (!dragAbove) {
+            if (lb->dragTarget == lr->index && lb->draggingLayer) {
+                float ypos = py - lb->scroll.y;
+
+                if (lb->putDragAtEnd) {
                     ypos = (py - lb->scroll.y) + LAYER_ITEM_HEIGHT - 8;
                 }
 
@@ -496,6 +488,22 @@ int LayerBarDraw(LayerBarState *lb) {
 
         if (lb->draggingLayer && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 
+            int fromIndex = lb->dragLayer->index;
+            int toIndex = lb->dragTarget;
+
+            if (lb->putDragAtEnd) {
+                toIndex++;
+            }
+
+            toIndex = ClampInt(toIndex, 0, lb->list->count - 1);
+
+            if (lb->putDragAtEnd &&
+                lb->dragTarget == arrlen(lb->list->layers) - 1) {
+                MoveIdxBottomLayerList(lb->list, fromIndex);
+            } else {
+                MoveIdxLayerList(lb->list, fromIndex, toIndex);
+            }
+
             lb->draggingLayer = false;
             lb->dragLayer = NULL;
         }
@@ -512,7 +520,11 @@ int LayerBarDraw(LayerBarState *lb) {
             GuiLabel(
                 (Rectangle){mpos.x, mpos.y, LAYER_NAME_WIDTH,
                             LAYER_ITEM_HEIGHT},
-                lb->dragLayer->name
+                TextFormat(
+                    "%s | #%d -> %c #%d", lb->dragLayer->name,
+                    lb->dragLayer->index, lb->putDragAtEnd ? 'v' : '^',
+                    lb->dragTarget
+                )
             );
         }
 

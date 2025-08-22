@@ -41,6 +41,8 @@ typedef struct LayerBarState {
 
     bool draggingLayer;
     LayerObj *dragLayer;
+    int dragTarget;
+    bool putDragAtEnd;
 
 } LayerBarState;
 

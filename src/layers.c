@@ -179,18 +179,41 @@ bool DuplicateIdxLayerList(LayerList *list, int index) {
 
 bool MoveIdxLayerList(LayerList *list, int from, int to) {
     int len = arrlen(list->layers);
-    if (list == NULL || from < 0 || from >= len || to < 0) {
+    if (list == NULL || from < 0 || from >= len || to < 0 || to >= len) {
         return false;
+    }
+
+    if (from == to) {
+        return true;
     }
 
     LayerObj *lr = list->layers[from];
     arrdel(list->layers, from);
-    if (to >= len) {
-        arrput(list->layers, lr);
-    } else {
-        arrins(list->layers, to, lr);
+
+    if (to > from) {
+        to--; // fill the gap
     }
 
+    arrins(list->layers, to, lr);
+
+    syncLayerIndex(list);
+
+    return true;
+}
+
+bool MoveIdxBottomLayerList(LayerList *list, int idx) {
+    int len = arrlen(list->layers);
+
+    if (len == 1) {
+        return true;
+    }
+
+    if (list == NULL || idx < 0 || idx >= len) {
+        return false;
+    }
+    LayerObj *lr = list->layers[idx];
+    arrdel(list->layers, idx);
+    arrput(list->layers, lr);
     syncLayerIndex(list);
 
     return true;

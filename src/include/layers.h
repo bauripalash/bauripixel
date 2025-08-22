@@ -29,5 +29,6 @@ void AddToLayerList(LayerList *list, LayerObj *layer);
 LayerObj *RemoveIdxLayerList(LayerList *list, int index);
 bool DuplicateIdxLayerList(LayerList *list, int index);
 bool MoveIdxLayerList(LayerList *list, int from, int to);
+bool MoveIdxBottomLayerList(LayerList *list, int idx);
 
 #endif // LAYERS_H
