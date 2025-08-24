@@ -320,12 +320,12 @@ static void GuiLoadStyleBIOSfontII(void)
 
     // Copy char recs data from global fontRecs
     // NOTE: Required to avoid issues if trying to free font
-    font.recs = (Rectangle *)RAYGUI_MALLOC(font.glyphCount*sizeof(Rectangle));
+    font.recs = (Rectangle *)malloc(font.glyphCount*sizeof(Rectangle));
     memcpy(font.recs, biosfontiiFontRecs, font.glyphCount*sizeof(Rectangle));
 
     // Copy font char info data from global fontChars
     // NOTE: Required to avoid issues if trying to free font
-    font.glyphs = (GlyphInfo *)RAYGUI_MALLOC(font.glyphCount*sizeof(GlyphInfo));
+    font.glyphs = (GlyphInfo *)malloc(font.glyphCount*sizeof(GlyphInfo));
     memcpy(font.glyphs, biosfontiiFontGlyphs, font.glyphCount*sizeof(GlyphInfo));
 
     GuiSetFont(font);
