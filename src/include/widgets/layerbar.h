@@ -11,10 +11,13 @@ typedef struct LayerBarState {
     WidgetProp p;
     Vector2 anchor;
     Vector2 bottom;
+    // Should the layer preview
     bool preview;
 
     Rectangle usableRect;
+    // Where the the toolbar of layerbar will be
     Rectangle toolsRect;
+    // Where the layer list will be drawn
     Rectangle layersRect;
 
     Rectangle vScrollRect;
@@ -22,26 +25,47 @@ typedef struct LayerBarState {
     bool vScrollDragging;
     bool hScrollDragging;
 
+    // Current gridsize of project (canvas)
     Vector2 gridSize;
+    // Layer list (comes from tab)
     LayerList *list;
+    // Current layer (comes from Tab object)
+    // Incoming <<
     LayerObj *curLayer;
-    LayerObj *selLayer;
+
+    // Selected layer (is used by tab to set current layer)
+    // Outgoing >>
+    LayerObj *selectedLayer;
+
+    // Background image from canvas widget
     Texture2D *previewBg;
 
+    // Used from layer list scrolling
     Vector2 scroll;
+    // Used layerlist view for scissor view
     Rectangle view;
 
     bool resizeDragging;
+
+    // Layer options state
     WLayerOptsState wLayerOpts;
+
+    // If any popup is active
     bool anypopup;
 
+    // Right click selected layer from menu
     LayerObj *menuSelLayer;
     bool menuOpen;
     Vector2 menuPos;
 
+    // Is a layer is being dragged
     bool draggingLayer;
+    // The layer being dragged
     LayerObj *dragLayer;
+
+    // The layer index where the dragged layer is going to be
     int dragTarget;
+    // Will the dragged layer be put below the `dragTarget` indexed layer
     bool putDragAtEnd;
 
 } LayerBarState;

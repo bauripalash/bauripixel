@@ -135,8 +135,8 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         tab->state->cvs.current = tab->state->cb.currentColor;
     }
 
-    if (tab->state->lb.selLayer->index != tab->curLayer->index) {
-        tab->curLayer = tab->state->lb.selLayer;
+    if (tab->state->lb.selectedLayer->index != tab->curLayer->index) {
+        tab->curLayer = tab->state->lb.selectedLayer;
     }
 
     if (tab->setupDone) {
@@ -199,7 +199,7 @@ TabObj *NewTabObj(int w, int h) {
     UpdateCanvasLayers(&t->state->cvs, t->layers, t->curLayer);
     t->state->lb.list = t->layers;
     t->state->lb.curLayer = t->curLayer;
-    t->state->lb.selLayer = t->curLayer;
+    t->state->lb.selectedLayer = t->curLayer;
     t->index = 0;
 
     t->canvasWidth = w;

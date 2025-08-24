@@ -26,7 +26,7 @@ LayerBarState NewLayerBar() {
     lb.preview = true;
     lb.list = NULL;
     lb.curLayer = NULL;
-    lb.selLayer = NULL;
+    lb.selectedLayer = NULL;
 
     lb.scroll = (Vector2){0};
     lb.view = (Rectangle){0};
@@ -108,20 +108,36 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
     updateBounds(lb);
 }
 
+static bool createNewLayer(LayerBarState *lb, LayerObj *targetLayer) {
+    LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
+    if (newLayer == NULL) {
+        return false;
+    }
+
+    newLayer->index = lb->list->count;
+    newLayer->name = MakeString(TextFormat("Layer %d", newLayer->index));
+
+    AddToLayerList(
+        lb->list, newLayer
+    ); // here the new layer will be added to the end
+
+    if (targetLayer != NULL) {
+        MoveIdxLayerList(lb->list, newLayer->index, targetLayer->index + 1);
+    }
+
+    return true;
+}
+
 #define HANDLE_THICKNESS  20
-
 #define LAYER_ITEM_HEIGHT 35
-
 #define LAYER_NAME_WIDTH  200
-
 #define LAYER_ITEM_MARGIN 5
+
 bool LayerItemDraw(
     LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
 ) {
     int ogBorder = OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_BRDR));
-    Font f = GuiGetFont();
     bool locked = GuiIsLocked();
-    int fontSize = f.baseSize;
 
     Vector2 mpos = GetMousePosition();
 
@@ -209,7 +225,6 @@ int LayerBarLogic(LayerBarState *lb) {
 
         Vector2 mpos = GetMousePosition();
 
-        bool atBounds = CheckCollisionPointRec(mpos, bounds);
         bool atHandle = CheckCollisionPointRec(mpos, handleRect);
 
         if (atHandle && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked) {
@@ -351,6 +366,7 @@ CtxMenuResult CtxMenu(LayerBarState *lb) {
         rect.width - MENU_PADDING * 2, MENU_ITEM_HEIGHT
     };
     float yInc = MENU_ITEM_HEIGHT + MENU_PADDING;
+
     if (lb->menuSelLayer != NULL) {
         if (BpLabelButton(labelRect, "Properties")) {
             SetupWLayerOpts(&lb->wLayerOpts, lb->menuSelLayer);
@@ -369,6 +385,7 @@ CtxMenuResult CtxMenu(LayerBarState *lb) {
 
         if (BpLabelButton(labelRect, "New Layer")) {
             // Create a new layer and push it to index after the selLayer
+            createNewLayer(lb, lb->menuSelLayer);
             result = CMR_CLOSE;
         }
 
@@ -376,6 +393,8 @@ CtxMenuResult CtxMenu(LayerBarState *lb) {
         if (BpLabelButton(labelRect, "Duplicate Layer")) {
             // Duplicate and push it index after
             DuplicateIdxLayerList(lb->list, lb->menuSelLayer->index);
+            lb->curLayer =
+                GetLayerFromList(lb->list, lb->menuSelLayer->index + 1);
             result = CMR_CLOSE;
         }
         labelRect.y += yInc;
@@ -397,7 +416,6 @@ int LayerBarDraw(LayerBarState *lb) {
         Vector2 mpos = GetMousePosition();
 
         Rectangle bounds = lb->p.bounds;
-        Rectangle usableBounds = lb->usableRect;
 
         Rectangle toolBarBounds = lb->toolsRect;
 
@@ -410,11 +428,7 @@ int LayerBarDraw(LayerBarState *lb) {
                             toolBarBounds.height, toolBarBounds.height},
                 2, false
             )) {
-            LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
-            newLayer->index = lb->list->count;
-            newLayer->name =
-                MakeString(TextFormat("Layer %d", newLayer->index));
-            AddToLayerList(lb->list, newLayer);
+            createNewLayer(lb, NULL);
         }
 
         GuiDrawIcon(
@@ -450,7 +464,7 @@ int LayerBarDraw(LayerBarState *lb) {
                     lb, (Vector2){px - lb->scroll.x, py - lb->scroll.y}, lr,
                     isCur
                 )) {
-                lb->selLayer = lr;
+                lb->selectedLayer = lr;
             }
 
             if (isCur) {
@@ -462,7 +476,8 @@ int LayerBarDraw(LayerBarState *lb) {
             }
 
             // Drawing the drag mark
-            if (lb->dragTarget == lr->index && lb->draggingLayer) {
+            if (lb->dragTarget == lr->index && lb->draggingLayer &&
+                lb->dragTarget != lb->curLayer->index) {
                 float ypos = py - lb->scroll.y;
 
                 if (lb->putDragAtEnd) {
@@ -490,18 +505,19 @@ int LayerBarDraw(LayerBarState *lb) {
 
             int fromIndex = lb->dragLayer->index;
             int toIndex = lb->dragTarget;
+            if (fromIndex != toIndex) {
+                if (lb->putDragAtEnd) {
+                    toIndex++;
+                }
 
-            if (lb->putDragAtEnd) {
-                toIndex++;
-            }
+                toIndex = ClampInt(toIndex, 0, lb->list->count - 1);
 
-            toIndex = ClampInt(toIndex, 0, lb->list->count - 1);
-
-            if (lb->putDragAtEnd &&
-                lb->dragTarget == arrlen(lb->list->layers) - 1) {
-                MoveIdxBottomLayerList(lb->list, fromIndex);
-            } else {
-                MoveIdxLayerList(lb->list, fromIndex, toIndex);
+                if (lb->putDragAtEnd &&
+                    lb->dragTarget == arrlen(lb->list->layers) - 1) {
+                    MoveIdxBottomLayerList(lb->list, fromIndex);
+                } else {
+                    MoveIdxLayerList(lb->list, fromIndex, toIndex);
+                }
             }
 
             lb->draggingLayer = false;
@@ -517,15 +533,17 @@ int LayerBarDraw(LayerBarState *lb) {
                 lb->scroll.y += 200 * GetFrameTime();
             }
 
-            GuiLabel(
-                (Rectangle){mpos.x, mpos.y, LAYER_NAME_WIDTH,
-                            LAYER_ITEM_HEIGHT},
-                TextFormat(
-                    "%s | #%d -> %c #%d", lb->dragLayer->name,
-                    lb->dragLayer->index, lb->putDragAtEnd ? 'v' : '^',
-                    lb->dragTarget
-                )
-            );
+            if (lb->dragTarget != lb->dragLayer->index) {
+                GuiLabel(
+                    (Rectangle){mpos.x, mpos.y, LAYER_NAME_WIDTH,
+                                LAYER_ITEM_HEIGHT},
+                    TextFormat(
+                        "%s | #%d -> %c #%d", lb->dragLayer->name,
+                        lb->dragLayer->index, lb->putDragAtEnd ? 'v' : '^',
+                        lb->dragTarget
+                    )
+                );
+            }
         }
 
         layerContentRect.height = py - layerContentRect.height;

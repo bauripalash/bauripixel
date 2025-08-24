@@ -4,7 +4,6 @@
 #include "../include/colors.h"
 #include "../include/components.h"
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #define SB_MARGIN_TB      5
@@ -85,16 +84,34 @@ bool StatusBar(StatusBarState *state) {
             textPos.x += 5 + MeasureTextEx(font, colorText, fontSize, 0).x;
         }
 
-        if (state->layerbar->draggingLayer && state->layerbar->dragLayer != NULL) {
+        if (state->layerbar->draggingLayer &&
+            state->layerbar->dragLayer != NULL) {
+
             int targetIndex = state->layerbar->dragTarget;
-            const char *targetLayer =
-                state->layerbar->list->layers[targetIndex]->name;
-            int selectIndex = state->layerbar->dragLayer->index;
-            const char *selectLayer = state->layerbar->dragLayer->name;
+            LayerObj *targetLayer =
+                GetLayerFromList(state->layerbar->list, targetIndex);
+            if (targetLayer == NULL) {
+                return false;
+            }
+
+            const char *targetName = targetLayer->name;
+            if (targetName == NULL || state->layerbar->dragLayer == NULL) {
+                return false;
+            }
+            LayerObj *selectLayer = state->layerbar->dragLayer;
+            int selectIndex = selectLayer->index;
+            const char *selectName = selectLayer->name;
+            if (selectName == NULL) {
+                return false;
+            }
+            if (selectIndex == targetIndex) {
+                return false;
+            }
             bool below = state->layerbar->putDragAtEnd;
+
             const char *text = TextFormat(
-                "Moving layer '%s' %s '%s'", selectLayer,
-                below ? "below" : "above", targetLayer
+                "Moving layer '%s' (#%d) %s '%s' (#%d)", selectName,
+                selectIndex, below ? "below" : "above", targetName, targetIndex
             );
             DrawTextEx(font, text, textPos, fontSize, 0, textClr);
         }

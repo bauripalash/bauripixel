@@ -30,5 +30,5 @@ LayerObj *RemoveIdxLayerList(LayerList *list, int index);
 bool DuplicateIdxLayerList(LayerList *list, int index);
 bool MoveIdxLayerList(LayerList *list, int from, int to);
 bool MoveIdxBottomLayerList(LayerList *list, int idx);
-
+LayerObj *GetLayerFromList(const LayerList *list, int index);
 #endif // LAYERS_H

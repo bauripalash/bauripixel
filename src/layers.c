@@ -131,7 +131,6 @@ void AddToLayerList(LayerList *list, LayerObj *layer) {
 
 void syncLayerIndex(LayerList *list) {
     int len = arrlen(list->layers);
-    TraceLog(LOG_WARNING, "When Sync -> Count %d", len);
     for (int i = 0; i < len; i++) {
         LayerObj *lr = list->layers[i];
         if (lr != NULL) {
@@ -217,4 +216,20 @@ bool MoveIdxBottomLayerList(LayerList *list, int idx) {
     syncLayerIndex(list);
 
     return true;
+}
+
+LayerObj *GetLayerFromList(const LayerList *list, int index) {
+    if (list == NULL) {
+        return NULL;
+    }
+
+    if (list->layers == NULL) {
+        return NULL;
+    }
+
+    if (index < 0 || index >= arrlen(list->layers)) {
+        return NULL;
+    }
+
+    return list->layers[index];
 }
