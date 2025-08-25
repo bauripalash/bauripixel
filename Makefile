@@ -31,6 +31,18 @@ cmake_setup:
 cmake_setup_clang:
 	cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang
 
+.PHONY: cmake_setup_web
+cmake_setup_web:
+	emcmake cmake -S . -B build-web -DPLATFORM=Web --log-level=VERBOSE
+	cp src/minshell.html build-web/
+
+.PHONY: cbuild_web
+cbuild_web:
+	cd build-web && emmake make
+
+.PHONE: web_serve
+web_serve:
+	cd build-web/bauripixel && python -m http.server
 
 .PHONY: zbuild
 zbuild:

@@ -52,4 +52,9 @@ float GetRadAngleAtoB(Vector2 a, Vector2 b);
 // Make Value of a Vector2 zero
 void MakeVecZero(Vector2 *vec);
 char *MakeString(const char *str);
+
+bool IsOsWeb();
+bool IsOsLinux();
+bool IsOsMac();
+bool IsOsWin();
 #endif

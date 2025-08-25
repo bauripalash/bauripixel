@@ -24,9 +24,12 @@ static int frameCounter = 0;
 
 int RunApp() {
     SetTraceLogLevel(LOG_WARNING);
+
+#ifndef BPM_OS_WEB
     SetConfigFlags(
         FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE
     );
+#endif
     InitWindow(DEF_WIN_WIDTH, DEF_WIN_HEIGHT, "BauriPixel");
     // SetWindowState(FLAG_WINDOW_MAXIMIZED);
     SetExitKey(KEY_NULL);
@@ -62,6 +65,10 @@ int RunApp() {
     while (!WindowShouldClose()) {
 
         if (IsWindowResized()) {
+        }
+
+        if (IsKeyDown(KEY_F11)) {
+            ToggleFullscreen();
         }
 
         LayoutLogic(gui);

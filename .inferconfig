@@ -2,6 +2,7 @@
     "skip-analysis-in-path": [
         "src/external/",
 		"src/include/exported",
-		"build/_deps/"
+		"build/_deps/",
+		"build-web/_deps"
     ]
 }

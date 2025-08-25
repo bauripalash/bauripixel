@@ -39,3 +39,32 @@ void MakeVecZero(Vector2 *vec) {
 }
 
 char *MakeString(const char *str) { return strdup(str); }
+
+bool IsOsWeb() {
+#ifdef BPM_OS_WEB
+    return true;
+#else
+    return false;
+#endif
+}
+bool IsOsLinux() {
+#ifdef BPM_OS_LINUX
+    return true;
+#else
+    return false;
+#endif
+}
+bool IsOsMac() {
+#ifdef BPM_OS_MAC
+    return true;
+#else
+    return false;
+#endif
+}
+bool IsOsWin() {
+#ifdef BPM_OS_WIN
+    return true;
+#else
+    return false;
+#endif
+}
