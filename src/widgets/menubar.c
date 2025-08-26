@@ -3,6 +3,7 @@
 #include "../external/raylib.h"
 #include "../include/components.h"
 #include "../include/defaults.h"
+#include "../include/colors.h"
 #include <stdbool.h>
 
 #define MENUBAR_PADDING 5
@@ -15,7 +16,8 @@
                  bounds.width - ENTRY_MARGIN * 2, state->font.baseSize})
 
 static TopMenuEntry TopMenus[TMENU_COUNT] = {
-    {"File", TMENU_FILE, 3, 200, false},
+    {"File", TMENU_FILE, 8, 150, false},
+	{"Edit", TMENU_EDIT, 10, 150, false},
     {"Help", TMENU_HELP, 1, 100, false},
 };
 
@@ -41,29 +43,62 @@ static void updateBounds(MenuBarState *state) {
     state->prop.bounds.width = GetScreenWidth();
     state->prop.bounds.height = state->height;
 }
+void drawSeparator(Rectangle bounds){
+	float y = bounds.y + (bounds.height / 2.0f) - 1;
+	DrawLineEx((Vector2){bounds.x + ENTRY_MARGIN,y}, (Vector2){bounds.x + bounds.width - ENTRY_MARGIN * 2, y}, 2, ColorBlack);
+}
+
+#define SimpleLabelBtnMenu(rect, text, action)\
+	if (BpLabelButton(rect, text)) {state->curMenu = TMENU_COUNT; return action;}
 
 MenuAction drawFileMenu(MenuBarState *state, Rectangle bounds) {
 
     BpPanelBorder(bounds, 2);
     Rectangle rect = MakeMenuRect();
-    if (BpLabelButton(rect, GuiIconText(ICON_FILE_NEW, "New"))) {
-        ResetMenu();
-        return MACTION_NEW_FILE;
-    }
-
+	SimpleLabelBtnMenu(rect, "New", MACTION_NEW_FILE);
     IncreaseItemY();
-    if (BpLabelButton(rect, GuiIconText(ICON_FILE_OPEN, "Open"))) {
-        ResetMenu();
-        return MACTION_OPEN_FILE;
-    }
-
+	SimpleLabelBtnMenu(rect, "Open", MACTION_OPEN_FILE);
     IncreaseItemY();
-    if (BpLabelButton(rect, GuiIconText(ICON_FILE_SAVE, "Save"))) {
-        ResetMenu();
-        return MACTION_SAVE_FILE;
-    }
+	SimpleLabelBtnMenu(rect, "Save", MACTION_SAVE_FILE);
+	IncreaseItemY();
+	drawSeparator(rect);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Import" , MACTION_IMPORT_FILE);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Export" , MACTION_EXPORT_FILE);
+	IncreaseItemY();
+	drawSeparator(rect);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Quit" , MACTION_QUIT);
+	IncreaseItemY();
 
     return MACTION_COUNT;
+}
+
+MenuAction drawEditMenu(MenuBarState * state, Rectangle bounds){
+	BpPanelBorder(bounds, 2);
+	Rectangle rect = MakeMenuRect();
+	SimpleLabelBtnMenu(rect, "Undo", MACTION_UNDO);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Redo", MACTION_REDO);
+	IncreaseItemY();
+	drawSeparator(rect);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Cut", MACTION_CUT);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Copy", MACTION_COPY);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Paste", MACTION_PASTE);
+	IncreaseItemY();
+	drawSeparator(rect);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Rotate", MACTION_ROTATE);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Flip Horizontal", MACTION_FLIP_H);
+	IncreaseItemY();
+	SimpleLabelBtnMenu(rect, "Flip Vertical", MACTION_FLIP_V);
+	IncreaseItemY();
+	return MACTION_COUNT;
 }
 
 MenuAction drawHelpMenu(MenuBarState *state, Rectangle bounds) {
@@ -88,6 +123,8 @@ MenuAction openMenuPanel(MenuBarState *state, TopMenuInfo m, Rectangle bounds) {
         return drawFileMenu(state, bounds);
     } else if (m == TMENU_HELP) {
         return drawHelpMenu(state, bounds);
+    } else if (m == TMENU_EDIT) {
+		return drawEditMenu(state,bounds);
     }
 
     return MACTION_COUNT;
@@ -150,7 +187,8 @@ MenuAction MenuBar(MenuBarState *state) {
     float posX = rect.x;
     MenuAction action = MACTION_COUNT;
     menuButton(state, TopMenus[0], &posX, &action);
-    menuButton(state, TopMenus[1], &posX, &action);
+	menuButton(state, TopMenus[1], &posX, &action);
+    menuButton(state, TopMenus[2], &posX, &action);
     state->menuOpen = isMenuOpen(state);
 
     return action;

@@ -5,6 +5,7 @@
 #include "include/options.h"
 #include "include/tabs.h"
 #include "include/theme.h"
+#include "include/utils.h"
 #include "include/widgets/canvas.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
@@ -91,6 +92,7 @@ static MenuAction maction = MACTION_COUNT;
 
 void handleMenubar(Gui *gui) {
     if (maction != MACTION_COUNT) {
+		TraceLog(LOG_WARNING, "Menu : %d", maction);
         if (maction == MACTION_SAVE_FILE) {
             ExportImage(gui->curTab->curLayer->img, "_temp.png");
             TraceLog(LOG_WARNING, "[+] Saved file as `_temp.png`");

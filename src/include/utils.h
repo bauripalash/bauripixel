@@ -40,6 +40,10 @@ typedef struct Side {
 #define DegToRad(d) ((float)(d * DEG2RAD))
 #define RadToDeg(r) ((float)(r * RAD2DEG))
 
+#define PrintEnum(d) TraceLog(LOG_WARNING, "%s", #d)
+
+//Functions
+
 int ClampInt(int val, int min, int max);
 
 // Get angle from a to b in Degrees;
