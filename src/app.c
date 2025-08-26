@@ -95,6 +95,9 @@ void handleMenubar(Gui *gui) {
             ExportImage(gui->curTab->curLayer->img, "_temp.png");
             TraceLog(LOG_WARNING, "[+] Saved file as `_temp.png`");
         }
+        if (maction == MACTION_SHOW_ABOUT) {
+            TraceLog(LOG_WARNING, "Show About");
+        }
     }
 }
 
@@ -200,14 +203,4 @@ void LayoutDraw(Gui *gui) {
     if (menuOpen) {
         GuiLock();
     }
-
-    /*
-    Rectangle rect = {100,100,500,500};
-    int ogBorder = OptThemeGetSet(T_PANEL_BORDER, HexColorVWhite);
-    BpPanelOnlyBorder(rect, 8);
-    DrawRectangleLinesEx(rect, 1, MAROON);
-
-    OptThemeSet(T_PANEL_BORDER, ogBorder);
-    */
-    // DrawFPS(200, 50);
 }

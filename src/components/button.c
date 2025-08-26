@@ -27,6 +27,25 @@ bool BpLabelButton(Rectangle bounds, const char *text) {
     return clicked;
 }
 
+bool BpTopMenuBtn(Rectangle bounds, const char *text, bool active) {
+    bool locked = GuiIsLocked();
+    Vector2 mpos = GetMousePosition();
+    bool hover = !locked && CheckCollisionPointRec(mpos, bounds);
+    bool clicked = hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    Color bg = BLANK;
+    int labelFG = GuiGetStyle(LABEL, TEXT_COLOR_NORMAL);
+    if (hover || active) {
+        bg = ColorVWhite;
+        GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, OptThemeGet(T_PANEL_BG));
+    }
+    DrawRectangleRec(bounds, bg);
+    GuiLabel(bounds, text);
+
+    GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, labelFG);
+
+    return clicked;
+}
+
 bool BpToggleButton(Rectangle bounds, int thick, bool active) {
     int clrBorder = OptThemeGet(T_TOGGLE_BRDR);
     int clrBg = OptThemeGet(T_TOGGLE_BG);

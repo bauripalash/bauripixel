@@ -11,7 +11,8 @@ typedef struct MenuBarState {
 
     bool menuOpen;
 
-    TopMenuEntry menus[TMENU_COUNT];
+    // TopMenuEntry menus[TMENU_COUNT];
+    TopMenuInfo curMenu;
 
 } MenuBarState;
 
