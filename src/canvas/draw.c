@@ -409,6 +409,7 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
                     BPDrawLine(
                         state, &layer->img, state->lastBrushPos, curPos, dClr
                     );
+					SyncImgLayerObj(state->curLayer);
                 }
             }
 
@@ -431,6 +432,15 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
         }
 
         case DT_ERASER: {
+            if (!state->eraserDragging && IsKeyDown(KEY_LEFT_SHIFT) &&
+                !IsVecNeg(state->lastEraserPos)) {
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    BPDrawLine(
+                        state, &layer->img, state->lastEraserPos, curPos, dClr
+                    );
+					SyncImgLayerObj(state->curLayer);
+                }
+            }
             if (leftDown) {
                 if (!state->eraserDragging) {
                     state->eraserDragging = true;
@@ -532,6 +542,10 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
             break;
         }
         case DT_ERASER: {
+			if (!state->eraserDragging && IsKeyDown(KEY_LEFT_SHIFT) && !IsVecNeg(state->lastEraserPos)) {
+					BPDrawLine(state,&state->previewImg, state->lastEraserPos, curPos, EraserColor);
+			
+			}
             DrawBrush(state, &state->previewImg, curPx, curPy, EraserColor);
             break;
         }
