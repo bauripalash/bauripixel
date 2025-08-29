@@ -21,12 +21,14 @@ typedef struct Side {
 #define Vector4ToSide(vec)                                                     \
     (Side) { .t = vec.x, .b = vec.w, .l = vec.y, .r = vec.z }
 
-#define SideAll()     (Side){0}
-#define SideNone()    (Side){-1, -1, -1, -1}
+#define SideAll()         (Side){0}
+#define SideNone()        (Side){-1, -1, -1, -1}
 
-#define IsAllSide(s)  (s.t != -1 && s.b != -1 && s.l != -1 && s.r != -1)
+#define IsAllSide(s)      (s.t != -1 && s.b != -1 && s.l != -1 && s.r != -1)
 
-#define ArrCount(arr) (sizeof(arr) / sizeof(arr[0]))
+#define ArrCount(arr)     (sizeof(arr) / sizeof(arr[0]))
+#define IsVecNeg(vec)     (vec.x < 0 && vec.y < 0)
+#define Vector2Negetive() ((Vector2){-1, -1})
 
 #define TraceVector(vec, msg)                                                  \
     TraceLog(LOG_WARNING, "%s [%f, %f]", msg, vec.x, vec.y)
@@ -37,12 +39,12 @@ typedef struct Side {
         r.height                                                               \
     )
 
-#define DegToRad(d) ((float)(d * DEG2RAD))
-#define RadToDeg(r) ((float)(r * RAD2DEG))
+#define DegToRad(d)  ((float)(d * DEG2RAD))
+#define RadToDeg(r)  ((float)(r * RAD2DEG))
 
 #define PrintEnum(d) TraceLog(LOG_WARNING, "%s", #d)
 
-//Functions
+// Functions
 
 int ClampInt(int val, int min, int max);
 

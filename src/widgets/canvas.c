@@ -59,7 +59,13 @@ CanvasState NewCanvas(int w, int h) {
     // --
     c.brushSize = 1;
     c.brushShape = BSP_SQAURE;
-    c.lineStart = (Vector2){0, 0};
+    c.brushDragging = false;
+    c.lastBrushPos = Vector2Negetive();
+
+    c.eraserDragging = false;
+    c.lastEraserPos = Vector2Negetive();
+
+    c.lineStart = Vector2Zero();
     c.lineDragging = false;
 
     c.circleStart = (Vector2){0, 0};
@@ -270,8 +276,6 @@ bool CanvasScrollBarsLogic(CanvasState *state) {
 
     bool locked = GuiIsLocked();
 
-    Camera2D cam = state->camera;
-    float zoom = state->camera.zoom;
     Vector2 mpos = GetMousePosition();
 
     Vector2 dTl = {drawArea.x, drawArea.y};
@@ -293,10 +297,12 @@ bool CanvasScrollBarsLogic(CanvasState *state) {
     float xScale = scrollWidth / hBounds.width;
     float yScale = scrollHeight / vBounds.height;
 
-    float minPosX = -canvasWidth;
-    float maxPosX = viewWidth;
-    float minPosY = -canvasHeight;
-    float maxPosY = viewHeight;
+    /* Limits of travel for canvas
+float minPosX = -canvasWidth;
+float maxPosX = viewWidth;
+float minPosY = -canvasHeight;
+float maxPosY = viewHeight;
+    */
 
     // distance from bottom edge of draw area to
     // top edge of the canvas
@@ -470,10 +476,12 @@ bool CanvasLogic(CanvasState *state) {
             canvasArea.x + canvasArea.width, canvasArea.y + canvasArea.height
         };
 
+        /* How much is left in each side
         float emptyLeft = cTopLeft.x - dTopLeft.x;
         float emptyRight = dBottomRight.x - cBottomRight.x;
         float emptyTop = cTopLeft.y - dTopLeft.y;
         float emptyBottom = dBottomRight.y - cBottomRight.y;
+        */
 
         state->drawArea4.x = dTopLeft.x;
         state->drawArea4.y = dTopLeft.y;

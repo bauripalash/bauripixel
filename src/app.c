@@ -92,7 +92,7 @@ static MenuAction maction = MACTION_COUNT;
 
 void handleMenubar(Gui *gui) {
     if (maction != MACTION_COUNT) {
-		TraceLog(LOG_WARNING, "Menu : %d", maction);
+        TraceLog(LOG_WARNING, "Menu : %d", maction);
         if (maction == MACTION_SAVE_FILE) {
             ExportImage(gui->curTab->curLayer->img, "_temp.png");
             TraceLog(LOG_WARNING, "[+] Saved file as `_temp.png`");

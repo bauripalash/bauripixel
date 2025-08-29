@@ -58,6 +58,11 @@ typedef struct {
 
     int brushSize;
     BrushShape brushShape;
+    bool brushDragging;
+    Vector2 lastBrushPos;
+
+    bool eraserDragging;
+    Vector2 lastEraserPos;
 
     Vector2 lineStart;
     bool lineDragging;

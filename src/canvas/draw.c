@@ -64,8 +64,6 @@ BPDrawLine(CanvasState *state, Image *img, Vector2 a, Vector2 b, Color clr) {
     int x1 = (int)b.x;
     int y1 = (int)b.y;
 
-    int bs = state->brushSize;
-
     int dx = abs(x1 - x0);
     int sx = x0 < x1 ? 1 : -1;
     int dy = -abs(y1 - y0);
@@ -371,12 +369,9 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
     int posLeft = (int)ceilf(rawCanvasPos.x - state->brushSize * 0.5f);
     int posTop = (int)ceilf(rawCanvasPos.y - state->brushSize * 0.5f);
-    int posRight = posLeft + state->brushSize;
-    int posBottom = posTop + state->brushSize;
 
     BrushShape shape = state->brushShape;
 
-    int brushSize = state->brushSize;
     DrawTool curtool = state->curTool;
 
     int curPx = rawCanvasPos.x;
@@ -400,25 +395,55 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
     bool leftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked;
     bool leftReleased = IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !locked;
     bool keepRatio =
-        IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT) && !locked;
+        (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) && !locked;
 
     LayerObj *layer = state->curLayer;
-    Image *preview = &state->previewImg;
 
     if (!locked && atDrawArea && isCurVisible) {
         switch (curtool) {
         case DT_PENCIL: {
+
+            if (!state->brushDragging && IsKeyDown(KEY_LEFT_SHIFT) &&
+                !IsVecNeg(state->lastBrushPos)) {
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    BPDrawLine(
+                        state, &layer->img, state->lastBrushPos, curPos, dClr
+                    );
+                }
+            }
+
             if (leftDown) {
-                DrawBrush(state, &layer->img, curPx, curPy, dClr);
+                if (!state->brushDragging) {
+                    state->brushDragging = true;
+                    state->lastBrushPos = curPos;
+                }
+                BPDrawLine(
+                    state, &layer->img, state->lastBrushPos, curPos, dClr
+                );
                 SyncImgLayerObj(state->curLayer);
+                state->lastBrushPos = curPos;
+            }
+
+            if (leftReleased && state->brushDragging) {
+                state->brushDragging = false;
             }
             break;
         }
 
         case DT_ERASER: {
             if (leftDown) {
-                DrawBrush(state, &layer->img, curPx, curPy, dClr);
+                if (!state->eraserDragging) {
+                    state->eraserDragging = true;
+                    state->lastEraserPos = curPos;
+                }
+                BPDrawLine(
+                    state, &layer->img, state->lastEraserPos, curPos, dClr
+                );
                 SyncImgLayerObj(state->curLayer);
+                state->lastEraserPos = curPos;
+            }
+            if (leftReleased && state->eraserDragging) {
+                state->eraserDragging = false;
             }
             break;
         }
@@ -497,6 +522,12 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
         switch (curtool) {
         case DT_PENCIL: {
+            if (!state->brushDragging && IsKeyDown(KEY_LEFT_SHIFT) &&
+                !IsVecNeg(state->lastBrushPos)) {
+                BPDrawLine(
+                    state, &state->previewImg, state->lastBrushPos, curPos, dClr
+                );
+            }
             DrawBrush(state, &state->previewImg, curPx, curPy, dClr);
             break;
         }
