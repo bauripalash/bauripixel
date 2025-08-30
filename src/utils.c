@@ -40,6 +40,10 @@ void MakeVecZero(Vector2 *vec) {
 
 char *MakeString(const char *str) { return strdup(str); }
 
+float FloatWithPrec(float value, float prec) {
+    return floorf(powf(10, prec) * value) / powf(10, prec);
+}
+
 bool IsOsWeb() {
 #ifdef BPM_OS_WEB
     return true;

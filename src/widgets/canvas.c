@@ -2,6 +2,7 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../external/raymath.h"
+#include "../external/rlgl.h"
 #include "../include/canvas/draw.h"
 #include "../include/colors.h"
 #include "../include/components.h"
@@ -11,6 +12,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+
+static const int GridSS = 8;
 
 CanvasState NewCanvas(int w, int h) {
     CanvasState c = {0};
@@ -84,6 +87,10 @@ CanvasState NewCanvas(int w, int h) {
     c.sbVThumbRect = (Rectangle){0};
     c.hoverVThumb = false;
 
+    c.guideGridSize = (Vector2){16, 16};
+    c.guideGridTxt = LoadRenderTexture(w * GridSS, h * GridSS);
+    c.redrawGuideGrid = true;
+
     return c;
 }
 
@@ -102,6 +109,8 @@ void FreeCanvas(CanvasState *c) {
         UnloadTexture(c->previewTxt); // Do we need this?
         UnloadImage(c->previewImg);
     }
+
+    UnloadRenderTexture(c->guideGridTxt);
 }
 
 void UpdateCanvasLayers(
@@ -444,6 +453,7 @@ bool CanvasLogic(CanvasState *state) {
                 state->camera.zoom = Clamp(
                     expf(logf(state->camera.zoom) + scale), 0.125f, 64.0f
                 );
+                state->redrawGuideGrid = true;
 
             } // wheel != 0
 
@@ -535,7 +545,6 @@ bool CanvasDraw(CanvasState *state) {
             state->drawArea.height
         };
         Rectangle bounds = state->prop.bounds;
-        // BpRoundedPanel(bounds, 4, 0.02, false);
         BpPanelBorder(bounds, 3);
         CanvasScrollBarsDraw(state);
 
@@ -543,12 +552,12 @@ bool CanvasDraw(CanvasState *state) {
             drawArea.x, drawArea.y, drawArea.width, drawArea.height
         );
         GuiGrid(drawArea, NULL, state->gridSize.x * 2.0f, 1, NULL);
+        Rectangle drawRect = {
+            drawArea.x, drawArea.y, state->gridSize.x, state->gridSize.y
+        };
         BeginMode2D(state->camera);
         {
-            DrawingCanvasDraw(
-                state, (Rectangle){drawArea.x, drawArea.y, state->gridSize.x,
-                                   state->gridSize.y}
-            );
+            DrawingCanvasDraw(state, drawRect);
         }
         EndMode2D();
 
