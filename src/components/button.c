@@ -46,6 +46,15 @@ bool BpTopMenuBtn(Rectangle bounds, const char *text, bool active) {
     return clicked;
 }
 
+bool BpTextButton(Rectangle bounds, const char *text) {
+    bool result = BpToggleButton(bounds, 2, false);
+    int ogal = GuiGetStyle(LABEL, TEXT_ALIGNMENT);
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+    GuiLabel(bounds, text);
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, ogal);
+    return result;
+}
+
 bool BpToggleButton(Rectangle bounds, int thick, bool active) {
     int clrBorder = OptThemeGet(T_TOGGLE_BRDR);
     int clrBg = OptThemeGet(T_TOGGLE_BG);

@@ -34,6 +34,7 @@ typedef enum OptThemeKey {
     T_BTN_CORNER,
     T_BTN_SHADOW,
     T_BTN_BRDR_THICK,
+    T_BTN_BRDR_CANCEL,
 
     T_TOGGLE_BG,
     T_TOGGLE_BRDR,

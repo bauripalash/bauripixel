@@ -177,6 +177,16 @@ bool menuButton(
     return clicked;
 }
 
+MenuAction handleShortcuts(MenuBarState *state) {
+
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_LEFT_SHIFT) &&
+        IsKeyPressed(KEY_N)) {
+        return MACTION_NEW_FILE;
+    }
+
+    return MACTION_COUNT;
+}
+
 MenuAction MenuBar(MenuBarState *state) {
     updateBounds(state);
     Vector2 mpos = GetMousePosition();
@@ -196,6 +206,10 @@ MenuAction MenuBar(MenuBarState *state) {
     menuButton(state, TopMenus[1], &posX, &action);
     menuButton(state, TopMenus[2], &posX, &action);
     state->menuOpen = isMenuOpen(state);
+
+    if (action == MACTION_COUNT) {
+        action = handleShortcuts(state);
+    }
 
     return action;
 }

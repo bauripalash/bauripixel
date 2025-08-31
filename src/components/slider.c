@@ -148,8 +148,6 @@ bool BpInputSliderInt(
         BpSliderInt(sliderRect, value, min, max, unit, sliderHover);
     }
 
-    float fontH = GuiGetFont().baseSize;
-
     DrawTextEx(
         GuiGetFont(), unit, (Vector2){boxRect.x + boxRect.width, boxRect.y}, 16,
         0, inputFg

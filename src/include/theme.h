@@ -46,6 +46,7 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_BTN_CORNER, HexColorVWhite},
     {T_BTN_SHADOW, HexColorBlack},
     {T_BTN_BRDR_THICK, 2},
+    {T_BTN_BRDR_CANCEL, HexColorTPink},
 
     {T_TOGGLE_BRDR, HexColorVGreen},
     {T_TOGGLE_CLKD_BRDR, HexColorVWhite},

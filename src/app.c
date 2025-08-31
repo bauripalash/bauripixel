@@ -9,6 +9,8 @@
 #include "include/widgets/canvas.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
+#include "include/windows/newsprite.h"
+#include "include/windows/window.h"
 #include <stdbool.h>
 
 #define STB_DS_IMPLEMENTATION
@@ -100,6 +102,10 @@ void handleMenubar(Gui *gui) {
         if (maction == MACTION_SHOW_ABOUT) {
             TraceLog(LOG_WARNING, "Show About");
         }
+
+        if (maction == MACTION_NEW_FILE) {
+            gui->state->newsprite.p.active = true;
+        }
     }
 }
 
@@ -115,7 +121,8 @@ void LayoutLogic(Gui *gui) {
     bool menuBarOpen = gui->state->menubar.menuOpen;
     bool sliderHover = gui->curTab->state->dtb.sliderHover;
     bool layerpopup = gui->curTab->state->lb.anypopup;
-    if (menuBarOpen || sliderHover || layerpopup) {
+    bool guipopup = gui->state->newsprite.p.active;
+    if (menuBarOpen || sliderHover || layerpopup || guipopup) {
         GuiLock();
     }
     ColorBarLogic(&gui->curTab->state->cb);
@@ -153,21 +160,35 @@ void TabItemsDraw(Gui *gui) {
         );
         if (result == 0) {
             TraceLog(LOG_ERROR, "Open Tab %d", tab->index);
-            gui->curTab = tab;
+            if (gui->curTab->index != tab->index) {
+                gui->curTab = tab;
+                gui->state->statusbar.colorbar = &gui->curTab->state->cb;
+                gui->state->statusbar.canvas = &gui->curTab->state->cvs;
+                gui->state->statusbar.layerbar = &gui->curTab->state->lb;
+                SetupTabData(tab, &gui->state->menubar, &gui->state->statusbar);
+            }
         } else if (result == 1) {
             TraceLog(LOG_ERROR, "Close Tab %d", tab->index);
         }
     }
 }
 
+void createNewTab(Gui *gui) {
+    WNewSpriteState ns = gui->state->newsprite;
+    TabObj *newTab = NewTabObj(ns.width, ns.height);
+    newTab->index = gui->tabList->count;
+    AddToTabList(gui->tabList, newTab);
+}
+
 void LayoutDraw(Gui *gui) {
     bool menuOpen = gui->state->menubar.menuOpen;
     bool sizeSliderHover = gui->curTab->state->dtb.sliderHover;
     bool layerpopup = gui->curTab->state->lb.anypopup;
+    bool guipopup = gui->state->newsprite.p.active;
 
     // SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
 
-    if (menuOpen || sizeSliderHover || layerpopup) {
+    if (menuOpen || sizeSliderHover || layerpopup || guipopup) {
         GuiLock();
     }
 
@@ -204,5 +225,27 @@ void LayoutDraw(Gui *gui) {
     maction = MenuBar(&gui->state->menubar);
     if (menuOpen) {
         GuiLock();
+    }
+
+    if (guipopup) {
+        GuiUnlock();
+    }
+    if (gui->state->newsprite.p.active) {
+        WinStatus result = WNewSprite(&gui->state->newsprite);
+        if (result == WIN_CLOSE || result == WIN_CANCEL || result == WIN_OK) {
+            gui->state->newsprite.p.active = false;
+        }
+
+        if (result == WIN_OK) {
+            WNewSpriteState ns = gui->state->newsprite;
+            TraceLog(
+                LOG_ERROR, "Create new sprite : %s (%dpx x %dpx)", ns.name,
+                ns.width, ns.height
+            );
+            createNewTab(gui);
+        }
+    }
+    if (guipopup) {
+        GuiUnlock();
     }
 }

@@ -10,4 +10,6 @@
 #define DEF_MENUBAR_HEIGHT   25
 #define DEF_STATUSBAR_HEIGHT 30
 
+#define DEF_NAME_SIZE        256
+
 #endif // DEFAULTS_H

@@ -1,14 +1,15 @@
 #include "include/gui.h"
-#include "external/raylib.h"
 #include "include/tabs.h"
 #include "include/widgets/menubar.h"
 #include "include/widgets/statusbar.h"
+#include "include/windows/newsprite.h"
 #include <stdlib.h>
 
 GuiGlobalState *NewGuiState() {
     GuiGlobalState *gs = malloc(sizeof(GuiGlobalState));
     gs->menubar = NewMenuBar();
     gs->statusbar = NewStatusBar();
+    gs->newsprite = NewWNewSprite();
 
     return gs;
 }
