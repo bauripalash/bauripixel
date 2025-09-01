@@ -77,3 +77,7 @@ clean: cmake_clean
 .PHONE: rdtools
 rdtools:
 	$(PACKER) assets/media/drawtools/drawtools_icon_minimal.png -o src/include/exported/drawtoolicons.h
+
+.PHONE: rappicon
+rappicon:
+	$(PACKER) assets/media/logos/logo.png -o src/include/exported/appicon.h

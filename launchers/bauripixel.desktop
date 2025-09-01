@@ -1,0 +1,12 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Version=0.1.0
+Type=Application
+Name=BauriPixel
+Comment='Simple and Lightweight Pixel Art Editor'
+Exec=~/work/bauripixel/build/bauripixel/bauripixel
+Icon=/home/palash/work/bauripixel/assets/media/logos/logo.png
+Path=~/work/bauripixel
+Terminal=false
+StartupNotify=false
+Categories=Graphics;2DGraphics;

@@ -53,6 +53,7 @@ pub fn build(b: *std.Build) void {
             "src/widgets/drawtoolbar.c",
             "src/widgets/layerbar.c",
             "src/windows/layeropts.c",
+            "src/windows/newsprite.c",
             "src/windows/window.c",
             "src/components/slider.c",
             "src/components/panels.c",

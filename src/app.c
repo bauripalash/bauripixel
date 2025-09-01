@@ -5,7 +5,6 @@
 #include "include/options.h"
 #include "include/tabs.h"
 #include "include/theme.h"
-#include "include/utils.h"
 #include "include/widgets/canvas.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
@@ -41,6 +40,7 @@ int RunApp() {
     SetTargetFPS(60);
     LoadAppDarkTheme();
     LoadAppFont();
+	LoadAppIcon();
 
     Gui *gui = NewGui();
 

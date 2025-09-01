@@ -7,6 +7,7 @@
 #include "../external/raylib.h"
 #include "../external/raygui.h"
 #include "../include/exported/biosfontii.h"
+#include "../include/exported/appicon.h"
 #include "colors.h"
 #include "options.h"
 #include "utils.h"
@@ -86,6 +87,13 @@ static const GuiStyleProp RgDarkThemeProps[] = {
 };
 
 // ============== RAGUI THEME END ==============
+
+void LoadAppIcon() { 
+
+	Image icon = LoadImageFromMemory(".png", LOGO_PNG_DATA, LOGO_PNG_SIZE);
+	SetWindowIcon(icon);
+	UnloadImage(icon);
+}
 
 void LoadAppFont() { GuiLoadStyleBIOSfontII(); }
 
