@@ -179,9 +179,58 @@ bool menuButton(
 
 MenuAction handleShortcuts(MenuBarState *state) {
 
-    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_LEFT_SHIFT) &&
-        IsKeyPressed(KEY_N)) {
-        return MACTION_NEW_FILE;
+    if (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) {
+
+        // File Menu Shortcuts
+        if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+            if (IsKeyPressed(KEY_N)) {
+                return MACTION_NEW_FILE;
+            }
+        }
+
+        if (IsKeyPressed(KEY_S)) {
+            return MACTION_SAVE_FILE;
+        }
+
+        if (IsKeyPressed(KEY_O)) {
+            return MACTION_OPEN_FILE;
+        }
+
+        if (IsKeyPressed(KEY_Q)) {
+            return MACTION_QUIT;
+        }
+
+        // Edit Menu Shortcuts
+
+        if (IsKeyPressed(KEY_Z)) {
+            return MACTION_UNDO;
+        }
+
+        if (IsKeyPressed(KEY_Y)) {
+            return MACTION_REDO;
+        }
+
+        if (IsKeyPressed(KEY_C)) {
+            return MACTION_COPY;
+        }
+
+        if (IsKeyPressed(KEY_X)) {
+            return MACTION_CUT;
+        }
+
+        if (IsKeyPressed(KEY_V)) {
+            return MACTION_PASTE;
+        }
+    }
+
+    if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+        if (IsKeyPressed(KEY_H)) {
+            return MACTION_FLIP_H;
+        }
+
+        if (IsKeyPressed(KEY_V)) {
+            return MACTION_FLIP_V;
+        }
     }
 
     return MACTION_COUNT;

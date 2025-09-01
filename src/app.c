@@ -104,7 +104,7 @@ void handleMenubar(Gui *gui) {
         }
 
         if (maction == MACTION_NEW_FILE) {
-            gui->state->newsprite.p.active = true;
+            // gui->state->newsprite.p.active = true;
         }
     }
 }
