@@ -40,7 +40,7 @@ int RunApp() {
     SetTargetFPS(60);
     LoadAppDarkTheme();
     LoadAppFont();
-	LoadAppIcon();
+    LoadAppIcon();
 
     Gui *gui = NewGui();
 

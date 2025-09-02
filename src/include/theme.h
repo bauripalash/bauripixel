@@ -88,11 +88,11 @@ static const GuiStyleProp RgDarkThemeProps[] = {
 
 // ============== RAGUI THEME END ==============
 
-void LoadAppIcon() { 
+void LoadAppIcon() {
 
-	Image icon = LoadImageFromMemory(".png", LOGO_PNG_DATA, LOGO_PNG_SIZE);
-	SetWindowIcon(icon);
-	UnloadImage(icon);
+    Image icon = LoadImageFromMemory(".png", LOGO_PNG_DATA, LOGO_PNG_SIZE);
+    SetWindowIcon(icon);
+    UnloadImage(icon);
 }
 
 void LoadAppFont() { GuiLoadStyleBIOSfontII(); }

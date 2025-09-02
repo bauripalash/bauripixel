@@ -10,3 +10,4 @@ Path=~/work/bauripixel
 Terminal=false
 StartupNotify=false
 Categories=Graphics;2DGraphics;
+StartupWMClass=BauriPixel
