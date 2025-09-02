@@ -83,9 +83,10 @@ typedef struct {
     Rectangle sbVThumbRect;
     bool hoverVThumb;
 
-    RenderTexture2D guideGridTxt;
     Vector2 guideGridSize;
-    bool redrawGuideGrid;
+    Vector2 guideGridOffset;
+    float guidGridThickness;
+    Color guideGridColor;
 
 } CanvasState;
 

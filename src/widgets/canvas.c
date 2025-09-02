@@ -13,8 +13,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-static const int GridSS = 8;
-
 CanvasState NewCanvas(int w, int h) {
     CanvasState c = {0};
     c.prop = NewWidgetProp();
@@ -87,9 +85,10 @@ CanvasState NewCanvas(int w, int h) {
     c.sbVThumbRect = (Rectangle){0};
     c.hoverVThumb = false;
 
-    c.guideGridSize = (Vector2){16, 16};
-    c.guideGridTxt = LoadRenderTexture(w * GridSS, h * GridSS);
-    c.redrawGuideGrid = true;
+    c.guideGridSize = (Vector2){8, 8};
+    c.guideGridOffset = (Vector2){0, 0};
+    c.guidGridThickness = 2.0f;
+    c.guideGridColor = BpSolidColor(0x0, 0x0, 0xff);
 
     return c;
 }
@@ -109,8 +108,6 @@ void FreeCanvas(CanvasState *c) {
         UnloadTexture(c->previewTxt); // Do we need this?
         UnloadImage(c->previewImg);
     }
-
-    UnloadRenderTexture(c->guideGridTxt);
 }
 
 void UpdateCanvasLayers(
@@ -453,7 +450,6 @@ bool CanvasLogic(CanvasState *state) {
                 state->camera.zoom = Clamp(
                     expf(logf(state->camera.zoom) + scale), 0.125f, 64.0f
                 );
-                state->redrawGuideGrid = true;
 
             } // wheel != 0
 
@@ -538,6 +534,38 @@ bool CanvasLogic(CanvasState *state) {
     return false;
 }
 
+static const float cellSize = 8.0f;
+
+void DrawGuideGrid(CanvasState *state) {
+    Color clr = state->guideGridColor;
+    int xSize = (int)state->guideGridSize.x;
+    int ySize = (int)state->guideGridSize.y;
+    int cHeight = (int)state->gridSize.y;
+    int cWidth = (int)state->gridSize.x;
+
+    rlPushMatrix();
+    rlTranslatef(state->drawArea.x, state->drawArea.y, 0.0f);
+    rlBegin(RL_LINES);
+    rlSetLineWidth(state->guidGridThickness);
+
+    rlColor4ub(clr.r, clr.g, clr.b, clr.a);
+
+    float offsetX = state->guideGridOffset.x;
+    float offsetY = state->guideGridOffset.y;
+    for (int x = offsetX; x <= cWidth; x += xSize) {
+        rlVertex2f(x, offsetY);
+        rlVertex2f(x, cHeight);
+    }
+
+    for (int y = offsetY; y <= cHeight; y += ySize) {
+        rlVertex2f(offsetX, y);
+        rlVertex2f(cWidth, y);
+    }
+
+    rlEnd();
+    rlPopMatrix();
+}
+
 bool CanvasDraw(CanvasState *state) {
     if (state->prop.active) {
         Rectangle drawArea = {
@@ -558,6 +586,7 @@ bool CanvasDraw(CanvasState *state) {
         BeginMode2D(state->camera);
         {
             DrawingCanvasDraw(state, drawRect);
+            DrawGuideGrid(state);
         }
         EndMode2D();
 
