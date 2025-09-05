@@ -57,14 +57,17 @@ pub fn build(b: *std.Build) void {
             "src/widgets/layerbar.c",
             "src/windows/layeropts.c",
             "src/windows/newsprite.c",
+            "src/windows/exportimg.c",
             "src/windows/window.c",
             "src/components/slider.c",
             "src/components/panels.c",
             "src/components/button.c",
             "src/components/winpanels.c",
+            "src/components/input.c",
             "src/canvas/draw.c",
             "src/options/opttheme.c",
             "src/layers.c",
+            "src/nativedlg.c",
             "src/tabs.c",
             "src/utils.c",
             "src/gui.c",
@@ -72,6 +75,7 @@ pub fn build(b: *std.Build) void {
 
             //Vendored external libs
             "src/external/tfd/tinyfiledialogs.c",
+            "src/external/sqlite/sqlite3.c",
         },
         .flags = &.{"-g3"},
     });
