@@ -3,6 +3,7 @@
 #include "include/widgets/menubar.h"
 #include "include/widgets/statusbar.h"
 #include "include/windows/newsprite.h"
+#include <stdbool.h>
 #include <stdlib.h>
 
 GuiGlobalState *NewGuiState() {
@@ -46,6 +47,7 @@ Gui *NewGui() {
     }
 
     g->curFilePath = NULL; // use be added later
+    g->popup = false;
 
     return g;
 }

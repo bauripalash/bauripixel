@@ -8,6 +8,7 @@
 #include "include/widgets/canvas.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
+#include "include/windows/exportimg.h"
 #include "include/windows/newsprite.h"
 #include "include/windows/window.h"
 #include <stdbool.h>
@@ -106,6 +107,11 @@ void handleMenubar(Gui *gui) {
         if (maction == MACTION_NEW_FILE) {
             // gui->state->newsprite.p.active = true;
         }
+
+        if (maction == MACTION_EXPORTAS_IMAGE) {
+            gui->curTab->state->eximg.p.active = true;
+            SetupWExportImage(&gui->curTab->state->eximg);
+        }
     }
 }
 
@@ -122,7 +128,9 @@ void LayoutLogic(Gui *gui) {
     bool sliderHover = gui->curTab->state->dtb.sliderHover;
     bool layerpopup = gui->curTab->state->lb.anypopup;
     bool guipopup = gui->state->newsprite.p.active;
-    if (menuBarOpen || sliderHover || layerpopup || guipopup) {
+
+    bool tabpopup = gui->curTab->state->eximg.p.active;
+    if (menuBarOpen || sliderHover || layerpopup || guipopup || tabpopup) {
         GuiLock();
     }
     ColorBarLogic(&gui->curTab->state->cb);
@@ -185,10 +193,11 @@ void LayoutDraw(Gui *gui) {
     bool sizeSliderHover = gui->curTab->state->dtb.sliderHover;
     bool layerpopup = gui->curTab->state->lb.anypopup;
     bool guipopup = gui->state->newsprite.p.active;
+    bool tabpopup = gui->curTab->state->eximg.p.active;
 
     // SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
 
-    if (menuOpen || sizeSliderHover || layerpopup || guipopup) {
+    if (menuOpen || sizeSliderHover || layerpopup || guipopup || tabpopup) {
         GuiLock();
     }
 
@@ -245,7 +254,28 @@ void LayoutDraw(Gui *gui) {
             createNewTab(gui);
         }
     }
+
     if (guipopup) {
+        GuiLock();
+    }
+
+    if (tabpopup) {
         GuiUnlock();
+    }
+
+    WExportImgState *expoImg = &gui->curTab->state->eximg;
+    if (expoImg->p.active) {
+        WinStatus result = WExportImg(expoImg);
+        if (result == WIN_CLOSE || result == WIN_CANCEL || result == WIN_OK) {
+            expoImg->p.active = false;
+        }
+
+        if (result == WIN_OK) {
+            TabExportImage(gui->curTab);
+        }
+    }
+
+    if (tabpopup) {
+        GuiLock();
     }
 }

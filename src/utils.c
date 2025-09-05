@@ -2,6 +2,7 @@
 #include "external/raygui.h"
 #include "external/raylib.h"
 #include <math.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,6 +43,31 @@ char *MakeString(const char *str) { return strdup(str); }
 
 float FloatWithPrec(float value, float prec) {
     return floorf(powf(10, prec) * value) / powf(10, prec);
+}
+
+float ClampMin(float value, float min) {
+    if (value < min) {
+        return min;
+    }
+
+    return value;
+}
+
+float ClampMax(float value, float max) {
+    if (value > max) {
+        return max;
+    }
+
+    return value;
+}
+
+bool RectAnyDiff(Rectangle a, Rectangle b) {
+    return a.x != b.x || a.y != b.y || a.width != b.width ||
+           a.height != b.height;
+}
+bool RectAllDiff(Rectangle a, Rectangle b) {
+    return a.x != b.x && a.y != b.y && a.width != b.width &&
+           a.height != b.height;
 }
 
 bool IsOsWeb() {

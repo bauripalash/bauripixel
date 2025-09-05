@@ -235,6 +235,10 @@ MenuAction handleShortcuts(MenuBarState *state) {
             if (IsKeyPressed(KEY_N)) {
                 return MACTION_NEW_FILE;
             }
+
+            if (IsKeyPressed(KEY_E)) {
+                return MACTION_EXPORTAS_IMAGE;
+            }
         }
 
         if (IsKeyPressed(KEY_S)) {
@@ -243,6 +247,10 @@ MenuAction handleShortcuts(MenuBarState *state) {
 
         if (IsKeyPressed(KEY_O)) {
             return MACTION_OPEN_FILE;
+        }
+
+        if (IsKeyPressed(KEY_E)) {
+            return MACTION_EXPORTAS_SHEET;
         }
 
         if (IsKeyPressed(KEY_Q)) {

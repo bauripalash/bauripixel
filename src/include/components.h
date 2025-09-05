@@ -18,6 +18,8 @@ bool BpSliderInt(
     bool *sliderHover
 );
 
+bool BpTextBox(Rectangle bounds, char *text, int textSize, bool *edit);
+
 bool BpDToolButton(
     Rectangle bounds, DrawTool *active, bool *showOther, int num,
     const DrawTool *tools, Texture2D *icons

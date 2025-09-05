@@ -3,6 +3,7 @@
 #include "external/stb/stb_ds.h"
 #include "include/colors.h"
 #include "include/defaults.h"
+#include "include/export.h"
 #include "include/layers.h"
 #include "include/widgets/canvas.h"
 #include "include/widgets/colorbar.h"
@@ -10,6 +11,7 @@
 #include "include/widgets/layerbar.h"
 #include "include/widgets/menubar.h"
 #include "include/widgets/statusbar.h"
+#include "include/windows/exportimg.h"
 #include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -38,6 +40,7 @@ TabStateObj *NewTabState(Rectangle panel, int w, int h) {
     ts->cb = NewColorBar();
     ts->dtb = NewDrawToolBar();
     ts->lb = NewLayerBar();
+    ts->eximg = NewWExportImage();
 
     ts->cvs.prop.active = false;
     ts->cb.prop.active = false;
@@ -85,6 +88,51 @@ void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
     tab->state->cb.currentIndex = 0;
 
     tab->setupDone = true;
+}
+
+BpImgFmt getFormat(const char *ext) {
+    if (TextIsEqual(ext, ".png")) {
+        return BP_IMG_PNG;
+    } else if (TextIsEqual(ext, ".jpg") || TextIsEqual(ext, ".jpeg")) {
+        return BP_IMG_JPEG;
+    } else if (TextIsEqual(ext, ".gif")) {
+        return BP_IMG_GIF;
+    }
+
+    return BP_IMG_COUNT;
+}
+
+Image getPatchedImage(TabObj *tab) {
+    Image img = GenImageColor(tab->canvasWidth, tab->canvasHeight, BLANK);
+    Rectangle imgRect = {0, 0, tab->canvasWidth, tab->canvasHeight};
+    for (int i = tab->layers->count - 1; i >= 0; i--) {
+        LayerObj *layer = tab->layers->layers[i];
+        ImageDraw(&img, layer->img, imgRect, imgRect, WHITE);
+    }
+    return img;
+}
+
+bool TabExportImage(TabObj *tab) {
+    const char *filename = tab->state->eximg.exportPath;
+    if (TextLength(filename) <= 0) {
+        TraceLog(LOG_ERROR, "Invalid export filename");
+        return false;
+    }
+
+    BpImgFmt imgfmt = getFormat(GetFileExtension(filename));
+
+    if (imgfmt == BP_IMG_COUNT) {
+        TraceLog(
+            LOG_ERROR, "Unsupported export format `%s`",
+            GetFileExtension(filename)
+        );
+        return false;
+    }
+
+    Image patchedImg = getPatchedImage(tab);
+    ExportImage(patchedImg, filename);
+
+    return true;
 }
 
 void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {

@@ -9,6 +9,7 @@
 #include "widgets/layerbar.h"
 #include "widgets/menubar.h"
 #include "widgets/statusbar.h"
+#include "windows/exportimg.h"
 #include <stdbool.h>
 
 typedef struct TabStateObj {
@@ -24,6 +25,9 @@ typedef struct TabStateObj {
 
     // LayerBar
     LayerBarState lb;
+
+    // Windows
+    WExportImgState eximg;
 
 } TabStateObj;
 
@@ -53,6 +57,7 @@ void FreeTabObj(TabObj *tab);
 void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status);
 void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status);
 void AddColorToTab(TabObj *tab, Color color);
+bool TabExportImage(TabObj *tab);
 
 typedef struct TabList {
     TabObj **tabs;

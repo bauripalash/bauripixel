@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include "../external/raylib.h"
+#include <stdbool.h>
 
 typedef struct Side {
     int t;
@@ -46,6 +47,7 @@ typedef struct Side {
 
 // Functions
 
+// Clamp integer between min and max
 int ClampInt(int val, int min, int max);
 
 // Get angle from a to b in Degrees;
@@ -57,8 +59,23 @@ float GetRadAngleAtoB(Vector2 a, Vector2 b);
 
 // Make Value of a Vector2 zero
 void MakeVecZero(Vector2 *vec);
+
+// Create a malloc'd string
 char *MakeString(const char *str);
+
+// Return a value with specified prec
 float FloatWithPrec(float value, float prec);
+
+// Return minimum clamped value
+float ClampMin(float value, float min);
+
+// Return maximum clamped value
+float ClampMax(float value, float max);
+
+// Check if `any` of the values of the Rects are different
+bool RectAnyDiff(Rectangle a, Rectangle b);
+// Check if `all` of the values of the Rects are different
+bool RectAllDiff(Rectangle a, Rectangle b);
 
 bool IsOsWeb();
 bool IsOsLinux();

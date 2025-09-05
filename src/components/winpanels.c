@@ -49,5 +49,29 @@ bool BpSimpleWindow(
         );
     }
 
+    if (resize != NULL) {
+        Rectangle handle = {
+            rdBounds.x + rdBounds.width - RESIZE_ICON_SIZE,
+            rdBounds.y + rdBounds.height - RESIZE_ICON_SIZE, RESIZE_ICON_SIZE,
+            RESIZE_ICON_SIZE
+        };
+        GuiDrawIcon(ICON_CORNER, handle.x, handle.y, 2, WHITE);
+
+        if (CheckCollisionPointRec(mpos, handle) &&
+            IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            *resize = true;
+        }
+
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            *resize = false;
+        }
+
+        if (*resize) {
+            Vector2 delta = GetMouseDelta();
+            bounds->width += delta.x;
+            bounds->height += delta.y;
+        }
+    }
+
     return result;
 }

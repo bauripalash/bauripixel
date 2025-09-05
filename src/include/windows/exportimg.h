@@ -12,6 +12,7 @@ typedef struct WExportImgState {
 } WExportImgState;
 
 WExportImgState NewWExportImage();
+void SetupWExportImage(WExportImgState *state);
 WinStatus WExportImg(WExportImgState *state);
 void FreeWExportImg();
 

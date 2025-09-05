@@ -3,11 +3,14 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define LO_DEF_WIDTH  500
+#define LO_DEF_HEIGHT 200
+
 WLayerOptsState NewWLayerOpts() {
     WLayerOptsState lo = {0};
     lo.p = NewWinProp();
-    lo.p.b.width = 500;
-    lo.p.b.height = 200;
+    lo.p.b.width = LO_DEF_WIDTH;
+    lo.p.b.height = LO_DEF_HEIGHT;
     lo.layer = NULL;
     strcpy(lo.name, "");
     lo.editName = false;
@@ -18,7 +21,6 @@ WLayerOptsState NewWLayerOpts() {
 
 static void updateBounds(WLayerOptsState *state) {
     if (!state->p.customPos) {
-
         float winH = GetScreenHeight();
         float winW = GetScreenWidth();
         state->p.b.x = (winW - state->p.b.width) / 2.0f;
@@ -32,6 +34,10 @@ void SetupWLayerOpts(WLayerOptsState *opts, LayerObj *layer) {
     opts->opacityVal = layer->opacity * 100.0f;
     TextCopy(opts->name, layer->name);
     TextCopy(opts->ogName, layer->name);
+
+    opts->p.customPos = false;
+    opts->p.b.width = LO_DEF_WIDTH;
+    opts->p.b.height = LO_DEF_HEIGHT;
 }
 
 #define LO_MARGIN_LR 10
@@ -60,12 +66,11 @@ WinStatus WLayerOpts(WLayerOptsState *state) {
             ),
             &state->p.drag, &state->p.resize
         );
-        if (bounds.x != state->p.b.x) {
+        if (RectAnyDiff(bounds, state->p.b)) {
             state->p.customPos = true;
+            state->p.b.width = ClampMin(state->p.b.width, LO_DEF_WIDTH);
+            state->p.b.height = ClampMin(state->p.b.height, LO_DEF_HEIGHT);
         }
-
-        TraceRect(state->p.b, "State bounds");
-        TraceRect(bounds, "Local bounds");
 
         if (winRes) {
             result = WIN_CLOSE;

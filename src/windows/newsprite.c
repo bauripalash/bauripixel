@@ -44,7 +44,6 @@ static void updateBounds(WNewSpriteState *state) {
 #define BTN_SIZE     80
 
 WinStatus WNewSprite(WNewSpriteState *state) {
-
     WinStatus result = WIN_NONE;
     if (state->p.active) {
         updateBounds(state);

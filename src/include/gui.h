@@ -5,6 +5,7 @@
 #include "widgets/menubar.h"
 #include "widgets/statusbar.h"
 #include "windows/newsprite.h"
+#include <stdbool.h>
 
 typedef struct GuiGlobalState {
     MenuBarState menubar;
@@ -21,6 +22,7 @@ typedef struct Gui {
     TabObj *curTab;
     char *curFilePath;
     GuiGlobalState *state;
+    bool popup;
 } Gui;
 
 Gui *NewGui();
