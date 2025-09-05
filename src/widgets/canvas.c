@@ -399,27 +399,6 @@ void handleTools(CanvasState *state) {
     if (state->curTool != DT_PAN) {
         state->enablePanning = false;
     }
-    switch (state->curTool) {
-    case DT_PENCIL: {
-        if (atCanvas) {
-            SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
-        }
-        break;
-    }
-
-    case DT_PAN: {
-        state->enablePanning = true;
-        if (atDrawArea) {
-            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
-        }
-
-        break;
-    }
-
-    default: {
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-    }
-    }
 }
 
 bool CanvasLogic(CanvasState *state) {

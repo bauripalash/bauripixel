@@ -95,7 +95,7 @@ int ColorBarLogic(ColorBarState *state) {
         bool atHandle = CheckCollisionPointRec(mpos, handleRect);
 
         if (atBounds) {
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            //SetMouseCursor(MOUSE_CURSOR_DEFAULT);
             if (IsKeyDown(KEY_LEFT_CONTROL) && !locked) {
                 float wheel = GetMouseWheelMove();
 

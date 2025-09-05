@@ -162,7 +162,7 @@ int BpTabItem(
         ogPanelBg =
             OptThemeGetSet(T_PANEL_BG, OptThemeGet(T_TAB_ITEM_INACTIVE));
     }
-    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    //SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     Rectangle tabRect =
         (Rectangle){bounds.x + (index * (tabWidth + tabThick)),
                     bounds.y - tabHeight, tabWidth, tabHeight + 4};

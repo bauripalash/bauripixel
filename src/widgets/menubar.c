@@ -242,7 +242,7 @@ MenuAction MenuBar(MenuBarState *state) {
 
     Rectangle bounds = state->prop.bounds;
     if (CheckCollisionPointRec(mpos, bounds)) {
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        //SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 
     Rectangle rect = {

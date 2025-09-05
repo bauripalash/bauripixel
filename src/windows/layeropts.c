@@ -42,7 +42,7 @@ WinStatus WLayerOpts(WLayerOptsState *state) {
         updateBounds(state);
         Rectangle bounds = state->p.b;
         if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            //SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
 
         if (BpSimpleWindow(
