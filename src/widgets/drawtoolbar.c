@@ -244,7 +244,7 @@ int DrawToolbar(DrawToolBarState *state) {
         Vector2 mpos = GetMousePosition();
 
         if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
-            //SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
         DrawOptToolbar(state);
 

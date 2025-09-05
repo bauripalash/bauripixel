@@ -69,6 +69,9 @@ pub fn build(b: *std.Build) void {
             "src/utils.c",
             "src/gui.c",
             "src/app.c",
+
+            //Vendored external libs
+            "src/external/tfd/tinyfiledialogs.c",
         },
         .flags = &.{"-g3"},
     });

@@ -16,6 +16,12 @@ typedef struct WinProp {
     bool active;
     // Window Bounds
     Rectangle b;
+    // User dragged the window
+    bool customPos;
+    // Is Window being Dragged to change position
+    bool drag;
+    // Is Window being resized
+    bool resize;
 } WinProp;
 
 WinProp NewWinProp();

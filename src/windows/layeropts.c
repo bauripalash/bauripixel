@@ -17,10 +17,13 @@ WLayerOptsState NewWLayerOpts() {
 }
 
 static void updateBounds(WLayerOptsState *state) {
-    float winH = GetScreenHeight();
-    float winW = GetScreenWidth();
-    state->p.b.x = (winW - state->p.b.width) / 2.0f;
-    state->p.b.y = (winH - state->p.b.height) / 2.0f;
+    if (!state->p.customPos) {
+
+        float winH = GetScreenHeight();
+        float winW = GetScreenWidth();
+        state->p.b.x = (winW - state->p.b.width) / 2.0f;
+        state->p.b.y = (winH - state->p.b.height) / 2.0f;
+    }
 }
 
 void SetupWLayerOpts(WLayerOptsState *opts, LayerObj *layer) {
@@ -40,19 +43,31 @@ WinStatus WLayerOpts(WLayerOptsState *state) {
     WinStatus result = WIN_NONE;
     if (state->p.active && state->layer != NULL) {
         updateBounds(state);
-        Rectangle bounds = state->p.b;
+        Rectangle bounds = {
+            state->p.b.x, state->p.b.y, state->p.b.width, state->p.b.height
+        };
         if (CheckCollisionPointRec(GetMousePosition(), bounds)) {
-            //SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
 
-        if (BpSimpleWindow(
-                bounds, GuiIconText(
-                            ICON_LAYERS, TextFormat(
-                                             "Layer Settings #%d : %s",
-                                             state->layer->index, state->ogName
-                                         )
-                        )
-            )) {
+        bool winRes = BpSimpleWindow(
+            &state->p.b,
+            GuiIconText(
+                ICON_LAYERS, TextFormat(
+                                 "Layer Settings #%d : %s", state->layer->index,
+                                 state->ogName
+                             )
+            ),
+            &state->p.drag, &state->p.resize
+        );
+        if (bounds.x != state->p.b.x) {
+            state->p.customPos = true;
+        }
+
+        TraceRect(state->p.b, "State bounds");
+        TraceRect(bounds, "Local bounds");
+
+        if (winRes) {
             result = WIN_CLOSE;
         }
 

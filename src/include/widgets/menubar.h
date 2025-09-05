@@ -10,6 +10,7 @@ typedef struct MenuBarState {
     Font font;
 
     bool menuOpen;
+    bool exportMenuOpen;
 
     // TopMenuEntry menus[TMENU_COUNT];
     TopMenuInfo curMenu;

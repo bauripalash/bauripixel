@@ -46,5 +46,7 @@ void BpMenuBarPanel(Vector2 position, float width, int items, float roundness);
 // Windows
 
 // Returns true on close
-bool BpSimpleWindow(Rectangle bounds, const char *title);
+bool BpSimpleWindow(
+    Rectangle *bounds, const char *title, bool *drag, bool *resize
+);
 #endif

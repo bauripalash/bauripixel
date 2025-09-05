@@ -30,8 +30,10 @@ void ClearWNewSpriteState(WNewSpriteState *state) {
 }
 
 static void updateBounds(WNewSpriteState *state) {
-    state->p.b.x = (GetScreenWidth() - state->p.b.width) / 2.0f;
-    state->p.b.y = (GetScreenHeight() - state->p.b.height) / 2.0f;
+    if (!state->p.customPos) {
+        state->p.b.x = (GetScreenWidth() - state->p.b.width) / 2.0f;
+        state->p.b.y = (GetScreenHeight() - state->p.b.height) / 2.0f;
+    }
 }
 
 #define NS_MARGIN_LR 10
@@ -48,7 +50,10 @@ WinStatus WNewSprite(WNewSpriteState *state) {
         updateBounds(state);
         Rectangle bounds = state->p.b;
 
-        if (BpSimpleWindow(bounds, "New Sprite")) {
+        if (BpSimpleWindow(&state->p.b, "New Sprite", NULL, NULL)) {
+            if (bounds.x != state->p.b.x || bounds.y != state->p.b.y) {
+                state->p.customPos = true;
+            }
             result = WIN_CLOSE;
         }
         Rectangle labelRect = {

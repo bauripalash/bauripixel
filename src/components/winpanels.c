@@ -2,24 +2,49 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define CLOSE_BTN_WIDTH 30
-#define WIN_MARGIN      10
-bool BpSimpleWindow(Rectangle bounds, const char *title) {
+#define CLOSE_BTN_WIDTH  30
+#define WIN_MARGIN       10
+#define RESIZE_ICON_SIZE 32
+
+bool BpSimpleWindow(
+    Rectangle *bounds, const char *title, bool *drag, bool *resize
+) {
     bool result = false;
-    BpPanelBorder(bounds, 2);
-    BpPanelBorder(
-        (Rectangle){bounds.x, bounds.y, bounds.width, WINDOW_TOP_HEIGHT}, 2
-    );
+    Vector2 mpos = GetMousePosition();
+    Rectangle rdBounds = *bounds;
+    BpPanelBorder(rdBounds, 2);
+    Rectangle headerRect =
+        (Rectangle){rdBounds.x, rdBounds.y, rdBounds.width, WINDOW_TOP_HEIGHT};
+    BpPanelBorder(headerRect, 2);
+
+    if (drag != NULL) {
+
+        if (CheckCollisionPointRec(mpos, headerRect) &&
+            IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            *drag = true;
+        }
+
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            *drag = false;
+        }
+
+        if (*drag) {
+            Vector2 delta = GetMouseDelta();
+            bounds->x += delta.x;
+            bounds->y += delta.y;
+        }
+    }
+
     result = GuiLabelButton(
-                 (Rectangle){bounds.x + bounds.width - CLOSE_BTN_WIDTH,
-                             bounds.y, CLOSE_BTN_WIDTH, WINDOW_TOP_HEIGHT},
+                 (Rectangle){rdBounds.x + rdBounds.width - CLOSE_BTN_WIDTH,
+                             rdBounds.y, CLOSE_BTN_WIDTH, WINDOW_TOP_HEIGHT},
                  GuiIconText(ICON_CROSS, NULL)
              ) != 0;
 
     if (title != NULL) {
         GuiLabel(
-            (Rectangle){bounds.x + WIN_MARGIN, bounds.y,
-                        bounds.width - CLOSE_BTN_WIDTH, WINDOW_TOP_HEIGHT},
+            (Rectangle){rdBounds.x + WIN_MARGIN, rdBounds.y,
+                        rdBounds.width - CLOSE_BTN_WIDTH, WINDOW_TOP_HEIGHT},
             title
         );
     }

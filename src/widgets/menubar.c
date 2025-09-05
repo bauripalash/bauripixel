@@ -9,7 +9,6 @@
 #define MENUBAR_PADDING 5
 #define ENTRY_MARGIN    5
 
-#define ResetMenu()     (state->curMenu = TMENU_COUNT)
 #define IncreaseItemY() (rect.y += state->font.baseSize + ENTRY_MARGIN)
 #define MakeMenuRect()                                                         \
     ((Rectangle){bounds.x + ENTRY_MARGIN, bounds.y + ENTRY_MARGIN,             \
@@ -51,16 +50,35 @@ void drawSeparator(Rectangle bounds) {
     );
 }
 
+void resetSubMenus(MenuBarState *state) { state->exportMenuOpen = false; }
+
+void resetMenu(MenuBarState *state) {
+    state->curMenu = TMENU_COUNT;
+    resetSubMenus(state);
+}
+
 #define SimpleLabelBtnMenu(rect, text, action)                                 \
     if (BpLabelButton(rect, text)) {                                           \
         state->curMenu = TMENU_COUNT;                                          \
         return action;                                                         \
     }
 
-MenuAction drawFileMenu(MenuBarState *state, Rectangle bounds) {
+MenuAction drawFileExportMenu(MenuBarState *state, Rectangle bounds) {
+    BpPanelBorder(bounds, 2);
+    Rectangle rect = MakeMenuRect();
+    SimpleLabelBtnMenu(rect, "as Image", MACTION_EXPORTAS_IMAGE);
+    IncreaseItemY();
+    SimpleLabelBtnMenu(rect, "as Spritesheet", MACTION_EXPORTAS_SHEET);
+
+    return MACTION_COUNT;
+}
+
+MenuAction
+drawFileMenu(MenuBarState *state, Rectangle bounds, Rectangle *subBounds) {
 
     BpPanelBorder(bounds, 2);
     Rectangle rect = MakeMenuRect();
+    Vector2 mpos = GetMousePosition();
     SimpleLabelBtnMenu(rect, "New", MACTION_NEW_FILE);
     IncreaseItemY();
     SimpleLabelBtnMenu(rect, "Open", MACTION_OPEN_FILE);
@@ -71,7 +89,33 @@ MenuAction drawFileMenu(MenuBarState *state, Rectangle bounds) {
     IncreaseItemY();
     SimpleLabelBtnMenu(rect, "Import", MACTION_IMPORT_FILE);
     IncreaseItemY();
-    SimpleLabelBtnMenu(rect, "Export", MACTION_EXPORT_FILE);
+
+    // Hover based Sub menu opening
+    /*
+    bool atExport = CheckCollisionPointRec(mpos, rect);
+if (atExport) {
+    state->exportMenuOpen = true;
+}*/
+
+    if (BpLabelButton(rect, "Export >>")) {
+        state->exportMenuOpen = !state->exportMenuOpen;
+    }
+
+    if (state->exportMenuOpen) {
+        *subBounds = (Rectangle){rect.x + rect.width, rect.y, rect.width, 100};
+
+        /*bool atExportSub = CheckCollisionPointRec(mpos, *subBounds);
+                if (atExportSub) {
+                        state->exportMenuOpen = true;
+                }*/
+        MenuAction result = drawFileExportMenu(state, *subBounds);
+
+        if (result != MACTION_COUNT) {
+            state->exportMenuOpen = false;
+            return result;
+        }
+    }
+
     IncreaseItemY();
     drawSeparator(rect);
     IncreaseItemY();
@@ -81,7 +125,8 @@ MenuAction drawFileMenu(MenuBarState *state, Rectangle bounds) {
     return MACTION_COUNT;
 }
 
-MenuAction drawEditMenu(MenuBarState *state, Rectangle bounds) {
+MenuAction
+drawEditMenu(MenuBarState *state, Rectangle bounds, Rectangle *subPanel) {
     BpPanelBorder(bounds, 2);
     Rectangle rect = MakeMenuRect();
     SimpleLabelBtnMenu(rect, "Undo", MACTION_UNDO);
@@ -113,7 +158,7 @@ MenuAction drawHelpMenu(MenuBarState *state, Rectangle bounds) {
     Rectangle rect = MakeMenuRect();
 
     if (BpLabelButton(rect, "About")) {
-        ResetMenu();
+        resetMenu(state);
         return MACTION_SHOW_ABOUT;
     }
 
@@ -124,13 +169,15 @@ MenuAction drawHelpMenu(MenuBarState *state, Rectangle bounds) {
 
 #define MENU_ITEM_MARGIN 10
 
-MenuAction openMenuPanel(MenuBarState *state, TopMenuInfo m, Rectangle bounds) {
+MenuAction openMenuPanel(
+    MenuBarState *state, TopMenuInfo m, Rectangle bounds, Rectangle *subBounds
+) {
     if (m == TMENU_FILE) {
-        return drawFileMenu(state, bounds);
+        return drawFileMenu(state, bounds, subBounds);
     } else if (m == TMENU_HELP) {
         return drawHelpMenu(state, bounds);
     } else if (m == TMENU_EDIT) {
-        return drawEditMenu(state, bounds);
+        return drawEditMenu(state, bounds, subBounds);
     }
 
     return MACTION_COUNT;
@@ -150,7 +197,7 @@ bool menuButton(
         BpTopMenuBtn(btnRect, menu.name, menu.info == state->curMenu);
     if (clicked) {
         if (state->curMenu == menu.info) {
-            ResetMenu();
+            resetMenu(state);
         } else {
             state->curMenu = menu.info;
         }
@@ -163,14 +210,16 @@ bool menuButton(
             (menu.itemCount * (state->font.baseSize + ENTRY_MARGIN)) +
                 ENTRY_MARGIN
         };
+        Rectangle subPanel = {-1};
 
         BpPanelBorder(panelRect, 2);
-        *action = openMenuPanel(state, menu.info, panelRect);
+        *action = openMenuPanel(state, menu.info, panelRect, &subPanel);
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
             !CheckCollisionPointRec(mpos, panelRect) &&
-            !CheckCollisionPointRec(mpos, btnRect)) {
-            ResetMenu();
+            !CheckCollisionPointRec(mpos, btnRect) &&
+            !CheckCollisionPointRec(mpos, subPanel)) {
+            resetMenu(state);
         }
     }
     *posX += btnWidth + MENUBAR_PADDING;
@@ -242,7 +291,7 @@ MenuAction MenuBar(MenuBarState *state) {
 
     Rectangle bounds = state->prop.bounds;
     if (CheckCollisionPointRec(mpos, bounds)) {
-        //SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        // SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 
     Rectangle rect = {
