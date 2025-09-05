@@ -2,6 +2,8 @@ const std = @import("std");
 const this = @This();
 const rl = @import("raylib");
 
+// Used Zig version : 0.16.0-dev.172+a11dfaf61
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
