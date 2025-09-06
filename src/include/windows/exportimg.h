@@ -8,6 +8,8 @@ typedef struct WExportImgState {
     WinProp p;
     bool editExportPath;
     char exportPath[512];
+    char exportFilename[256];
+    bool editResize;
 
 } WExportImgState;
 

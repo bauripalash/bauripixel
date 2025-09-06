@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define EXPO_DEF_WIDTH  300
+#define EXPO_DEF_WIDTH  500
 #define EXPO_DEF_HEIGHT 200
 
 WExportImgState NewWExportImage() {
@@ -14,6 +14,7 @@ WExportImgState NewWExportImage() {
     expi.p.b.width = EXPO_DEF_WIDTH;
     expi.p.b.height = EXPO_DEF_HEIGHT;
     strcpy(expi.exportPath, "");
+    strcpy(expi.exportFilename, "");
     expi.editExportPath = false;
 
     return expi;
@@ -37,6 +38,7 @@ static void updateBounds(WExportImgState *state) {
 #define LABEL_HEIGHT   30
 #define BTN_SIZE       80
 
+static int active = 0;
 WinStatus WExportImg(WExportImgState *state) {
     WinStatus result = WIN_NONE;
 
@@ -59,23 +61,38 @@ WinStatus WExportImg(WExportImgState *state) {
             result = WIN_CLOSE;
         }
 
+        float ogWidth = bounds.width - EXPO_MARGIN_LR * 2;
         Rectangle rect = {
             bounds.x + EXPO_MARGIN_LR,
-            bounds.y + WINDOW_TOP_HEIGHT + EXPO_MARGIN_TB,
-            bounds.width - EXPO_MARGIN_LR * 2, LABEL_HEIGHT
+            bounds.y + WINDOW_TOP_HEIGHT + EXPO_MARGIN_TB, ogWidth, LABEL_HEIGHT
         };
 
         GuiLabel(rect, "Export to");
-        rect.y += LABEL_HEIGHT;
-        rect.width -= BTN_SIZE + EXPO_MARGIN_LR;
-        BpTextBox(rect, state->exportPath, 512, &state->editExportPath);
+        // rect.y += LABEL_HEIGHT;
+        rect.x += LABEL_WIDTH;
+        rect.width -= BTN_SIZE + EXPO_MARGIN_LR + LABEL_WIDTH;
+        BpTextBox(rect, state->exportFilename, 512, &state->editExportPath);
         rect.width = BTN_SIZE;
         rect.x = (bounds.x + bounds.width) - EXPO_MARGIN_LR - rect.width;
         if (BpTextButton(rect, "Browse")) {
             BpSaveFileDialog(
                 "Export to", state->exportPath, "*.png;*.jpg;*.jpeg;*.gif", NULL
             );
+            strcpy(state->exportFilename, GetFileName(state->exportPath));
         }
+
+        rect.y += LABEL_HEIGHT + EXPO_MARGIN_TB;
+        rect.x = bounds.x + EXPO_MARGIN_LR;
+        rect.width = ogWidth;
+        GuiLabel(rect, "Resize :");
+        rect.x += LABEL_WIDTH;
+        rect.width = ogWidth - LABEL_WIDTH;
+
+        BpDropdownBox(
+            rect, "25%;50%;100%;200%;300%;400%;500%;600%;700%;800%;900%;1000%",
+            &active, &state->editResize
+        );
+
         rect.width = BTN_SIZE;
         rect.y = (bounds.y + bounds.height) - rect.height - EXPO_MARGIN_TB;
         rect.x = (bounds.x + bounds.width) - EXPO_MARGIN_LR - BTN_SIZE;

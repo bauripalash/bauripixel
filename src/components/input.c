@@ -48,3 +48,77 @@ bool BpTextBox(Rectangle bounds, char *text, int textSize, bool *edit) {
 
     return false;
 }
+
+#define DDOWN_PADDING 10
+bool BpDropdownBox(
+    Rectangle bounds, const char *options, int *selected, bool *clicked
+) {
+    bool locked = GuiIsLocked();
+    Vector2 mpos = GetMousePosition();
+    int textClrInt = OptThemeGet(T_ISLIDER_FG);
+    Color inputFg = GetColor(textClrInt);
+
+    Color inputBg = GetColor(OptThemeGet(T_ISLIDER_BG));
+
+    DrawRectangleRounded(bounds, 0.2, 0, Fade(inputBg, 0.8));
+    DrawRectangleRoundedLinesEx(bounds, 0.2, 0, 0, ColorTGrayDarker);
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+        CheckCollisionPointRec(mpos, bounds) && !locked) {
+        *clicked = !*clicked;
+    }
+
+    int numOpt = 0;
+    char **optList = TextSplit(options, ';', &numOpt);
+
+    const char *selOpt = optList[*selected];
+
+    Rectangle previewRect = {
+        bounds.x + DDOWN_PADDING, bounds.y,
+        bounds.width - DDOWN_PADDING * 2 - bounds.height, bounds.height
+    };
+    GuiLabel(previewRect, selOpt);
+
+    GuiLabel(
+        (Rectangle){(bounds.x + bounds.width) - bounds.height, bounds.y,
+                    bounds.height, bounds.height},
+        GuiIconText(ICON_ARROW_DOWN_FILL, "")
+    );
+
+    if (*clicked && numOpt > 1) {
+        Rectangle optPanel = {
+            bounds.x + DDOWN_PADDING, bounds.y + bounds.height,
+            bounds.width - DDOWN_PADDING * 2, bounds.height * (numOpt - 1)
+        };
+
+        int ogPanel = OptThemeGetSet(T_PANEL_BG, OptThemeGet(T_ISLIDER_BG));
+
+        BpPanelBorder(optPanel, 2);
+
+        OptThemeSet(T_PANEL_BG, ogPanel);
+
+        float ypos = optPanel.y;
+        for (int i = 0; i < numOpt; i++) {
+            if (i == *selected) {
+                continue;
+            }
+            Rectangle btnRect = {
+                optPanel.x, ypos, optPanel.width, bounds.height
+            };
+            if (BpLabelButton(btnRect, optList[i])) {
+                *selected = i;
+                *clicked = false;
+            }
+            ypos += bounds.height;
+        }
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+            (!CheckCollisionPointRec(mpos, bounds) &&
+             !CheckCollisionPointRec(mpos, optPanel)) &&
+            !locked) {
+            *clicked = false;
+        }
+    }
+
+    return false;
+}

@@ -19,6 +19,9 @@ bool BpSliderInt(
 );
 
 bool BpTextBox(Rectangle bounds, char *text, int textSize, bool *edit);
+bool BpDropdownBox(
+    Rectangle bounds, const char *options, int *selected, bool *clicked
+);
 
 bool BpDToolButton(
     Rectangle bounds, DrawTool *active, bool *showOther, int num,
