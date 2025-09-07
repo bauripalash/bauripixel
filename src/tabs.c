@@ -60,6 +60,7 @@ void FreeTabState(TabStateObj *state) {
 
     FreeDrawToolBar(&state->dtb);
     FreeCanvas(&state->cvs);
+    FreeWExportImg(&state->eximg);
     free(state);
 }
 
@@ -102,11 +103,30 @@ BpImgFmt getFormat(const char *ext) {
     return BP_IMG_COUNT;
 }
 
+typedef enum {
+    EXPORT_ALL = 0,
+    EXPORT_VIS = 1,
+    EXPORT_INDV = 2
+} ExportLayerWhich;
+
 Image getPatchedImage(TabObj *tab) {
+    int whichLayer = tab->state->eximg.expoLayerValue;
     Image img = GenImageColor(tab->canvasWidth, tab->canvasHeight, BLANK);
     Rectangle imgRect = {0, 0, tab->canvasWidth, tab->canvasHeight};
-    for (int i = tab->layers->count - 1; i >= 0; i--) {
-        LayerObj *layer = tab->layers->layers[i];
+    if (whichLayer == EXPORT_ALL || whichLayer == EXPORT_VIS) {
+        for (int i = tab->layers->count - 1; i >= 0; i--) {
+            LayerObj *layer = tab->layers->layers[i];
+            if (whichLayer == EXPORT_VIS &&
+                !layer->visible) { // Visible Layer Export
+                continue;
+            }
+            ImageDraw(&img, layer->img, imgRect, imgRect, WHITE);
+        }
+    } else if (whichLayer >= EXPORT_INDV) {
+        // Layer name index starts from 2
+        // first layer index = (whichLayer - EXPORT_INDV (2))
+        int layerIndex = abs(whichLayer - EXPORT_INDV); // abs(...) -> fail safe
+        LayerObj *layer = tab->layers->layers[layerIndex];
         ImageDraw(&img, layer->img, imgRect, imgRect, WHITE);
     }
     return img;
@@ -131,6 +151,7 @@ bool TabExportImage(TabObj *tab) {
 
     Image patchedImg = getPatchedImage(tab);
     ExportImage(patchedImg, filename);
+    UnloadImage(patchedImg);
 
     return true;
 }
@@ -261,6 +282,7 @@ TabObj *NewTabObj(int w, int h) {
 
     t->filepath = NULL; // will be set later
     t->state->dtb.maxBrushSize = (int)fmaxf((float)w, (float)h);
+    t->state->eximg.layerlist = t->layers;
 
     return t;
 }

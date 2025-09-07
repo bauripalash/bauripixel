@@ -268,10 +268,12 @@ void LayoutDraw(Gui *gui) {
         WinStatus result = WExportImg(expoImg);
         if (result == WIN_CLOSE || result == WIN_CANCEL || result == WIN_OK) {
             expoImg->p.active = false;
+            FreeWExportImg(expoImg);
         }
 
         if (result == WIN_OK) {
             TabExportImage(gui->curTab);
+            FreeWExportImg(expoImg);
         }
     }
 

@@ -4,6 +4,7 @@
 #include "include/utils.h"
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 LayerObj *NewLayerObj(int w, int h) {
     LayerObj *l = malloc(sizeof(LayerObj));
@@ -126,10 +127,11 @@ void AddToLayerList(LayerList *list, LayerObj *layer) {
     }
 
     arrput(list->layers, layer);
+
     list->count++;
 }
 
-void syncLayerIndex(LayerList *list) {
+static void syncLayerIndex(LayerList *list) {
     int len = arrlen(list->layers);
     for (int i = 0; i < len; i++) {
         LayerObj *lr = list->layers[i];

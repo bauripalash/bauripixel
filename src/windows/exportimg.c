@@ -3,10 +3,13 @@
 #include "../include/nativedlg.h"
 #include "../include/options.h"
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define EXPO_DEF_WIDTH  500
 #define EXPO_DEF_HEIGHT 200
+
+static const char InitLayerNames[] = "All Layers;Visible Layers";
 
 WExportImgState NewWExportImage() {
     WExportImgState expi = {0};
@@ -16,11 +19,46 @@ WExportImgState NewWExportImage() {
     strcpy(expi.exportPath, "");
     strcpy(expi.exportFilename, "");
     expi.editExportPath = false;
+    expi.layerlist = NULL;
 
     return expi;
 }
 
-void SetupWExportImage(WExportImgState *state) { state->p.customPos = false; }
+void FreeWExportImg(WExportImgState *state) {
+    if (state->layerNames != NULL) {
+        free(state->layerNames);
+        state->layerNames = NULL;
+    }
+}
+
+void SetupWExportImage(WExportImgState *state) {
+    if (state->layerlist != NULL) {
+        if (state->layerNames != NULL) {
+            free(state->layerNames);
+        }
+
+        int lcount = state->layerlist->count;
+        int nameLen = strlen(InitLayerNames);
+        for (int i = 0; i < lcount; i++) {
+            nameLen += strlen(state->layerlist->layers[i]->name) + 1;
+        }
+
+        state->layerNames = (char *)malloc(sizeof(char) * nameLen + 1);
+        if (state->layerNames == NULL) {
+            state->p.active = false; // error handle?
+        }
+
+        int textpos = 0;
+        TextAppend(state->layerNames, InitLayerNames, &textpos);
+
+        for (int i = 0; i < lcount; i++) {
+            LayerObj *l = state->layerlist->layers[i];
+            TextAppend(state->layerNames, TextFormat(";%s", l->name), &textpos);
+        }
+    }
+    state->resizeValue = 2;
+    state->p.customPos = false;
+}
 
 static void updateBounds(WExportImgState *state) {
     if (!state->p.customPos) {
@@ -42,7 +80,7 @@ static int active = 0;
 WinStatus WExportImg(WExportImgState *state) {
     WinStatus result = WIN_NONE;
 
-    if (state->p.active) {
+    if (state->p.active && state->layerlist != NULL) {
         updateBounds(state);
         Rectangle bounds = state->p.b;
 
@@ -85,13 +123,9 @@ WinStatus WExportImg(WExportImgState *state) {
         rect.x = bounds.x + EXPO_MARGIN_LR;
         rect.width = ogWidth;
         GuiLabel(rect, "Resize :");
-        rect.x += LABEL_WIDTH;
-        rect.width = ogWidth - LABEL_WIDTH;
 
-        BpDropdownBox(
-            rect, "25%;50%;100%;200%;300%;400%;500%;600%;700%;800%;900%;1000%",
-            &active, &state->editResize
-        );
+        rect.y += LABEL_HEIGHT + EXPO_MARGIN_LR;
+        GuiLabel(rect, "Layers : ");
 
         rect.width = BTN_SIZE;
         rect.y = (bounds.y + bounds.height) - rect.height - EXPO_MARGIN_TB;
@@ -110,6 +144,23 @@ WinStatus WExportImg(WExportImgState *state) {
         }
 
         GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+
+        // Dropdowns (to maintain Z index); Bottom to up;
+
+        BpDropdownBox(
+            (Rectangle){bounds.x + EXPO_MARGIN_LR + LABEL_WIDTH,
+                        bounds.y + LABEL_HEIGHT * 3 + EXPO_MARGIN_TB * 3,
+                        ogWidth - LABEL_WIDTH, LABEL_HEIGHT},
+            state->layerNames, &state->expoLayerValue, &state->editExpoLayer
+        );
+
+        BpDropdownBox(
+            (Rectangle){bounds.x + EXPO_MARGIN_LR + LABEL_WIDTH,
+                        bounds.y + LABEL_HEIGHT * 2 + EXPO_MARGIN_TB * 2,
+                        ogWidth - LABEL_WIDTH, LABEL_HEIGHT},
+            "25%;50%;100%;200%;300%;400%;500%;600%;700%;800%;900%;1000%",
+            &state->resizeValue, &state->editResize
+        );
     }
 
     return result;
