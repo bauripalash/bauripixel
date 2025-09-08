@@ -1,6 +1,7 @@
 #include "include/layers.h"
 #include "external/raylib.h"
 #include "external/stb/stb_ds.h"
+#include "include/frames.h"
 #include "include/utils.h"
 #include <stdbool.h>
 #include <stdlib.h>
@@ -20,6 +21,8 @@ LayerObj *NewLayerObj(int w, int h) {
     l->img = GenImageColor(w, h, BLANK);
     l->txt = LoadTextureFromImage(l->img);
 
+    l->flist = NewFrameList(w, h);
+
     return l;
 }
 
@@ -34,6 +37,10 @@ void FreeLayerObj(LayerObj *layer) {
 
     if (layer->img.data == NULL) {
         return;
+    }
+
+    if (layer->flist != NULL) {
+        FreeFrameList(layer->flist);
     }
 
     UnloadTexture(layer->txt);

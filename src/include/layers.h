@@ -1,6 +1,7 @@
 #ifndef LAYERS_H
 #define LAYERS_H
 #include "../external/raylib.h"
+#include "frames.h"
 #include <stdbool.h>
 
 typedef struct LayerObj {
@@ -11,6 +12,8 @@ typedef struct LayerObj {
     char *name;
     bool visible;
     float opacity;
+
+    FrameList *flist;
 } LayerObj;
 
 LayerObj *NewLayerObj(int w, int h);

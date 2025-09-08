@@ -492,6 +492,20 @@ int LayerBarDraw(LayerBarState *lb) {
                 );
             }
 
+            float fxpos = px - lb->scroll.x + LAYER_NAME_WIDTH;
+            float fypos = py - lb->scroll.y;
+            int fborder =
+                OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_BRDR));
+            for (int i = 0; i < lr->flist->count; i++) {
+                BpFramePrevBox(
+                    (Rectangle){fxpos, fypos, LAYER_ITEM_HEIGHT,
+                                LAYER_ITEM_HEIGHT},
+                    lr->flist->frames[i], true
+                );
+            }
+
+            OptThemeSet(T_PANEL_BORDER, fborder);
+
             py += pyinc;
         }
         int ogBorder =

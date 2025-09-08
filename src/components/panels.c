@@ -1,6 +1,7 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../include/components.h"
+#include "../include/frames.h"
 #include "../include/options.h"
 #include "../include/utils.h"
 #include <stdbool.h>
@@ -211,4 +212,14 @@ void BpMenuBarPanel(Vector2 position, float width, int items, float roundness) {
 
     // BpRoundedFlatPanel(rect, roundness);
     BpPanelBorder(rect, 2);
+}
+
+bool BpFramePrevBox(Rectangle bounds, FrameObj *frame, bool preview) {
+    BpPanelBorder(bounds, 2);
+    if (preview) {
+        // preview TODO
+    } else {
+        GuiLabel(bounds, GuiIconText(ICON_FILETYPE_ALPHA, NULL));
+    }
+    return false;
 }

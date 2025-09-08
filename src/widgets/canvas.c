@@ -39,7 +39,7 @@ CanvasState NewCanvas(int w, int h) {
     c.vScrollDragging = false;
     c.hScrollDragging = false;
     c.panning = false;
-    c.enablePanning = false;
+    c.enablePanning = true;
 
     c.camera.target = (Vector2){0, 0};
 
@@ -396,7 +396,9 @@ void handleTools(CanvasState *state) {
                     state->gridSize.y}
     );
 
-    if (state->curTool != DT_PAN) {
+    if (state->curTool == DT_PAN) {
+        state->enablePanning = true;
+    } else {
         state->enablePanning = false;
     }
 }

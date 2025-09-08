@@ -4,6 +4,7 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
 #include "../include/drawtools.h"
+#include "../include/frames.h"
 #include "../include/utils.h"
 #include <stdbool.h>
 
@@ -47,7 +48,7 @@ void BpPanelNoBorder(Rectangle bounds);
 
 void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow);
 void BpMenuBarPanel(Vector2 position, float width, int items, float roundness);
-
+bool BpFramePrevBox(Rectangle bounds, FrameObj *frame, bool preview);
 // Windows
 
 // Returns true on close
