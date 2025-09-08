@@ -4,7 +4,6 @@
 #include "include/utils.h"
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
 LayerObj *NewLayerObj(int w, int h) {
     LayerObj *l = malloc(sizeof(LayerObj));
@@ -86,12 +85,12 @@ LayerList *NewLayerList(int w, int h) {
     ll->layers = NULL;
 
     LayerObj *initLayer = NewLayerObj(w, h);
-    initLayer->index = 0;
-    initLayer->name = MakeString("Layer 0");
     if (initLayer == NULL) {
         free(ll);
         return NULL;
     }
+    initLayer->index = 0;
+    initLayer->name = MakeString("Layer 0");
 
     AddToLayerList(ll, initLayer);
 
@@ -106,6 +105,7 @@ void FreeLayerList(LayerList *list) {
     }
 
     if (list->layers == NULL) {
+        free(list);
         return;
     }
 
@@ -161,11 +161,10 @@ bool DuplicateIdxLayerList(LayerList *list, int index) {
 
     LayerObj *lr = list->layers[index];
     LayerObj *dupLr = DuplicateLayerObj(lr);
-    dupLr->index += 1;
-
     if (dupLr == NULL) {
         return false;
     }
+    dupLr->index += 1;
 
     if (index == (list->count - 1)) {
         arrput(list->layers, dupLr);
@@ -179,8 +178,14 @@ bool DuplicateIdxLayerList(LayerList *list, int index) {
 }
 
 bool MoveIdxLayerList(LayerList *list, int from, int to) {
+    if (list == NULL) {
+        return false;
+    }
+    if (list->layers == NULL) {
+        return false;
+    }
     int len = arrlen(list->layers);
-    if (list == NULL || from < 0 || from >= len || to < 0 || to >= len) {
+    if (from < 0 || from >= len || to < 0 || to >= len) {
         return false;
     }
 
