@@ -1,6 +1,5 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
-#include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/options.h"
 #include "../include/utils.h"
