@@ -12,8 +12,8 @@ typedef struct WExportImgState {
     char exportPath[512];
     char exportFilename[256];
 
-    bool editResize;
-    int resizeValue;
+    bool editScale;
+    int scaleValue;
 
     bool editExpoLayer;
     int expoLayerValue;

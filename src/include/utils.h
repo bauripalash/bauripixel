@@ -40,10 +40,23 @@ typedef struct Side {
         r.height                                                               \
     )
 
-#define DegToRad(d)  ((float)(d * DEG2RAD))
-#define RadToDeg(r)  ((float)(r * RAD2DEG))
+#define DegToRad(d) ((float)(d * DEG2RAD))
+#define RadToDeg(r) ((float)(r * RAD2DEG))
 
-#define PrintEnum(d) TraceLog(LOG_WARNING, "%s", #d)
+// If left/right shift key is being pressed down
+#define IsShiftDown() (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT))
+
+// If left/right control key is being pressed down
+#define IsCtrlDown()                                                           \
+    (IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL))
+
+// If left/right alt key is being pressed down
+#define IsAltDown() (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))
+
+// If left/right Meta/Super/Windows key is being pressed down
+#define IsSuperDown() (IsKeyDown(KEY_LEFT_SUPER) || IsKeyDown(KEY_RIGHT_SUPER))
+
+#define PrintEnum(d)  TraceLog(LOG_WARNING, "%s", #d)
 
 // Functions
 
@@ -76,6 +89,9 @@ float ClampMax(float value, float max);
 bool RectAnyDiff(Rectangle a, Rectangle b);
 // Check if `all` of the values of the Rects are different
 bool RectAllDiff(Rectangle a, Rectangle b);
+
+// If Shift, Ctrl or Meta/Windows key is being pressed down
+bool IsModifierDown();
 
 bool IsOsWeb();
 bool IsOsLinux();

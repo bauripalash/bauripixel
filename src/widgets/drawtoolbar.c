@@ -148,27 +148,27 @@ DrawTool HandleDToolsShortcuts(DrawToolBarState *state) {
         return tool;
     }
 
-    if (IsKeyPressed(KEY_B)) {
+    if (IsKeyPressed(KEY_B) && !IsModifierDown()) {
         tool = DT_PENCIL;
-    } else if (IsKeyPressed(KEY_E)) {
+    } else if (IsKeyPressed(KEY_E) && !IsModifierDown()) {
         tool = DT_ERASER;
-    } else if (IsKeyPressed(KEY_L)) {
+    } else if (IsKeyPressed(KEY_L) && !IsModifierDown()) {
         tool = DT_LINE;
-    } else if (IsKeyPressed(KEY_M)) {
+    } else if (IsKeyPressed(KEY_M) && !IsModifierDown()) {
         tool = DT_PAN;
     } else if (IsKeyPressed(KEY_C)) {
-        if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+        if (IsShiftDown()) {
             tool = DT_CIRCLE_FILL;
         } else {
             tool = DT_CIRCLE;
         }
     } else if (IsKeyPressed(KEY_R)) {
-        if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+        if (IsShiftDown()) {
             tool = DT_RECT_FILL;
         } else {
             tool = DT_RECT;
         }
-    } else if (IsKeyPressed(KEY_G)) {
+    } else if (IsKeyPressed(KEY_G) && !IsModifierDown()) {
         tool = DT_BUCKET;
     }
 
@@ -176,7 +176,7 @@ DrawTool HandleDToolsShortcuts(DrawToolBarState *state) {
         state->currentTool = tool;
     }
 
-    if (IsKeyDown(KEY_LEFT_CONTROL) && !GuiIsLocked()) {
+    if (IsCtrlDown() && !GuiIsLocked()) {
         float wheel = GetMouseWheelMove();
         state->brushSize += wheel;
 

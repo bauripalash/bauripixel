@@ -70,6 +70,10 @@ bool RectAllDiff(Rectangle a, Rectangle b) {
            a.height != b.height;
 }
 
+bool IsModifierDown() {
+    return IsShiftDown() || IsCtrlDown() || IsAltDown() || IsSuperDown();
+}
+
 bool IsOsWeb() {
 #ifdef BPM_OS_WEB
     return true;

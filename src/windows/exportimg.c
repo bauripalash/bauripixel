@@ -10,6 +10,7 @@
 #define EXPO_DEF_HEIGHT 200
 
 static const char InitLayerNames[] = "All Layers;Visible Layers";
+static const char ScaleNames[] = "1x;0.5x;0.25x;2x;3x;4x;5x;6x;7x;8x;9x;10x";
 
 WExportImgState NewWExportImage() {
     WExportImgState expi = {0};
@@ -19,6 +20,7 @@ WExportImgState NewWExportImage() {
     strcpy(expi.exportPath, "");
     strcpy(expi.exportFilename, "");
     expi.editExportPath = false;
+    expi.editScale = false;
     expi.layerlist = NULL;
 
     return expi;
@@ -56,7 +58,7 @@ void SetupWExportImage(WExportImgState *state) {
             TextAppend(state->layerNames, TextFormat(";%s", l->name), &textpos);
         }
     }
-    state->resizeValue = 2;
+    state->scaleValue = 0;
     state->p.customPos = false;
 }
 
@@ -122,7 +124,7 @@ WinStatus WExportImg(WExportImgState *state) {
         rect.y += LABEL_HEIGHT + EXPO_MARGIN_TB;
         rect.x = bounds.x + EXPO_MARGIN_LR;
         rect.width = ogWidth;
-        GuiLabel(rect, "Resize :");
+        GuiLabel(rect, "Scale :");
 
         rect.y += LABEL_HEIGHT + EXPO_MARGIN_LR;
         GuiLabel(rect, "Layers : ");
@@ -158,8 +160,7 @@ WinStatus WExportImg(WExportImgState *state) {
             (Rectangle){bounds.x + EXPO_MARGIN_LR + LABEL_WIDTH,
                         bounds.y + LABEL_HEIGHT * 2 + EXPO_MARGIN_TB * 2,
                         ogWidth - LABEL_WIDTH, LABEL_HEIGHT},
-            "25%;50%;100%;200%;300%;400%;500%;600%;700%;800%;900%;1000%",
-            &state->resizeValue, &state->editResize
+            ScaleNames, &state->scaleValue, &state->editScale
         );
     }
 

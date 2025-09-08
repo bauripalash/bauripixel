@@ -109,6 +109,14 @@ typedef enum {
     EXPORT_INDV = 2
 } ExportLayerWhich;
 
+typedef enum {
+    SCALE_1x = 0,
+    SCALE_05x = 1,
+    SCALE_025x = 2,
+    SCALE_2x = 3,
+    SCALE_10x = 10 + 1, // 10x Scaling (max) (if 2x => 3 then 10x => 10 + 1)
+} ExportScale;
+
 Image getPatchedImage(TabObj *tab) {
     int whichLayer = tab->state->eximg.expoLayerValue;
     Image img = GenImageColor(tab->canvasWidth, tab->canvasHeight, BLANK);
@@ -129,6 +137,25 @@ Image getPatchedImage(TabObj *tab) {
         LayerObj *layer = tab->layers->layers[layerIndex];
         ImageDraw(&img, layer->img, imgRect, imgRect, WHITE);
     }
+
+    int scale = tab->state->eximg.scaleValue;
+
+    if (scale != SCALE_1x) {
+        float scaleValue = 1.0f;
+        if (scale == SCALE_05x) {
+            scaleValue = 0.5f;
+        } else if (scale == SCALE_025x) {
+            scaleValue = 0.25f;
+        } else if (scale != SCALE_1x && scale >= SCALE_2x &&
+                   scale <= SCALE_10x) {
+            scaleValue = scale - 1;
+        }
+        int newWidth = ceilf((float)tab->canvasWidth * scaleValue);
+        int newHeight = ceilf((float)tab->canvasHeight * scaleValue);
+
+        ImageResizeNN(&img, newWidth, newHeight);
+    }
+
     return img;
 }
 
@@ -283,7 +310,6 @@ TabObj *NewTabObj(int w, int h) {
     t->filepath = NULL; // will be set later
     t->state->dtb.maxBrushSize = (int)fmaxf((float)w, (float)h);
     t->state->eximg.layerlist = t->layers;
-
     return t;
 }
 
