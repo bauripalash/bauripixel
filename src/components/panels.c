@@ -143,10 +143,6 @@ void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow) {
             DrawBLDot(bounds, thick, brdr);
         }
     }
-
-    if (IsKeyDown(KEY_A)) {
-        DrawRectangleLinesEx(bounds, 1, MAGENTA);
-    }
 }
 
 float tabHeight = 30;
