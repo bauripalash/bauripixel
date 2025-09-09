@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-LayerObj *NewLayerObj(int w, int h) {
+LayerObj *NewLayerObj(int w, int h, int framecount) {
     LayerObj *l = malloc(sizeof(LayerObj));
     if (l == NULL) {
         return NULL;
@@ -22,6 +22,12 @@ LayerObj *NewLayerObj(int w, int h) {
     l->txt = LoadTextureFromImage(l->img);
 
     l->flist = NewFrameList(w, h);
+    for (int i = 0; i < (framecount - 1); i++) {
+        FrameObj *f = NewFrameObj(w, h);
+        if (f != NULL) { // TODO: Error check
+            AddToFrameList(l->flist, f);
+        }
+    }
 
     return l;
 }
@@ -91,7 +97,7 @@ LayerList *NewLayerList(int w, int h) {
 
     ll->layers = NULL;
 
-    LayerObj *initLayer = NewLayerObj(w, h);
+    LayerObj *initLayer = NewLayerObj(w, h, 1);
     if (initLayer == NULL) {
         free(ll);
         return NULL;

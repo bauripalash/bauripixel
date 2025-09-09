@@ -109,7 +109,8 @@ void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom) {
 }
 
 static bool createNewLayer(LayerBarState *lb, LayerObj *targetLayer) {
-    LayerObj *newLayer = NewLayerObj(lb->gridSize.x, lb->gridSize.y);
+    LayerObj *newLayer =
+        NewLayerObj(lb->gridSize.x, lb->gridSize.y, lb->curLayer->flist->count);
     if (newLayer == NULL) {
         return false;
     }
@@ -125,6 +126,23 @@ static bool createNewLayer(LayerBarState *lb, LayerObj *targetLayer) {
         MoveIdxLayerList(lb->list, newLayer->index, targetLayer->index + 1);
     }
 
+    return true;
+}
+
+static bool createNewFrame(LayerBarState *lb) {
+    for (int i = 0; i < lb->list->count; i++) {
+        LayerObj *lr = lb->list->layers[i];
+        if (lr == NULL) {
+            return false;
+        }
+
+        FrameObj *frame = NewFrameObj(lr->img.width, lr->img.height);
+        if (frame == NULL) {
+            return false;
+        }
+
+        AddToFrameList(lr->flist, frame);
+    }
     return true;
 }
 
@@ -426,12 +444,17 @@ int LayerBarDraw(LayerBarState *lb) {
 
         // BpRoundedPanel(bounds, 2, 0.125, true);
         BpPanelBorder(bounds, 2);
-        if (BpToggleButton(
-                (Rectangle){toolBarBounds.x, toolBarBounds.y,
-                            toolBarBounds.height, toolBarBounds.height},
-                2, false
-            )) {
-            createNewLayer(lb, NULL);
+        Rectangle toolBtnRect = {
+            toolBarBounds.x, toolBarBounds.y, toolBarBounds.height,
+            toolBarBounds.height
+        };
+
+        if (BpTextButton(toolBtnRect, GuiIconText(ICON_TARGET_SMALL, NULL))) {
+            createNewLayer(lb, lb->curLayer);
+        }
+        toolBtnRect.x += toolBtnRect.width;
+        if (BpTextButton(toolBtnRect, GuiIconText(ICON_PLAYER_JUMP, NULL))) {
+            createNewFrame(lb);
         }
 
         GuiDrawIcon(
@@ -499,7 +522,7 @@ int LayerBarDraw(LayerBarState *lb) {
             float fypos = py - lb->scroll.y;
             int fborder =
                 OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_BRDR));
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < lb->curLayer->flist->count; i++) {
                 if (BpFramePrevBox(
                         (Rectangle){fxpos, fypos, LAYER_ITEM_HEIGHT,
                                     LAYER_ITEM_HEIGHT},

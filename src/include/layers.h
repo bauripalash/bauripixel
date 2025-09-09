@@ -16,7 +16,7 @@ typedef struct LayerObj {
     FrameList *flist;
 } LayerObj;
 
-LayerObj *NewLayerObj(int w, int h);
+LayerObj *NewLayerObj(int w, int h, int framecount);
 void FreeLayerObj(LayerObj *layer);
 void SyncImgLayerObj(LayerObj *layer);
 LayerObj *DuplicateLayerObj(const LayerObj *layer);
