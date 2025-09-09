@@ -154,6 +154,21 @@ static bool selFrameAll = false;
 #define LAYER_NAME_WIDTH  200
 #define LAYER_ITEM_MARGIN 5
 
+bool LayerItemFrameDraw(
+    LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
+) {
+    int framecount = layer->flist->count;
+    Rectangle cellRect = {pos.x, pos.y, LAYER_ITEM_HEIGHT, LAYER_ITEM_HEIGHT};
+
+    for (int i = 0; i < framecount; i++) {
+        FrameObj *f = layer->flist->frames[i];
+        BpFramePrevBox(cellRect, f, false);
+        cellRect.x += cellRect.width;
+    }
+
+    return true;
+}
+
 bool LayerItemDraw(
     LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
 ) {
@@ -178,7 +193,6 @@ bool LayerItemDraw(
         bounds.x, bounds.y, LAYER_NAME_WIDTH, bounds.height
     };
 
-    BpPanelBorder(bounds, 2);
     BpPanelBorder(nameBounds, 2);
 
     if (hover && (lb->draggingLayer)) {
@@ -227,6 +241,10 @@ bool LayerItemDraw(
         lb->draggingLayer = true;
         lb->dragLayer = layer;
     }
+
+    LayerItemFrameDraw(
+        lb, (Vector2){pos.x + LAYER_NAME_WIDTH, pos.y}, layer, isCur
+    );
 
     OptThemeSet(T_PANEL_BORDER, ogBorder);
 
@@ -457,10 +475,6 @@ int LayerBarDraw(LayerBarState *lb) {
             createNewFrame(lb);
         }
 
-        GuiDrawIcon(
-            ICON_TARGET_SMALL_FILL, toolBarBounds.x + 6, toolBarBounds.y + 6, 1,
-            ColorWhite
-        );
         Rectangle layerContentRect = {
             layersBounds.x, layersBounds.y, layersBounds.width, layersBounds.y
         };
@@ -484,19 +498,17 @@ int LayerBarDraw(LayerBarState *lb) {
         for (int i = 0; i < lb->list->count; i++) {
             LayerObj *lr = lb->list->layers[i];
             Rectangle layerBtn = {px, py, 300, LAYER_ITEM_HEIGHT};
+            float posX = px - lb->scroll.x;
+            float posY = py - lb->scroll.y;
 
             bool isCur = i == lb->curLayer->index;
-            if (LayerItemDraw(
-                    lb, (Vector2){px - lb->scroll.x, py - lb->scroll.y}, lr,
-                    isCur
-                )) {
+            if (LayerItemDraw(lb, (Vector2){posX, posY}, lr, isCur)) {
                 lb->selectedLayer = lr;
             }
 
             if (isCur) {
                 activeRect =
-                    (Rectangle){layerBtn.x - lb->scroll.x,
-                                layerBtn.y - lb->scroll.y,
+                    (Rectangle){posX, posY,
                                 lb->layersRect.width - LAYER_ITEM_MARGIN * 2,
                                 LAYER_ITEM_HEIGHT};
             }
@@ -504,37 +516,19 @@ int LayerBarDraw(LayerBarState *lb) {
             // Drawing the drag mark
             if (lb->dragTarget == lr->index && lb->draggingLayer &&
                 lb->dragTarget != lb->curLayer->index) {
-                float ypos = py - lb->scroll.y;
+                float ypos = posY;
 
                 if (lb->putDragAtEnd) {
-                    ypos = (py - lb->scroll.y) + LAYER_ITEM_HEIGHT - 8;
+                    ypos += LAYER_ITEM_HEIGHT - 8;
                 }
 
                 DrawRectangleRec(
-                    (Rectangle){px - lb->scroll.x, ypos,
+                    (Rectangle){posX, ypos,
                                 lb->layersRect.width - LAYER_ITEM_MARGIN * 2,
                                 8},
                     BpColorSetAlpha(ColorVGreen, 200)
                 );
             }
-
-            float fxpos = px - lb->scroll.x + LAYER_NAME_WIDTH;
-            float fypos = py - lb->scroll.y;
-            int fborder =
-                OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_BRDR));
-            for (int i = 0; i < lb->curLayer->flist->count; i++) {
-                if (BpFramePrevBox(
-                        (Rectangle){fxpos, fypos, LAYER_ITEM_HEIGHT,
-                                    LAYER_ITEM_HEIGHT},
-                        lr->flist->frames[i], true
-                    )) {
-                    curFrame = i;
-                }
-
-                fxpos += LAYER_ITEM_HEIGHT;
-            }
-
-            OptThemeSet(T_PANEL_BORDER, fborder);
 
             py += pyinc;
         }
@@ -542,14 +536,17 @@ int LayerBarDraw(LayerBarState *lb) {
             OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_ACTIVE_BRDR));
         BpPanelOnlyBorder(activeRect, 2);
 
-        if (!selFrameAll) {
-            Rectangle frameRect = {
-                activeRect.x + LAYER_NAME_WIDTH +
-                    (curFrame * activeRect.height),
-                activeRect.y, activeRect.height, activeRect.height
-            };
-            BpFramePrevActive(frameRect, NULL, false);
-        }
+        /*
+if (!selFrameAll) {
+    Rectangle frameRect = {
+        activeRect.x + LAYER_NAME_WIDTH +
+            (curFrame * activeRect.height),
+        activeRect.y, activeRect.height, activeRect.height
+    };
+    BpFramePrevActive(frameRect, NULL, false);
+}
+        */
+
         OptThemeSet(T_PANEL_BORDER, ogBorder);
 
         EndScissorMode();
