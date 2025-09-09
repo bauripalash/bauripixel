@@ -49,6 +49,7 @@ void BpPanelNoBorder(Rectangle bounds);
 void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow);
 void BpMenuBarPanel(Vector2 position, float width, int items, float roundness);
 bool BpFramePrevBox(Rectangle bounds, FrameObj *frame, bool preview);
+bool BpFramePrevActive(Rectangle bounds, FrameObj *frame, bool preview);
 // Windows
 
 // Returns true on close

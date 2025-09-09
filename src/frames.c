@@ -73,6 +73,12 @@ FrameList *NewFrameList(int w, int h) {
     initFrame->index = 0;
     AddToFrameList(list, initFrame);
     list->count = 1;
+    FrameObj *twoFrame = NewFrameObj(w, h);
+    if (twoFrame != NULL) {
+        twoFrame->index = 1;
+        AddToFrameList(list, twoFrame);
+        list->count = 2;
+    }
 
     return list;
 }

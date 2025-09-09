@@ -128,6 +128,9 @@ static bool createNewLayer(LayerBarState *lb, LayerObj *targetLayer) {
     return true;
 }
 
+static int curFrame = 0;
+static bool selFrameAll = false;
+
 #define HANDLE_THICKNESS  20
 #define LAYER_ITEM_HEIGHT 35
 #define LAYER_NAME_WIDTH  200
@@ -496,12 +499,16 @@ int LayerBarDraw(LayerBarState *lb) {
             float fypos = py - lb->scroll.y;
             int fborder =
                 OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_BRDR));
-            for (int i = 0; i < lr->flist->count; i++) {
-                BpFramePrevBox(
-                    (Rectangle){fxpos, fypos, LAYER_ITEM_HEIGHT,
-                                LAYER_ITEM_HEIGHT},
-                    lr->flist->frames[i], true
-                );
+            for (int i = 0; i < 5; i++) {
+                if (BpFramePrevBox(
+                        (Rectangle){fxpos, fypos, LAYER_ITEM_HEIGHT,
+                                    LAYER_ITEM_HEIGHT},
+                        lr->flist->frames[i], true
+                    )) {
+                    curFrame = i;
+                }
+
+                fxpos += LAYER_ITEM_HEIGHT;
             }
 
             OptThemeSet(T_PANEL_BORDER, fborder);
@@ -511,6 +518,15 @@ int LayerBarDraw(LayerBarState *lb) {
         int ogBorder =
             OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_ACTIVE_BRDR));
         BpPanelOnlyBorder(activeRect, 2);
+
+        if (!selFrameAll) {
+            Rectangle frameRect = {
+                activeRect.x + LAYER_NAME_WIDTH +
+                    (curFrame * activeRect.height),
+                activeRect.y, activeRect.height, activeRect.height
+            };
+            BpFramePrevActive(frameRect, NULL, false);
+        }
         OptThemeSet(T_PANEL_BORDER, ogBorder);
 
         EndScissorMode();

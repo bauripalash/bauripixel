@@ -215,11 +215,21 @@ void BpMenuBarPanel(Vector2 position, float width, int items, float roundness) {
 }
 
 bool BpFramePrevBox(Rectangle bounds, FrameObj *frame, bool preview) {
-    BpPanelBorder(bounds, 2);
-    if (preview) {
-        // preview TODO
-    } else {
-        GuiLabel(bounds, GuiIconText(ICON_FILETYPE_ALPHA, NULL));
-    }
-    return false;
+    Rectangle rect = {bounds.x + 1, bounds.y, bounds.width - 2, bounds.height};
+    BpPanelBorder(rect, 2);
+    GuiDrawIcon(
+        ICON_BREAKPOINT_OFF, rect.x, rect.y, 2,
+        GetColor(OptThemeGet(T_PANEL_BORDER))
+    );
+    return CheckCollisionPointRec(GetMousePosition(), rect) &&
+           IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !GuiIsLocked();
+}
+
+bool BpFramePrevActive(Rectangle bounds, FrameObj *frame, bool preview) {
+    int ogBorder =
+        OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_ACTIVE_BRDR));
+    bool result = BpFramePrevBox(bounds, frame, preview);
+    OptThemeSet(T_PANEL_BORDER, ogBorder);
+
+    return result;
 }
