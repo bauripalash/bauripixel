@@ -6,19 +6,19 @@
 
 typedef struct LayerObj {
     int index;
-    Image img;
-    Texture2D txt;
     int mode;
     char *name;
     bool visible;
     float opacity;
+    int width;
+    int height;
 
     FrameList *flist;
 } LayerObj;
 
 LayerObj *NewLayerObj(int w, int h, int framecount);
 void FreeLayerObj(LayerObj *layer);
-void SyncImgLayerObj(LayerObj *layer);
+void SyncImgLayerObj(LayerObj *layer, int frame);
 LayerObj *DuplicateLayerObj(const LayerObj *layer);
 
 typedef struct LayerList {

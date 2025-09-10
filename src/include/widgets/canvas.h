@@ -46,6 +46,7 @@ typedef struct {
 
     LayerList *layers;
     LayerObj *curLayer;
+    int curFrame;
 
     Texture previewTxt;
     Image previewImg;

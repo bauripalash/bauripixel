@@ -217,19 +217,28 @@ void BpMenuBarPanel(Vector2 position, float width, int items, float roundness) {
 bool BpFramePrevBox(Rectangle bounds, FrameObj *frame, bool preview) {
     Rectangle rect = {bounds.x + 1, bounds.y, bounds.width - 2, bounds.height};
     BpPanelBorder(rect, 2);
-    GuiDrawIcon(
-        ICON_BREAKPOINT_OFF, rect.x, rect.y, 2,
-        GetColor(OptThemeGet(T_PANEL_BORDER))
-    );
+    int ogAlign = GuiGetStyle(LABEL, TEXT_ALIGNMENT);
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+    GuiLabel(rect, TextFormat("%d", frame->index));
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, ogAlign);
     return CheckCollisionPointRec(GetMousePosition(), rect) &&
            IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !GuiIsLocked();
 }
 
+#define ACTIVE_FRAME_PADDING 3
 bool BpFramePrevActive(Rectangle bounds, FrameObj *frame, bool preview) {
+    Rectangle newBounds = {
+        bounds.x + ACTIVE_FRAME_PADDING, bounds.y + ACTIVE_FRAME_PADDING,
+        bounds.width - ACTIVE_FRAME_PADDING * 2,
+        bounds.height - ACTIVE_FRAME_PADDING * 2
+    };
+
+    bool result = BpFramePrevBox(bounds, frame, preview);
     int ogBorder =
         OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_ACTIVE_BRDR));
-    bool result = BpFramePrevBox(bounds, frame, preview);
-    OptThemeSet(T_PANEL_BORDER, ogBorder);
 
+    BpPanelOnlyBorder(newBounds, 2);
+
+    OptThemeSet(T_PANEL_BORDER, ogBorder);
     return result;
 }

@@ -58,6 +58,19 @@ FrameObj *DuplicateFrameObj(const FrameObj *frame) {
     return dup;
 }
 
+bool SyncFrameObj(FrameObj *frame) {
+    if (frame == NULL) {
+        return false;
+    }
+
+    if (frame->img.data == NULL) {
+        return false;
+    }
+    UnloadTexture(frame->txt);
+    frame->txt = LoadTextureFromImage(frame->img);
+    return true;
+}
+
 FrameList *NewFrameList(int w, int h) {
     FrameList *list = (FrameList *)malloc(sizeof(FrameList));
     if (list == NULL) {
@@ -96,6 +109,8 @@ void FreeFrameList(FrameList *list) {
     free(list);
     list = NULL;
 }
+
+FrameList *DuplicateFrameList(const FrameList *list);
 
 static void syncFrameIndexes(FrameList *list) {
     if (list == NULL) {

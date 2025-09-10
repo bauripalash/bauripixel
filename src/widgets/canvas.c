@@ -89,6 +89,7 @@ CanvasState NewCanvas(int w, int h) {
     c.guideGridOffset = (Vector2){0, 0};
     c.guidGridThickness = 2.0f;
     c.guideGridColor = BpSolidColor(0x0, 0x0, 0xff);
+    c.curFrame = 0;
 
     return c;
 }

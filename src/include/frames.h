@@ -14,6 +14,7 @@ typedef struct FrameObj {
 FrameObj *NewFrameObj(int w, int h);
 void FreeFrameObj(FrameObj *frame);
 FrameObj *DuplicateFrameObj(const FrameObj *frame);
+bool SyncFrameObj(FrameObj *frame);
 
 typedef struct FrameList {
     FrameObj **frames;
@@ -22,6 +23,7 @@ typedef struct FrameList {
 
 FrameList *NewFrameList(int w, int h);
 void FreeFrameList(FrameList *list);
+FrameList *DuplicateFrameList(const FrameList *list);
 void AddToFrameList(FrameList *list, FrameObj *frame);
 FrameObj *RemoveIdxFrameList(FrameList *list, int index);
 bool DuplicateIdxFrameList(FrameList *list, int index);

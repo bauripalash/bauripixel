@@ -17,9 +17,8 @@ LayerObj *NewLayerObj(int w, int h, int framecount) {
     l->name = NULL;
     l->visible = true;
     l->opacity = 1.0f;
-
-    l->img = GenImageColor(w, h, BLANK);
-    l->txt = LoadTextureFromImage(l->img);
+    l->width = w;
+    l->height = h;
 
     l->flist = NewFrameList(w, h);
     for (int i = 0; i < (framecount - 1); i++) {
@@ -41,28 +40,29 @@ void FreeLayerObj(LayerObj *layer) {
         free(layer->name);
     }
 
-    if (layer->img.data == NULL) {
-        return;
-    }
-
     if (layer->flist != NULL) {
         FreeFrameList(layer->flist);
     }
 
-    UnloadTexture(layer->txt);
-    UnloadImage(layer->img);
     free(layer);
 }
 
-void SyncImgLayerObj(LayerObj *layer) {
-    if (layer == NULL || layer->img.data == NULL) {
+void SyncImgLayerObj(LayerObj *layer, int frame) {
+    if (layer == NULL) {
         return;
     }
 
-    UpdateTexture(layer->txt, layer->img.data);
+    if (frame < 0 || frame >= layer->flist->count) {
+        return;
+    }
+
+    if (!SyncFrameObj(layer->flist->frames[frame])) {
+        TraceLog(LOG_ERROR, "Layers | Sync Failed | %d", frame);
+    }
 }
 
 LayerObj *DuplicateLayerObj(const LayerObj *layer) {
+    return NULL;
     LayerObj *l = malloc(sizeof(LayerObj));
     if (l == NULL) {
         return NULL;
@@ -82,9 +82,7 @@ LayerObj *DuplicateLayerObj(const LayerObj *layer) {
 
     l->visible = layer->visible;
     l->opacity = layer->opacity;
-
-    l->img = ImageCopy(layer->img);
-    l->txt = LoadTextureFromImage(l->img);
+    // TODO: framelist duplicate
 
     return l;
 }

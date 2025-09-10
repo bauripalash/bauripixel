@@ -7,6 +7,12 @@
 #include "widget.h"
 #include <stdbool.h>
 
+typedef enum TimeLineState {
+    TIMELINE_PLAY,
+    TIMELINE_STOP,
+    TIMELINE_PAUSE,
+} TimeLineState;
+
 typedef struct LayerBarState {
     WidgetProp p;
     Vector2 anchor;
@@ -14,11 +20,15 @@ typedef struct LayerBarState {
     // Should the layer preview
     bool preview;
 
+    // Usable area (excludes margins and stuff)
     Rectangle usableRect;
     // Where the the toolbar of layerbar will be
     Rectangle toolsRect;
     // Where the layer list will be drawn
     Rectangle layersRect;
+
+    // Where frames will be drawn; used for scrollbars
+    Rectangle framesRect;
 
     Rectangle vScrollRect;
     Rectangle hScrollRect;
@@ -36,6 +46,9 @@ typedef struct LayerBarState {
     // Selected layer (is used by tab to set current layer)
     // Outgoing >>
     LayerObj *selectedLayer;
+
+    int curFrame;
+    bool selAllFrames;
 
     // Background image from canvas widget
     Texture2D *previewBg;
@@ -67,6 +80,10 @@ typedef struct LayerBarState {
     int dragTarget;
     // Will the dragged layer be put below the `dragTarget` indexed layer
     bool putDragAtEnd;
+
+    float layerNameWidth;
+
+    TimeLineState timelineState;
 
 } LayerBarState;
 

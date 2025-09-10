@@ -398,6 +398,8 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
         (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) && !locked;
 
     LayerObj *layer = state->curLayer;
+    int curFrame = state->curFrame;
+    Image *drawimg = &layer->flist->frames[curFrame]->img;
 
     if (!locked && atDrawArea && isCurVisible) {
         switch (curtool) {
@@ -407,9 +409,9 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
                 !IsVecNeg(state->lastBrushPos)) {
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     BPDrawLine(
-                        state, &layer->img, state->lastBrushPos, curPos, dClr
+                        state, drawimg, state->lastBrushPos, curPos, dClr
                     );
-                    SyncImgLayerObj(state->curLayer);
+                    SyncImgLayerObj(state->curLayer, curFrame);
                 }
             }
 
@@ -418,10 +420,8 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
                     state->brushDragging = true;
                     state->lastBrushPos = curPos;
                 }
-                BPDrawLine(
-                    state, &layer->img, state->lastBrushPos, curPos, dClr
-                );
-                SyncImgLayerObj(state->curLayer);
+                BPDrawLine(state, drawimg, state->lastBrushPos, curPos, dClr);
+                SyncImgLayerObj(state->curLayer, curFrame);
                 state->lastBrushPos = curPos;
             }
 
@@ -436,9 +436,9 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
                 !IsVecNeg(state->lastEraserPos)) {
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     BPDrawLine(
-                        state, &layer->img, state->lastEraserPos, curPos, dClr
+                        state, drawimg, state->lastEraserPos, curPos, dClr
                     );
-                    SyncImgLayerObj(state->curLayer);
+                    SyncImgLayerObj(state->curLayer, curFrame);
                 }
             }
             if (leftDown) {
@@ -446,10 +446,8 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
                     state->eraserDragging = true;
                     state->lastEraserPos = curPos;
                 }
-                BPDrawLine(
-                    state, &layer->img, state->lastEraserPos, curPos, dClr
-                );
-                SyncImgLayerObj(state->curLayer);
+                BPDrawLine(state, drawimg, state->lastEraserPos, curPos, dClr);
+                SyncImgLayerObj(state->curLayer, curFrame);
                 state->lastEraserPos = curPos;
             }
             if (leftReleased && state->eraserDragging) {
@@ -465,8 +463,8 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
             }
 
             if (leftReleased && state->lineDragging) {
-                BPDrawLine(state, &layer->img, state->lineStart, curPos, dClr);
-                SyncImgLayerObj(state->curLayer);
+                BPDrawLine(state, drawimg, state->lineStart, curPos, dClr);
+                SyncImgLayerObj(state->curLayer, curFrame);
                 MakeVecZero(&state->lineStart);
                 state->lineDragging = false;
             }
@@ -482,10 +480,10 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
             if (leftReleased && state->rectDragging) {
                 BPDrawRectangle(
-                    state, &layer->img, state->rectStart, curPos, dClr,
+                    state, drawimg, state->rectStart, curPos, dClr,
                     curtool == DT_RECT_FILL
                 );
-                SyncImgLayerObj(state->curLayer);
+                SyncImgLayerObj(state->curLayer, curFrame);
                 MakeVecZero(&state->rectStart);
                 state->rectDragging = false;
             }
@@ -502,10 +500,10 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
 
             if (leftReleased && state->circleDragging) {
                 BPDrawEllipse(
-                    state, &layer->img, state->circleStart, curPos, dClr,
+                    state, drawimg, state->circleStart, curPos, dClr,
                     curtool == DT_CIRCLE_FILL, keepRatio
                 );
-                SyncImgLayerObj(state->curLayer);
+                SyncImgLayerObj(state->curLayer, curFrame);
                 MakeVecZero(&state->circleStart);
                 state->circleDragging = false;
             }
@@ -514,8 +512,8 @@ void DrawingCanvasLogic(CanvasState *state, Rectangle bounds) {
         }
         case DT_BUCKET: {
             if (leftPressed && atCanvas) {
-                BpFill(state, &layer->img, curPx, curPy, dClr);
-                SyncImgLayerObj(state->curLayer);
+                BpFill(state, drawimg, curPx, curPy, dClr);
+                SyncImgLayerObj(state->curLayer, curFrame);
             }
 
             break;
@@ -613,7 +611,10 @@ void DrawingCanvasDraw(CanvasState *state, Rectangle bounds) {
         int alpha = (int)(ceilf(lr->opacity * 255));
         Color tint = BpColorSetAlpha(WHITE, alpha);
         if (lr->visible) {
-            DrawTexture(lr->txt, state->drawArea.x, state->drawArea.y, tint);
+            DrawTexture(
+                lr->flist->frames[state->curFrame]->txt, state->drawArea.x,
+                state->drawArea.y, tint
+            );
         }
 
         if (lr->index == curLayerIndex) {

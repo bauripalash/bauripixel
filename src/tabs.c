@@ -87,6 +87,7 @@ void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
 
     tab->state->cb.currentColor = tab->colors[0];
     tab->state->cb.currentIndex = 0;
+    tab->state->lb.curFrame = 0;
 
     tab->setupDone = true;
 }
@@ -128,14 +129,20 @@ Image getPatchedImage(TabObj *tab) {
                 !layer->visible) { // Visible Layer Export
                 continue;
             }
-            ImageDraw(&img, layer->img, imgRect, imgRect, WHITE);
+            ImageDraw(
+                &img, layer->flist->frames[tab->curFrame]->img, imgRect,
+                imgRect, WHITE
+            );
         }
     } else if (whichLayer >= EXPORT_INDV) {
         // Layer name index starts from 2
         // first layer index = (whichLayer - EXPORT_INDV (2))
         int layerIndex = abs(whichLayer - EXPORT_INDV); // abs(...) -> fail safe
         LayerObj *layer = tab->layers->layers[layerIndex];
-        ImageDraw(&img, layer->img, imgRect, imgRect, WHITE);
+        ImageDraw(
+            &img, layer->flist->frames[tab->curFrame]->img, imgRect, imgRect,
+            WHITE
+        );
     }
 
     int scale = tab->state->eximg.scaleValue;
@@ -183,6 +190,11 @@ bool TabExportImage(TabObj *tab) {
     return true;
 }
 
+void TabPlayAnimation(TabObj *tab) {
+    double time = GetTime();
+    int frameCount = tab->curLayer->flist->count;
+}
+
 void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
 
     tab->state->cvs.curTool = tab->state->dtb.currentTool;
@@ -226,6 +238,11 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         },
         (Vector2){tab->state->cb.prop.bounds.x, panel.y + panel.height}
     );
+
+    if (tab->state->lb.curFrame != tab->curFrame) {
+        tab->curFrame = tab->state->lb.curFrame;
+        tab->state->cvs.curFrame = tab->curFrame;
+    }
 
     if (CurrentColorChanged(&tab->state->cb)) {
         tab->state->cvs.current = tab->state->cb.currentColor;
@@ -291,6 +308,7 @@ TabObj *NewTabObj(int w, int h) {
 
     t->curLayer = t->layers->layers[0]; // layer list will have atleast one
                                         // layer after creation;
+    t->curFrame = 0;
 
     UpdateCanvasLayers(&t->state->cvs, t->layers, t->curLayer);
     t->state->lb.list = t->layers;

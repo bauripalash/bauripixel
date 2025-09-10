@@ -43,6 +43,7 @@ typedef struct TabObj {
     Color *colors;
     LayerList *layers;
     LayerObj *curLayer;
+    int curFrame;
     char *filepath;
     Rectangle tabPanel;
 

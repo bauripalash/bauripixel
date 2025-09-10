@@ -5,15 +5,21 @@
 #include "../include/components.h"
 #include "../include/options.h"
 #include "../include/utils.h"
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define LB_INIT_HEIGHT 120
-#define LB_MIN_HEIGHT  50
-#define LB_MARGIN_LR   10
-#define LB_MARGIN_TB   10
-#define LB_PADDING_LR  10
-#define LB_PADDING_TB  10
+#define LB_INIT_HEIGHT       120
+#define LB_MIN_HEIGHT        50
+#define LB_MARGIN_LR         10
+#define LB_MARGIN_TB         10
+#define LB_PADDING_LR        10
+#define LB_PADDING_TB        10
+
+#define HANDLE_THICKNESS     20
+#define LAYER_ITEM_HEIGHT    35
+#define DEF_LAYER_NAME_WIDTH 200
+#define LAYER_ITEM_MARGIN    5
 
 LayerBarState NewLayerBar() {
     LayerBarState lb = {0};
@@ -42,7 +48,10 @@ LayerBarState NewLayerBar() {
     lb.usableRect = (Rectangle){0};
     lb.toolsRect = (Rectangle){0};
     lb.layersRect = (Rectangle){0};
+    lb.framesRect = (Rectangle){0};
     lb.wLayerOpts = NewWLayerOpts();
+
+    lb.layerNameWidth = DEF_LAYER_NAME_WIDTH;
 
     lb.menuSelLayer = NULL;
     lb.menuOpen = false;
@@ -51,12 +60,17 @@ LayerBarState NewLayerBar() {
     lb.draggingLayer = false;
     lb.dragLayer = NULL;
 
+    lb.curFrame = 0;
+    lb.selAllFrames = false;
+    lb.timelineState = TIMELINE_STOP;
+
     return lb;
 }
 
 void FreeLayerBar(LayerBarState *lb) { return; }
 
-#define SCROLLT 10
+#define SCROLLT              10
+#define LAYER_NAME_FRAME_GAP 8
 static void updateBounds(LayerBarState *lb) {
     lb->p.bounds.x = lb->anchor.x + LB_MARGIN_LR;
     lb->p.bounds.width = lb->bottom.x - lb->anchor.x - LB_MARGIN_LR * 2;
@@ -78,6 +92,13 @@ static void updateBounds(LayerBarState *lb) {
                     lb->toolsRect.width, 0};
     lb->layersRect.height =
         lb->usableRect.height - lb->toolsRect.height - LB_PADDING_TB;
+
+    lb->framesRect = (Rectangle){
+        lb->layersRect.x + lb->layerNameWidth + LAYER_NAME_FRAME_GAP,
+        lb->layersRect.y,
+        lb->layersRect.width - (lb->layerNameWidth + LAYER_NAME_FRAME_GAP),
+        lb->layersRect.height
+    };
 
     lb->vScrollRect =
         (Rectangle){lb->layersRect.x + lb->layersRect.width, lb->layersRect.y,
@@ -136,7 +157,7 @@ static bool createNewFrame(LayerBarState *lb) {
             return false;
         }
 
-        FrameObj *frame = NewFrameObj(lr->img.width, lr->img.height);
+        FrameObj *frame = NewFrameObj(lr->width, lr->height);
         if (frame == NULL) {
             return false;
         }
@@ -146,54 +167,74 @@ static bool createNewFrame(LayerBarState *lb) {
     return true;
 }
 
-static int curFrame = 0;
-static bool selFrameAll = false;
-
-#define HANDLE_THICKNESS  20
-#define LAYER_ITEM_HEIGHT 35
-#define LAYER_NAME_WIDTH  200
-#define LAYER_ITEM_MARGIN 5
-
 bool LayerItemFrameDraw(
-    LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
+    LayerBarState *lb, Rectangle bounds, LayerObj *layer, bool isCur
 ) {
+
     int framecount = layer->flist->count;
-    Rectangle cellRect = {pos.x, pos.y, LAYER_ITEM_HEIGHT, LAYER_ITEM_HEIGHT};
+    Rectangle cellRect = {
+        bounds.x, bounds.y, LAYER_ITEM_HEIGHT, LAYER_ITEM_HEIGHT
+    };
 
     for (int i = 0; i < framecount; i++) {
         FrameObj *f = layer->flist->frames[i];
-        BpFramePrevBox(cellRect, f, false);
+        bool clicked = false;
+        if (isCur && lb->curFrame == i) {
+            clicked = BpFramePrevActive(cellRect, f, false);
+        } else {
+            clicked = BpFramePrevBox(cellRect, f, false);
+        }
+
+        if (clicked) {
+            lb->curFrame = i;
+        }
+
         cellRect.x += cellRect.width;
     }
 
-    return true;
+    return CheckCollisionPointRec(GetMousePosition(), bounds) &&
+           IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !GuiIsLocked();
 }
 
 bool LayerItemDraw(
-    LayerBarState *lb, Vector2 pos, LayerObj *layer, bool isCur
+    LayerBarState *lb, Rectangle bounds, LayerObj *layer, bool isCur
 ) {
     int ogBorder = OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_BRDR));
     bool locked = GuiIsLocked();
 
     Vector2 mpos = GetMousePosition();
 
-    Rectangle bounds = {
-        pos.x, pos.y, lb->layersRect.width - LAYER_ITEM_MARGIN * 2,
-        LAYER_ITEM_HEIGHT
-    };
-
     bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
     bool clicked = hover && (IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
     float halfHeight = bounds.height / 2.0f;
 
-    Rectangle layerToolBounds = {
-        bounds.x + 5, bounds.y, bounds.height * 3, bounds.height
+    Rectangle toolRect = {
+        bounds.x + 5,
+        bounds.y,
+        50,
+        bounds.height,
     };
-    Rectangle nameBounds = {
-        bounds.x, bounds.y, LAYER_NAME_WIDTH, bounds.height
+    Rectangle nameRect = {
+        toolRect.x + toolRect.width, toolRect.y, bounds.width - 50,
+        bounds.height
     };
 
-    BpPanelBorder(nameBounds, 2);
+    BpPanelBorder(bounds, 2);
+
+    Rectangle btnRect = {toolRect.x, toolRect.y, 20, toolRect.height};
+
+    GuiIconName visIcon = layer->visible ? ICON_EYE_ON : ICON_EYE_OFF;
+    if (BpLabelButton(btnRect, GuiIconText(visIcon, NULL))) {
+        layer->visible = !layer->visible;
+    }
+
+    btnRect.x += btnRect.width;
+
+    GuiIconName lockIcon = ICON_LOCK_OPEN;
+    if (BpLabelButton(btnRect, GuiIconText(lockIcon, NULL))) {
+    }
+
+    GuiLabel(nameRect, TextFormat("#%d %s", layer->index, layer->name));
 
     if (hover && (lb->draggingLayer)) {
         lb->dragTarget = layer->index;
@@ -209,42 +250,11 @@ bool LayerItemDraw(
         lb->menuSelLayer = layer;
     }
 
-    float btnSize = 25;
-    Rectangle optsBtn = {
-        layerToolBounds.x, layerToolBounds.y, btnSize, layerToolBounds.height
-    };
-    float optsInc = btnSize + 2;
-
-    bool visibility =
-        GuiLabelButton(
-            optsBtn,
-            GuiIconText(layer->visible ? ICON_EYE_ON : ICON_EYE_OFF, NULL)
-        ) != 0;
-
-    if (visibility) {
-        layer->visible = !layer->visible;
-    }
-
-    optsBtn.x += optsInc;
-
-    bool lock = GuiLabelButton(optsBtn, GuiIconText(ICON_LOCK_OPEN, NULL)) != 0;
-    optsBtn.x += optsInc;
-    Rectangle layerNameRect = {
-        optsBtn.x, optsBtn.y, nameBounds.width - (optsInc * 2),
-        nameBounds.height
-    };
-
-    GuiLabel(layerNameRect, TextFormat("#%d %s", layer->index, layer->name));
-
-    if (CheckCollisionPointRec(mpos, layerNameRect) &&
+    if (CheckCollisionPointRec(mpos, nameRect) &&
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked) {
         lb->draggingLayer = true;
         lb->dragLayer = layer;
     }
-
-    LayerItemFrameDraw(
-        lb, (Vector2){pos.x + LAYER_NAME_WIDTH, pos.y}, layer, isCur
-    );
 
     OptThemeSet(T_PANEL_BORDER, ogBorder);
 
@@ -292,56 +302,75 @@ int LayerBarLogic(LayerBarState *lb) {
 void DrawScrollBars(LayerBarState *lb, Rectangle content) {
 
     Vector2 mpos = GetMousePosition();
-    bool hasVerticalScroll = content.height > lb->layersRect.height;
-    bool hasHorizontalScroll = content.width > lb->layersRect.width;
 
-    Rectangle viewArea = lb->layersRect;
+    Rectangle viewArea = lb->framesRect;
 
-    DrawRectangleRounded(lb->vScrollRect, 0.9, 0, Fade(ColorBlack, 0.5));
+    bool hasHorizontalScroll = content.width > viewArea.width;
+    bool hasVerticalScroll = content.height > viewArea.height;
+
     DrawRectangleRounded(lb->hScrollRect, 0.9, 0, Fade(ColorBlack, 0.5));
+    DrawRectangleRounded(lb->vScrollRect, 0.9, 0, Fade(ColorBlack, 0.5));
 
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
         lb->hScrollDragging = false;
         lb->hScrollDragging = false;
     }
 
-    if (CheckCollisionPointRec(mpos, viewArea)) {
-        float wheelMove = GetMouseWheelMove();
-        float wheelDelta = wheelMove * 20.0f;
-        lb->scroll.y -= wheelDelta;
-    }
-
+    float maxScrollX = content.width - viewArea.width;
     float maxScrollY = content.height - viewArea.height;
+
+    float ratioH = viewArea.width / content.width;
+    float ratioV = viewArea.height / content.height;
+
+    if (maxScrollX <= 0.0f) {
+        maxScrollX = 0.0f;
+    }
     if (maxScrollY < 0.0f) {
         maxScrollY = 0.0f;
     }
 
-    float visRatio = viewArea.height / content.height;
-    float vSliderH = viewArea.height * visRatio;
-    if (vSliderH < 10.0f) {
-        vSliderH = 10.0f;
+    float hSliderWidth = viewArea.width * ratioH;
+    float vSliderHeight = viewArea.height * ratioV;
+
+    if (hSliderWidth < MIN_SLIDER) {
+        hSliderWidth = MIN_SLIDER;
+    }
+    if (vSliderHeight < MIN_SLIDER) {
+        vSliderHeight = MIN_SLIDER;
     }
 
-    if (vSliderH < MIN_SLIDER) {
-        vSliderH = MIN_SLIDER;
-    }
+    float hSliderTravel = viewArea.width - hSliderWidth;
+    float vSliderTravel = viewArea.height - vSliderHeight;
 
-    float vSliderTravel = viewArea.height - vSliderH;
+    float hScrollNorm = (maxScrollX > 0.0f) ? lb->scroll.x / maxScrollX : 0.0f;
     float vScrollNorm = (maxScrollY > 0.0f) ? lb->scroll.y / maxScrollY : 0.0f;
-    float sliderY = lb->vScrollRect.y + vScrollNorm * vSliderTravel;
 
-    Rectangle vThumb = {
-        lb->vScrollRect.x,
-        sliderY,
-        SCROLLT,
-        vSliderH,
-    };
+    float hSliderX = lb->hScrollRect.x + hScrollNorm * hSliderTravel;
+    float vSliderY = lb->vScrollRect.y + vScrollNorm * vSliderTravel;
 
-    Rectangle hThumb = {lb->hScrollRect.x, lb->hScrollRect.y, 20, SCROLLT};
+    Rectangle vThumb = {lb->vScrollRect.x, vSliderY, SCROLLT, vSliderHeight};
+    Rectangle hThumb = {hSliderX, lb->hScrollRect.y, hSliderWidth, SCROLLT};
+
+    if (CheckCollisionPointRec(mpos, viewArea)) {
+        Vector2 wheelMove = GetMouseWheelMoveV();
+
+        float wheelDeltaX = wheelMove.x * 20.0f;
+        lb->scroll.x -= wheelDeltaX;
+        lb->scroll.x = Clamp(lb->scroll.x, 0.0f, maxScrollX);
+
+        float wheelDeltaY = wheelMove.y * 20.0f;
+        lb->scroll.y -= wheelDeltaY;
+        lb->scroll.y = Clamp(lb->scroll.y, 0.0f, maxScrollY);
+    }
 
     if (CheckCollisionPointRec(mpos, vThumb) &&
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !lb->vScrollDragging) {
         lb->vScrollDragging = true;
+    }
+
+    if (CheckCollisionPointRec(mpos, hThumb) &&
+        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !lb->hScrollDragging) {
+        lb->hScrollDragging = true;
     }
 
     if (lb->vScrollDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
@@ -349,6 +378,12 @@ void DrawScrollBars(LayerBarState *lb, Rectangle content) {
         lb->scroll.y += delta;
     }
 
+    if (lb->hScrollDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        float delta = GetMouseDelta().x;
+        lb->scroll.x += delta;
+    }
+
+    lb->scroll.x = Clamp(lb->scroll.x, 0.0f, maxScrollX);
     lb->scroll.y = Clamp(lb->scroll.y, 0.0f, maxScrollY);
 
     if (hasVerticalScroll) {
@@ -455,17 +490,17 @@ int LayerBarDraw(LayerBarState *lb) {
         Vector2 mpos = GetMousePosition();
 
         Rectangle bounds = lb->p.bounds;
-
+        // Bounds for tool buttons
         Rectangle toolBarBounds = lb->toolsRect;
-
+        // Bounds for layers (with frames)
         Rectangle layersBounds = lb->layersRect;
+        // Bounds for frames only (part of layersBounds)
+        Rectangle framesBounds = lb->framesRect;
 
         // BpRoundedPanel(bounds, 2, 0.125, true);
         BpPanelBorder(bounds, 2);
-        Rectangle toolBtnRect = {
-            toolBarBounds.x, toolBarBounds.y, toolBarBounds.height,
-            toolBarBounds.height
-        };
+        Rectangle toolBtnRect = toolBarBounds;
+        toolBtnRect.width = toolBtnRect.height;
 
         if (BpTextButton(toolBtnRect, GuiIconText(ICON_TARGET_SMALL, NULL))) {
             createNewLayer(lb, lb->curLayer);
@@ -475,9 +510,33 @@ int LayerBarDraw(LayerBarState *lb) {
             createNewFrame(lb);
         }
 
-        Rectangle layerContentRect = {
-            layersBounds.x, layersBounds.y, layersBounds.width, layersBounds.y
-        };
+        toolBtnRect.x += toolBtnRect.width + LAYER_ITEM_MARGIN;
+        if (BpTextButton(
+                toolBtnRect, GuiIconText(ICON_PLAYER_PREVIOUS, NULL)
+            )) {
+            // go_prev
+        }
+        toolBtnRect.x += toolBtnRect.width;
+        GuiIconName playIcon = lb->timelineState == TIMELINE_PLAY
+                                   ? ICON_PLAYER_PAUSE
+                                   : ICON_PLAYER_PLAY;
+        if (BpTextButton(toolBtnRect, GuiIconText(playIcon, NULL))) {
+            if (lb->timelineState == TIMELINE_PLAY) {
+                lb->timelineState = TIMELINE_PAUSE;
+            } else {
+                lb->timelineState = TIMELINE_PLAY;
+            }
+        }
+        toolBtnRect.x += toolBtnRect.width;
+        if (BpTextButton(toolBtnRect, GuiIconText(ICON_PLAYER_STOP, NULL))) {
+            lb->timelineState = TIMELINE_STOP;
+        }
+        toolBtnRect.x += toolBtnRect.width;
+        if (BpTextButton(toolBtnRect, GuiIconText(ICON_PLAYER_NEXT, NULL))) {
+            // go_next
+        }
+
+        Rectangle layerContentRect = layersBounds;
 
         BpPanelBorder(
             (Rectangle){layersBounds.x - 1, layersBounds.y - 1,
@@ -485,70 +544,79 @@ int LayerBarDraw(LayerBarState *lb) {
             2
         );
 
-        float px = layersBounds.x + LAYER_ITEM_MARGIN;
-        float py = layersBounds.y + LAYER_ITEM_MARGIN;
-        float pyinc = LAYER_ITEM_HEIGHT - 1;
-
+        int layerCount = lb->list->count;
+        float posY = layersBounds.y + LAYER_ITEM_MARGIN;
+        float pyinc = LAYER_ITEM_HEIGHT + 1;
+        Rectangle activeRect = {0};
         BeginScissorMode(
-            layersBounds.x, layersBounds.y, layersBounds.width,
+            layersBounds.x, layersBounds.y, lb->layerNameWidth + 8,
             layersBounds.height
         );
-
-        Rectangle activeRect = {0};
-        for (int i = 0; i < lb->list->count; i++) {
-            LayerObj *lr = lb->list->layers[i];
-            Rectangle layerBtn = {px, py, 300, LAYER_ITEM_HEIGHT};
-            float posX = px - lb->scroll.x;
-            float posY = py - lb->scroll.y;
-
-            bool isCur = i == lb->curLayer->index;
-            if (LayerItemDraw(lb, (Vector2){posX, posY}, lr, isCur)) {
-                lb->selectedLayer = lr;
+        for (int i = 0; i < layerCount; i++) {
+            LayerObj *layer = lb->list->layers[i];
+            Rectangle layerNameBtn = {
+                layersBounds.x + LAYER_ITEM_MARGIN,
+                posY - lb->scroll.y,
+                lb->layerNameWidth,
+                LAYER_ITEM_HEIGHT,
+            };
+            bool isCur = (i == lb->curLayer->index);
+            if (LayerItemDraw(lb, layerNameBtn, layer, isCur)) {
+                lb->selectedLayer = layer;
             }
-
             if (isCur) {
                 activeRect =
-                    (Rectangle){posX, posY,
-                                lb->layersRect.width - LAYER_ITEM_MARGIN * 2,
-                                LAYER_ITEM_HEIGHT};
+                    (Rectangle){layerNameBtn.x, layerNameBtn.y,
+                                layerNameBtn.width, layerNameBtn.height};
             }
 
-            // Drawing the drag mark
-            if (lb->dragTarget == lr->index && lb->draggingLayer &&
+            if (lb->dragTarget == layer->index && lb->draggingLayer &&
                 lb->dragTarget != lb->curLayer->index) {
-                float ypos = posY;
-
+                TraceLog(LOG_ERROR, "Draw Drag");
+                float dragY = layerNameBtn.y;
                 if (lb->putDragAtEnd) {
-                    ypos += LAYER_ITEM_HEIGHT - 8;
+                    dragY += LAYER_ITEM_HEIGHT - 8;
                 }
 
                 DrawRectangleRec(
-                    (Rectangle){posX, ypos,
-                                lb->layersRect.width - LAYER_ITEM_MARGIN * 2,
-                                8},
+                    (Rectangle){layerNameBtn.x, dragY,
+                                lb->layersRect.width - LAYER_ITEM_MARGIN, 8},
                     BpColorSetAlpha(ColorVGreen, 200)
                 );
             }
 
-            py += pyinc;
+            posY += pyinc;
         }
+
         int ogBorder =
             OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_ACTIVE_BRDR));
-        BpPanelOnlyBorder(activeRect, 2);
 
-        /*
-if (!selFrameAll) {
-    Rectangle frameRect = {
-        activeRect.x + LAYER_NAME_WIDTH +
-            (curFrame * activeRect.height),
-        activeRect.y, activeRect.height, activeRect.height
-    };
-    BpFramePrevActive(frameRect, NULL, false);
-}
-        */
+        BpPanelOnlyBorder(activeRect, 2);
+        OptThemeSet(T_PANEL_BORDER, ogBorder);
+        EndScissorMode();
+        BeginScissorModeRec(framesBounds);
+
+        ogBorder = OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_BRDR));
+
+        int frameCount = lb->curLayer->flist->count;
+        float fposY = layersBounds.y + LAYER_ITEM_MARGIN;
+
+        for (int i = 0; i < layerCount; i++) {
+            LayerObj *layer = lb->list->layers[i];
+            Rectangle layerFrameRect = {
+                (framesBounds.x + 1) - lb->scroll.x, fposY - lb->scroll.y,
+                (LAYER_ITEM_HEIGHT * frameCount), LAYER_ITEM_HEIGHT
+            };
+
+            bool isCur = (lb->curLayer->index == i);
+            if (LayerItemFrameDraw(lb, layerFrameRect, layer, isCur)) {
+                lb->selectedLayer = layer;
+            }
+
+            fposY += pyinc;
+        }
 
         OptThemeSet(T_PANEL_BORDER, ogBorder);
-
         EndScissorMode();
 
         if (lb->draggingLayer && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
@@ -585,7 +653,7 @@ if (!selFrameAll) {
 
             if (lb->dragTarget != lb->dragLayer->index) {
                 GuiLabel(
-                    (Rectangle){mpos.x, mpos.y, LAYER_NAME_WIDTH,
+                    (Rectangle){mpos.x, mpos.y, lb->layerNameWidth,
                                 LAYER_ITEM_HEIGHT},
                     TextFormat(
                         "%s | #%d -> %c #%d", lb->dragLayer->name,
@@ -596,11 +664,13 @@ if (!selFrameAll) {
             }
         }
 
-        layerContentRect.height = py - layerContentRect.height;
-        DrawScrollBars(
-            lb, (Rectangle){0, 0, layersBounds.width,
-                            (LAYER_ITEM_HEIGHT)*lb->list->count}
-        );
+        layerContentRect.height = posY - layerContentRect.height;
+        Rectangle usedRect = {
+            framesBounds.x, framesBounds.y + LAYER_ITEM_MARGIN,
+            (LAYER_ITEM_HEIGHT + 1) * frameCount,
+            (LAYER_ITEM_HEIGHT * layerCount)
+        };
+        DrawScrollBars(lb, usedRect);
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
             CheckCollisionPointRec(mpos, bounds) && !locked) {

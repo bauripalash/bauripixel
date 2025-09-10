@@ -58,6 +58,9 @@ typedef struct Side {
 
 #define PrintEnum(d)  TraceLog(LOG_WARNING, "%s", #d)
 
+// BeginScissorMode but with Rectangle
+#define BeginScissorModeRec(r) BeginScissorMode(r.x, r.y, r.width, r.height)
+
 // Functions
 
 // Clamp integer between min and max
