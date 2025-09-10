@@ -404,7 +404,7 @@ void handleTools(CanvasState *state) {
     }
 }
 
-bool CanvasLogic(CanvasState *state) {
+bool CanvasLogic(CanvasState *state, double dt) {
     if (state->prop.active) {
         updateBounds(state);
         handleTools(state);
@@ -548,7 +548,7 @@ void DrawGuideGrid(CanvasState *state) {
     rlPopMatrix();
 }
 
-bool CanvasDraw(CanvasState *state) {
+bool CanvasDraw(CanvasState *state, double dt) {
     if (state->prop.active) {
         Rectangle drawArea = {
             state->drawArea.x, state->drawArea.y, state->drawArea.width,

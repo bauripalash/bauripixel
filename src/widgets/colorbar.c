@@ -79,7 +79,7 @@ bool CurrentColorChanged(ColorBarState *state) {
 Rectangle view = {0};
 #define SELECT_THICKNESSS 3.0f
 
-int ColorBarLogic(ColorBarState *state) {
+int ColorBarLogic(ColorBarState *state, double dt) {
     if (state->prop.active) {
         updateBounds(state);
         bool locked = GuiIsLocked();
@@ -184,7 +184,7 @@ int ColorBarLogic(ColorBarState *state) {
     return -1;
 }
 
-int ColorBarDraw(ColorBarState *state) {
+int ColorBarDraw(ColorBarState *state, double dt) {
     if (state->prop.active) {
         Rectangle bounds = state->prop.bounds;
         float colorBoxSize = state->boxSize;

@@ -79,7 +79,7 @@ static void updateBounds(WExportImgState *state) {
 #define BTN_SIZE       80
 
 static int active = 0;
-WinStatus WExportImg(WExportImgState *state) {
+WinStatus WExportImg(WExportImgState *state, double dt) {
     WinStatus result = WIN_NONE;
 
     if (state->p.active && state->layerlist != NULL) {

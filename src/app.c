@@ -20,8 +20,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include "external/raygui.h"
 
-void LayoutDraw(Gui *gui);
-void LayoutLogic(Gui *gui);
+void LayoutDraw(Gui *gui, double dt);
+void LayoutLogic(Gui *gui, double dt);
 
 static int frameCounter = 0;
 
@@ -65,8 +65,10 @@ int RunApp() {
 
     GuiSetStyle(LISTVIEW, SCROLLBAR_WIDTH, 5);
 
-    SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
+    double dt = GetFrameTime();
+    SetupTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar, dt);
     while (!WindowShouldClose()) {
+        dt = GetFrameTime();
 
         if (IsWindowResized()) {
         }
@@ -75,15 +77,14 @@ int RunApp() {
             ToggleFullscreen();
         }
 
-        LayoutLogic(gui);
+        LayoutLogic(gui, dt);
         BeginDrawing();
         {
 
             ClearBackground(GetColor(OptThemeGet(T_APP_BG)));
-            LayoutDraw(gui);
+            LayoutDraw(gui, dt);
         }
         EndDrawing();
-        frameCounter++;
     }
 
     FreeGui(gui);
@@ -115,12 +116,12 @@ void handleMenubar(Gui *gui) {
     }
 }
 
-void LayoutLogic(Gui *gui) {
+void LayoutLogic(Gui *gui, double dt) {
 
     if (GuiIsLocked())
         GuiUnlock();
 
-    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
+    SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar, dt);
 
     handleMenubar(gui);
 
@@ -133,7 +134,7 @@ void LayoutLogic(Gui *gui) {
     if (menuBarOpen || sliderHover || layerpopup || guipopup || tabpopup) {
         GuiLock();
     }
-    ColorBarLogic(&gui->curTab->state->cb);
+    ColorBarLogic(&gui->curTab->state->cb, dt);
     if (sliderHover) {
         GuiUnlock();
     }
@@ -142,11 +143,11 @@ void LayoutLogic(Gui *gui) {
         GuiLock();
     }
 
-    CanvasLogic(&gui->curTab->state->cvs);
+    CanvasLogic(&gui->curTab->state->cvs, dt);
     if (layerpopup) {
         GuiUnlock();
     }
-    LayerBarLogic(&gui->curTab->state->lb);
+    LayerBarLogic(&gui->curTab->state->lb, dt);
     if (layerpopup) {
         GuiLock();
     }
@@ -158,7 +159,7 @@ int tab0 = true;
 int tab1 = false;
 int tab2 = false;
 
-void TabItemsDraw(Gui *gui) {
+void TabItemsDraw(Gui *gui, double dt) {
     int tabCount = gui->tabList->count;
     for (int t = 0; t < tabCount; t++) {
         TabObj *tab = gui->tabList->tabs[t];
@@ -173,7 +174,9 @@ void TabItemsDraw(Gui *gui) {
                 gui->state->statusbar.colorbar = &gui->curTab->state->cb;
                 gui->state->statusbar.canvas = &gui->curTab->state->cvs;
                 gui->state->statusbar.layerbar = &gui->curTab->state->lb;
-                SetupTabData(tab, &gui->state->menubar, &gui->state->statusbar);
+                SetupTabData(
+                    tab, &gui->state->menubar, &gui->state->statusbar, dt
+                );
             }
         } else if (result == 1) {
             TraceLog(LOG_ERROR, "Close Tab %d", tab->index);
@@ -188,7 +191,7 @@ void createNewTab(Gui *gui) {
     AddToTabList(gui->tabList, newTab);
 }
 
-void LayoutDraw(Gui *gui) {
+void LayoutDraw(Gui *gui, double dt) {
     bool menuOpen = gui->state->menubar.menuOpen;
     bool sizeSliderHover = gui->curTab->state->dtb.sliderHover;
     bool layerpopup = gui->curTab->state->lb.anypopup;
@@ -205,17 +208,17 @@ void LayoutDraw(Gui *gui) {
     BpPanelBorder(gui->curTab->tabPanel, 3);
     OptThemeSet(T_PANEL_BG, ogPanel);
 
-    TabItemsDraw(gui);
+    TabItemsDraw(gui, dt);
 
-    CanvasDraw(&gui->curTab->state->cvs);
-    ColorBarDraw(&gui->curTab->state->cb);
-    StatusBar(&gui->state->statusbar);
+    CanvasDraw(&gui->curTab->state->cvs, dt);
+    ColorBarDraw(&gui->curTab->state->cb, dt);
+    StatusBar(&gui->state->statusbar, dt);
 
     if (sizeSliderHover) {
         GuiUnlock();
     }
 
-    DrawToolbar(&gui->curTab->state->dtb);
+    DrawToolbar(&gui->curTab->state->dtb, dt);
 
     if (sizeSliderHover) {
         GuiLock();
@@ -224,14 +227,14 @@ void LayoutDraw(Gui *gui) {
     if (layerpopup) {
         GuiUnlock();
     }
-    LayerBarDraw(&gui->curTab->state->lb);
+    LayerBarDraw(&gui->curTab->state->lb, dt);
     if (layerpopup) {
         GuiLock();
     }
     if (menuOpen) {
         GuiUnlock();
     }
-    maction = MenuBar(&gui->state->menubar);
+    maction = MenuBar(&gui->state->menubar, dt);
     if (menuOpen) {
         GuiLock();
     }
@@ -240,7 +243,7 @@ void LayoutDraw(Gui *gui) {
         GuiUnlock();
     }
     if (gui->state->newsprite.p.active) {
-        WinStatus result = WNewSprite(&gui->state->newsprite);
+        WinStatus result = WNewSprite(&gui->state->newsprite, dt);
         if (result == WIN_CLOSE || result == WIN_CANCEL || result == WIN_OK) {
             gui->state->newsprite.p.active = false;
         }
@@ -265,7 +268,7 @@ void LayoutDraw(Gui *gui) {
 
     WExportImgState *expoImg = &gui->curTab->state->eximg;
     if (expoImg->p.active) {
-        WinStatus result = WExportImg(expoImg);
+        WinStatus result = WExportImg(expoImg, dt);
         if (result == WIN_CLOSE || result == WIN_CANCEL || result == WIN_OK) {
             expoImg->p.active = false;
             FreeWExportImg(expoImg);

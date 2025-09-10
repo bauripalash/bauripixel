@@ -5,7 +5,6 @@
 #include "../include/components.h"
 #include "../include/options.h"
 #include "../include/utils.h"
-#include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -167,6 +166,29 @@ static bool createNewFrame(LayerBarState *lb) {
     return true;
 }
 
+static bool createDupFrame(LayerBarState *lb) {
+    int fcount = lb->curLayer->flist->count;
+    for (int i = 0; i < lb->list->count; i++) {
+        LayerObj *lr = lb->list->layers[i];
+        if (lr == NULL) {
+            return false;
+        }
+
+        FrameObj *frame;
+        if (fcount > 0) {
+            frame = DuplicateFrameObj(lr->flist->frames[lb->curFrame]);
+        } else {
+            frame = NewFrameObj(lr->width, lr->height);
+        }
+        if (frame == NULL) {
+            return false;
+        }
+
+        AddToFrameList(lr->flist, frame);
+    }
+    return true;
+}
+
 bool LayerItemFrameDraw(
     LayerBarState *lb, Rectangle bounds, LayerObj *layer, bool isCur
 ) {
@@ -179,7 +201,7 @@ bool LayerItemFrameDraw(
     for (int i = 0; i < framecount; i++) {
         FrameObj *f = layer->flist->frames[i];
         bool clicked = false;
-        if (isCur && lb->curFrame == i) {
+        if (lb->curFrame == i) {
             clicked = BpFramePrevActive(cellRect, f, false);
         } else {
             clicked = BpFramePrevBox(cellRect, f, false);
@@ -261,7 +283,7 @@ bool LayerItemDraw(
     return clicked;
 }
 
-int LayerBarLogic(LayerBarState *lb) {
+int LayerBarLogic(LayerBarState *lb, double dt) {
     if (lb->p.active) {
         updateBounds(lb);
         bool locked = GuiIsLocked();
@@ -472,18 +494,20 @@ CtxMenuResult CtxMenu(LayerBarState *lb) {
             result = CMR_CLOSE;
         }
         labelRect.y += yInc;
+        // TODO: Delete and select prev/next layer
         if (BpLabelButton(labelRect, "Delete Layer")) {
-            LayerObj *lr =
-                RemoveIdxLayerList(lb->list, lb->menuSelLayer->index);
-            TraceLog(LOG_ERROR, "count -> %d", lb->list->count);
-            FreeLayerObj(lr);
+            if (/*lb->list->count >= 2*/ false) { // DISABLE for now
+                LayerObj *lr =
+                    RemoveIdxLayerList(lb->list, lb->menuSelLayer->index);
+                FreeLayerObj(lr);
+            }
             result = CMR_CLOSE;
         }
     }
     return result;
 }
 
-int LayerBarDraw(LayerBarState *lb) {
+int LayerBarDraw(LayerBarState *lb, double dt) {
     if (lb->p.active) {
         lb->anypopup = lb->wLayerOpts.p.active;
         bool locked = GuiIsLocked();
@@ -507,14 +531,17 @@ int LayerBarDraw(LayerBarState *lb) {
         }
         toolBtnRect.x += toolBtnRect.width;
         if (BpTextButton(toolBtnRect, GuiIconText(ICON_PLAYER_JUMP, NULL))) {
-            createNewFrame(lb);
+            createDupFrame(lb);
+            lb->curFrame++;
         }
 
         toolBtnRect.x += toolBtnRect.width + LAYER_ITEM_MARGIN;
         if (BpTextButton(
                 toolBtnRect, GuiIconText(ICON_PLAYER_PREVIOUS, NULL)
             )) {
-            // go_prev
+            if (lb->curFrame != 0) {
+                lb->curFrame--;
+            }
         }
         toolBtnRect.x += toolBtnRect.width;
         GuiIconName playIcon = lb->timelineState == TIMELINE_PLAY
@@ -533,7 +560,9 @@ int LayerBarDraw(LayerBarState *lb) {
         }
         toolBtnRect.x += toolBtnRect.width;
         if (BpTextButton(toolBtnRect, GuiIconText(ICON_PLAYER_NEXT, NULL))) {
-            // go_next
+            if (lb->curFrame != (lb->curLayer->flist->count - 1)) {
+                lb->curFrame++;
+            }
         }
 
         Rectangle layerContentRect = layersBounds;
@@ -572,7 +601,6 @@ int LayerBarDraw(LayerBarState *lb) {
 
             if (lb->dragTarget == layer->index && lb->draggingLayer &&
                 lb->dragTarget != lb->curLayer->index) {
-                TraceLog(LOG_ERROR, "Draw Drag");
                 float dragY = layerNameBtn.y;
                 if (lb->putDragAtEnd) {
                     dragY += LAYER_ITEM_HEIGHT - 8;
@@ -697,7 +725,7 @@ int LayerBarDraw(LayerBarState *lb) {
             if (!locked && IsKeyPressed(KEY_ESCAPE)) {
                 lb->wLayerOpts.p.active = false;
             }
-            WinStatus optStatus = WLayerOpts(&lb->wLayerOpts);
+            WinStatus optStatus = WLayerOpts(&lb->wLayerOpts, dt);
             if (optStatus == WIN_OK) {
                 lb->curLayer->opacity = (lb->wLayerOpts.opacityVal / 100.0f);
                 if (!TextIsEqual(lb->curLayer->name, lb->wLayerOpts.name)) {

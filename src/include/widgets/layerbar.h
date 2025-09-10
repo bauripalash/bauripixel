@@ -90,7 +90,7 @@ typedef struct LayerBarState {
 LayerBarState NewLayerBar();
 void FreeLayerBar(LayerBarState *lb);
 void SetLayerBarAnchor(LayerBarState *lb, Vector2 anchor, Vector2 bottom);
-int LayerBarLogic(LayerBarState *lb);
-int LayerBarDraw(LayerBarState *lb);
+int LayerBarLogic(LayerBarState *lb, double dt);
+int LayerBarDraw(LayerBarState *lb, double dt);
 
 #endif // LAYERBAR_H

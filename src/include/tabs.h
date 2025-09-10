@@ -36,6 +36,8 @@ void FreeTabState(TabStateObj *state);
 
 typedef struct TabObj {
     int index;
+    double dttime;
+    double animtime;
     int canvasHeight;
     int canvasWidth;
     Color bg;
@@ -55,8 +57,12 @@ typedef struct TabObj {
 TabObj *NewTabObj(int w, int h);
 void FreeTabObj(TabObj *tab);
 
-void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status);
-void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status);
+void SetupTabData(
+    TabObj *tab, MenuBarState *menu, StatusBarState *status, double dt
+);
+void SyncTabData(
+    TabObj *tab, MenuBarState *menu, StatusBarState *status, double dt
+);
 void AddColorToTab(TabObj *tab, Color color);
 bool TabExportImage(TabObj *tab);
 

@@ -20,7 +20,7 @@ typedef struct WNewSpriteState {
 } WNewSpriteState;
 
 WNewSpriteState NewWNewSprite();
-WinStatus WNewSprite(WNewSpriteState *state);
+WinStatus WNewSprite(WNewSpriteState *state, double dt);
 void FreeWNewSprite(WNewSpriteState *state);
 
 #endif

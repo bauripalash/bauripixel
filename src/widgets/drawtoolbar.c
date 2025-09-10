@@ -235,7 +235,7 @@ static bool otherPan = false;
 
 #define rd (float)0.125
 
-int DrawToolbar(DrawToolBarState *state) {
+int DrawToolbar(DrawToolBarState *state, double dt) {
     if (state->prop.active) {
 
         updateBounds(state);

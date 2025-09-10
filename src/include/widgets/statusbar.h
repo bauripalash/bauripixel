@@ -18,6 +18,6 @@ typedef struct StatusBarState {
 
 StatusBarState NewStatusBar();
 void SetStatusBarPosition(StatusBarState *state, float x, float height);
-bool StatusBar(StatusBarState *state);
+bool StatusBar(StatusBarState *state, double dt);
 
 #endif

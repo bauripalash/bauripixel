@@ -1,6 +1,7 @@
 #include "include/tabs.h"
 #include "external/raylib.h"
 #include "external/stb/stb_ds.h"
+#include "external/tfd/tinyfiledialogs.h"
 #include "include/colors.h"
 #include "include/defaults.h"
 #include "include/export.h"
@@ -64,11 +65,13 @@ void FreeTabState(TabStateObj *state) {
     free(state);
 }
 
-void SetupTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
+void SetupTabData(
+    TabObj *tab, MenuBarState *menu, StatusBarState *status, double dt
+) {
     if (tab->setupDone) {
         return;
     }
-    SyncTabData(tab, menu, status);
+    SyncTabData(tab, menu, status, dt);
     tab->state->dtb.prop.active = true;
     tab->state->cb.prop.active = true;
     tab->state->lb.p.active = true;
@@ -190,12 +193,27 @@ bool TabExportImage(TabObj *tab) {
     return true;
 }
 
-void TabPlayAnimation(TabObj *tab) {
-    double time = GetTime();
-    int frameCount = tab->curLayer->flist->count;
+static double fdl = 0.2;
+void TabPlayAnimation(TabObj *tab, double dt) {
+    tab->animtime += dt;
+    int framecount = tab->curLayer->flist->count;
+    if (tab->animtime >= fdl) {
+        tab->animtime -= fdl;
+
+        if (tab->curFrame == framecount - 1) {
+            tab->curFrame = 0;
+        } else {
+            tab->curFrame++;
+        }
+
+        tab->state->lb.curFrame = tab->curFrame;
+        tab->state->cvs.curFrame = tab->curFrame;
+    }
 }
 
-void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
+void SyncTabData(
+    TabObj *tab, MenuBarState *menu, StatusBarState *status, double dt
+) {
 
     tab->state->cvs.curTool = tab->state->dtb.currentTool;
     tab->state->cvs.brushSize = tab->state->dtb.brushSize;
@@ -239,9 +257,14 @@ void SyncTabData(TabObj *tab, MenuBarState *menu, StatusBarState *status) {
         (Vector2){tab->state->cb.prop.bounds.x, panel.y + panel.height}
     );
 
-    if (tab->state->lb.curFrame != tab->curFrame) {
+    if (tab->state->lb.timelineState != TIMELINE_PLAY &&
+        tab->state->lb.curFrame != tab->curFrame) {
         tab->curFrame = tab->state->lb.curFrame;
         tab->state->cvs.curFrame = tab->curFrame;
+    }
+
+    if (tab->state->lb.timelineState == TIMELINE_PLAY) {
+        TabPlayAnimation(tab, dt);
     }
 
     if (CurrentColorChanged(&tab->state->cb)) {
@@ -280,6 +303,8 @@ TabObj *NewTabObj(int w, int h) {
         return NULL;
     }
 
+    t->dttime = GetFrameTime();
+    t->animtime = GetFrameTime();
     float menuHeight = DEF_MENUBAR_HEIGHT;
 
     t->tabPanel = (Rectangle){TAB_PANEL_MARGIN,

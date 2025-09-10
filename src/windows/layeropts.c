@@ -45,7 +45,7 @@ void SetupWLayerOpts(WLayerOptsState *opts, LayerObj *layer) {
 #define LABEL_WIDTH  100
 #define LABEL_HEIGHT 30
 
-WinStatus WLayerOpts(WLayerOptsState *state) {
+WinStatus WLayerOpts(WLayerOptsState *state, double dt) {
     WinStatus result = WIN_NONE;
     if (state->p.active && state->layer != NULL) {
         updateBounds(state);

@@ -60,6 +60,6 @@ void SetColorBarAnchor(ColorBarState *cb, Vector2 anchor, Vector2 bottom);
 // int ColorBar(ColorBarState *state);
 bool CurrentColorChanged(ColorBarState *state);
 
-int ColorBarDraw(ColorBarState *state);
-int ColorBarLogic(ColorBarState *state);
+int ColorBarDraw(ColorBarState *state, double dt);
+int ColorBarLogic(ColorBarState *state, double dt);
 #endif

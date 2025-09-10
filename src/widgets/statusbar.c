@@ -36,7 +36,7 @@ void SetStatusBarPosition(StatusBarState *state, float x, float height) {
 }
 static void drawBounds(Rectangle bounds) { BpPanelBorder(bounds, 2); }
 
-bool StatusBar(StatusBarState *state) {
+bool StatusBar(StatusBarState *state, double dt) {
     if (state->prop.active) {
 
         updateBounds(state);

@@ -17,7 +17,7 @@ typedef struct WLayerOptsState {
 
 WLayerOptsState NewWLayerOpts();
 void SetupWLayerOpts(WLayerOptsState *state, LayerObj *layer);
-WinStatus WLayerOpts(WLayerOptsState *state);
+WinStatus WLayerOpts(WLayerOptsState *state, double dt);
 void FreeWLayerOpts(WLayerOptsState *state);
 
 #endif

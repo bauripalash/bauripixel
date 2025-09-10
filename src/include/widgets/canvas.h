@@ -98,7 +98,7 @@ void SetCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
 void UpdateCanvasAnchor(CanvasState *c, Vector2 anchor, Vector2 bottom);
 void CenterAlignCanvas(CanvasState *state);
 void SetCurrentCanvasColor(CanvasState *state, Color color);
-bool CanvasLogic(CanvasState *state);
-bool CanvasDraw(CanvasState *state);
+bool CanvasLogic(CanvasState *state, double dt);
+bool CanvasDraw(CanvasState *state, double dt);
 
 #endif

@@ -45,6 +45,6 @@ void SetDrawToolBarAnchor(
     DrawToolBarState *dtb, Vector2 anchor, Vector2 bottom
 );
 void FreeDrawToolBar(DrawToolBarState *state);
-int DrawToolbar(DrawToolBarState *state);
+int DrawToolbar(DrawToolBarState *state, double dt);
 
 #endif

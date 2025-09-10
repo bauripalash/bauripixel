@@ -18,6 +18,6 @@ typedef struct MenuBarState {
 } MenuBarState;
 
 MenuBarState NewMenuBar();
-MenuAction MenuBar(MenuBarState *state);
+MenuAction MenuBar(MenuBarState *state, double dt);
 
 #endif

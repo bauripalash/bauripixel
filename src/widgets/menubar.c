@@ -293,7 +293,7 @@ MenuAction handleShortcuts(MenuBarState *state) {
     return MACTION_COUNT;
 }
 
-MenuAction MenuBar(MenuBarState *state) {
+MenuAction MenuBar(MenuBarState *state, double dt) {
     updateBounds(state);
     Vector2 mpos = GetMousePosition();
 
