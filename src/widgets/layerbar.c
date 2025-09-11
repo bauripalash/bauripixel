@@ -207,7 +207,7 @@ bool LayerItemFrameDraw(
             clicked = BpFramePrevBox(cellRect, f, false);
         }
 
-        if (clicked) {
+        if (clicked && CheckCollisionPointRec(GetMousePosition(), lb->framesRect)) {
             lb->curFrame = i;
         }
 
@@ -226,7 +226,7 @@ bool LayerItemDraw(
 
     Vector2 mpos = GetMousePosition();
 
-    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked;
+    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked && CheckCollisionPointRec(mpos, lb->layersRect);
     bool clicked = hover && (IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
     float halfHeight = bounds.height / 2.0f;
 
@@ -268,12 +268,12 @@ bool LayerItemDraw(
         }
     }
 
-    if (hover && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+    if (hover && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && CheckCollisionPointRec(mpos, lb->layersRect)) {
         lb->menuSelLayer = layer;
     }
 
     if (CheckCollisionPointRec(mpos, nameRect) &&
-        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked) {
+        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked && CheckCollisionPointRec(mpos, lb->layersRect)) {
         lb->draggingLayer = true;
         lb->dragLayer = layer;
     }
@@ -577,10 +577,10 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
         float posY = layersBounds.y + LAYER_ITEM_MARGIN;
         float pyinc = LAYER_ITEM_HEIGHT + 1;
         Rectangle activeRect = {0};
-        BeginScissorMode(
-            layersBounds.x, layersBounds.y, lb->layerNameWidth + 8,
-            layersBounds.height
-        );
+		Rectangle layerNamesRect = {layersBounds.x, layersBounds.y, lb->layerNameWidth + 8,
+            layersBounds.height};
+		BeginScissorModeRec(layerNamesRect);
+
         for (int i = 0; i < layerCount; i++) {
             LayerObj *layer = lb->list->layers[i];
             Rectangle layerNameBtn = {
@@ -590,7 +590,7 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
                 LAYER_ITEM_HEIGHT,
             };
             bool isCur = (i == lb->curLayer->index);
-            if (LayerItemDraw(lb, layerNameBtn, layer, isCur)) {
+            if (LayerItemDraw(lb, layerNameBtn, layer, isCur) && CheckCollisionPointRec(mpos, layerNamesRect)) {
                 lb->selectedLayer = layer;
             }
             if (isCur) {
@@ -637,7 +637,7 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
             };
 
             bool isCur = (lb->curLayer->index == i);
-            if (LayerItemFrameDraw(lb, layerFrameRect, layer, isCur)) {
+            if (LayerItemFrameDraw(lb, layerFrameRect, layer, isCur) && CheckCollisionPointRec(mpos, lb->framesRect)) {
                 lb->selectedLayer = layer;
             }
 
@@ -696,10 +696,14 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
         Rectangle usedRect = {
             framesBounds.x, framesBounds.y + LAYER_ITEM_MARGIN,
             (LAYER_ITEM_HEIGHT + 1) * frameCount,
-            (LAYER_ITEM_HEIGHT * layerCount)
+            ((LAYER_ITEM_HEIGHT + 1) * layerCount) + LAYER_ITEM_MARGIN * 2
         };
-        DrawScrollBars(lb, usedRect);
+		Rectangle scrollRect = lb->framesRect;
+		scrollRect.width += 5;
+		scrollRect.height += 5;
+		BpScrollPanel(scrollRect, usedRect, &lb->scroll, lb->framesRect , &lb->hScrollDragging, &lb->vScrollDragging);
 
+		DrawRectangleLinesEx(lb->framesRect, 2, RED);
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
             CheckCollisionPointRec(mpos, bounds) && !locked) {
             lb->menuOpen = !lb->menuOpen;

@@ -1,5 +1,6 @@
 #include "../external/raygui.h"
 #include "../external/raylib.h"
+#include "../external/raymath.h"
 #include "../include/colors.h"
 #include "../include/components.h"
 #include "../include/options.h"
@@ -164,4 +165,122 @@ bool BpInputSliderInt(
     GuiSetStyle(VALUEBOX, TEXT_COLOR_PRESSED, ogBoxTextP);
 
     return oldValue != *value;
+}
+
+#define SCROLL_THICKNESS 10
+bool BpScrollPanel(Rectangle bounds, Rectangle content, Vector2 * scroll, Rectangle view, bool * hDrag, bool * vDrag){
+	bool isLocked = GuiIsLocked();
+	Vector2 mpos = GetMousePosition();
+	Color scrollBg = GetColor(OptThemeGet(T_SLIDER_BG));
+	Color scrollFg = GetColor(OptThemeGet(T_SLIDER_FG));
+
+	bool hasHorizontalScroll = content.width > view.width;
+	bool hasVerticalScroll = content.height > view.height;
+
+	Rectangle hScrollRect = {
+		bounds.x,
+		bounds.y + bounds.height,
+		bounds.width,
+		SCROLL_THICKNESS
+	};
+
+	Rectangle vScrollRect = {
+		bounds.x + bounds.width,
+		bounds.y,
+		SCROLL_THICKNESS,
+		bounds.height
+	};
+
+	DrawRectangleRounded(hScrollRect, 0.9f, 0, scrollBg);
+	DrawRectangleRounded(vScrollRect, 0.9f, 0, scrollBg);
+
+
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+		*vDrag = false;
+		*hDrag = false;
+	}
+
+	float maxScrollX = content.width - view.width;
+	float maxScrollY = content.height - view.height;
+	
+	float ratioH = view.width / content.width;
+	float ratioV = view.height / content.height;
+	
+	if (maxScrollX <= 0.0f) {
+		maxScrollX = 0.0f;
+	}
+
+	if (maxScrollY <= 0.0f) {
+		maxScrollY = 0.0f;
+	}
+
+	float hSliderWidth = view.width * ratioH;
+	float vSliderHeight = view.height * ratioV;
+
+	if (hSliderWidth < 10.0f) {
+		hSliderWidth = 10.0f;
+	}
+
+	if (vSliderHeight < 10.0f) {
+		vSliderHeight = 10.0f;
+	}
+
+	float hSliderTravel = view.width - hSliderWidth;
+	float vSliderTravel = view.height - vSliderHeight;
+
+	float hScrollNorm = (maxScrollX > 0.0f) ? scroll->x / maxScrollX : 0.0f;
+	float vScrollNorm = (maxScrollY > 0.0f) ? scroll->y / maxScrollY : 0.0f;
+	float hSliderX = hScrollRect.x + hScrollNorm * hSliderTravel;
+	float vSliderY = vScrollRect.y + vScrollNorm * vSliderTravel;
+
+	Rectangle hThumb = {
+		hSliderX,
+		hScrollRect.y,
+		hSliderWidth,
+		SCROLL_THICKNESS
+	};
+
+	Rectangle vThumb = {
+		vScrollRect.x,
+		vSliderY,
+		SCROLL_THICKNESS,
+		vSliderHeight
+	};
+
+	if (!isLocked && CheckCollisionPointRec(mpos, view)) {
+		Vector2 wheelMove = GetMouseWheelMoveV();
+		scroll->x -= wheelMove.x * 20.0f;
+		scroll->x = Clamp(scroll->x, 0.0f, maxScrollX);
+		scroll->y -= wheelMove.y * 20.0f;
+		scroll->y = Clamp(scroll->y, 0.0f, maxScrollY);
+	}
+	if (!isLocked && CheckCollisionPointRec(mpos, hThumb) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !*hDrag) {
+		*hDrag = true;
+	}
+	if (!isLocked && CheckCollisionPointRec(mpos, vThumb) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !*vDrag) {
+		*vDrag = true;
+	}
+
+
+
+	if (*hDrag && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+		scroll->x += GetMouseDelta().x;
+	}
+
+	if (*vDrag && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+		scroll->y += GetMouseDelta().y;
+	}
+
+
+	scroll->x = Clamp(scroll->x, 0.0f, maxScrollX);
+	scroll->y = Clamp(scroll->y, 0.0f, maxScrollY);
+
+	if (hasHorizontalScroll) {
+		DrawRectangleRounded(hThumb, 0.9, 0, scrollFg);
+	}
+	if (hasVerticalScroll) {
+		DrawRectangleRounded(vThumb, 0.9, 0, scrollFg);
+	}
+
+	return true;
 }

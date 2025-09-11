@@ -19,6 +19,7 @@ bool BpSliderInt(
     bool *sliderHover
 );
 
+bool BpScrollPanel(Rectangle bounds, Rectangle content, Vector2 * scroll, Rectangle view, bool * hDrag, bool * vDrag);
 bool BpTextBox(Rectangle bounds, char *text, int textSize, bool *edit);
 bool BpDropdownBox(
     Rectangle bounds, const char *options, int *selected, bool *clicked
