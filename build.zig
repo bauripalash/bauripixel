@@ -67,6 +67,7 @@ pub fn build(b: *std.Build) void {
             "src/canvas/draw.c",
             "src/options/opttheme.c",
             "src/layers.c",
+            "src/frames.c",
             "src/nativedlg.c",
             "src/tabs.c",
             "src/utils.c",
