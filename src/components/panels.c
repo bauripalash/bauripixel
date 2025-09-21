@@ -82,6 +82,12 @@ void BpPanelOnlyBorder(Rectangle bounds, int thick) {
     DrawBRDot(innerRect, thick, brdr);
 }
 
+void BpPanelOnlyClrBorder(Rectangle bounds, int thick, Color color) {
+    int og = OptThemeGetSet(T_PANEL_BORDER, ColorToInt(color));
+    BpPanelOnlyBorder(bounds, thick);
+    OptThemeSet(T_PANEL_BORDER, og);
+}
+
 // Note: Only One Side Border Hiding Works for now
 void BpSimplePanel(Rectangle bounds, int thick, Side border, Side shadow) {
     Color brdr = GetColor(OptThemeGet(T_PANEL_BORDER));
@@ -234,8 +240,7 @@ bool BpFramePrevActive(Rectangle bounds, FrameObj *frame, bool preview) {
     };
 
     bool result = BpFramePrevBox(bounds, frame, preview);
-    int ogBorder =
-        OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_LAYER_ACTIVE_BRDR));
+    int ogBorder = OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_FRAME_ACTIVE));
 
     BpPanelOnlyBorder(newBounds, 2);
 

@@ -57,6 +57,7 @@ static const OptThemeProp darkThemeOpts[] = {
     {T_DTOOL_ICON_FG, HexColorVWhite},
     {T_LAYER_BRDR, HexColorTGrayLighter},
     {T_LAYER_ACTIVE_BRDR, HexColorVWhite},
+    {T_FRAME_ACTIVE, HexColorVGreen},
 };
 
 static const OptThemeProp lightThemeOpts[] = {

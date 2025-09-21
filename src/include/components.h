@@ -19,7 +19,10 @@ bool BpSliderInt(
     bool *sliderHover
 );
 
-bool BpScrollPanel(Rectangle bounds, Rectangle content, Vector2 * scroll, Rectangle view, bool * hDrag, bool * vDrag);
+bool BpScrollPanel(
+    Rectangle bounds, Rectangle content, Vector2 *scroll, Rectangle view,
+    bool *hDrag, bool *vDrag, const Rectangle *zone
+);
 bool BpTextBox(Rectangle bounds, char *text, int textSize, bool *edit);
 bool BpDropdownBox(
     Rectangle bounds, const char *options, int *selected, bool *clicked
@@ -44,6 +47,7 @@ int BpTabItem(
 void BpBrushShapeButton(Rectangle bounds, BrushShape *shape, Texture2D *icons);
 
 void BpPanelOnlyBorder(Rectangle bounds, int thick);
+void BpPanelOnlyClrBorder(Rectangle bounds, int thick, Color color);
 void BpPanelBorder(Rectangle bounds, int thick);
 void BpPanelNoBorder(Rectangle bounds);
 

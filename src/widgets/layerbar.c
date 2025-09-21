@@ -201,14 +201,16 @@ bool LayerItemFrameDraw(
     for (int i = 0; i < framecount; i++) {
         FrameObj *f = layer->flist->frames[i];
         bool clicked = false;
-        if (lb->curFrame == i) {
+        if (lb->curFrame == i && isCur) {
             clicked = BpFramePrevActive(cellRect, f, false);
         } else {
             clicked = BpFramePrevBox(cellRect, f, false);
         }
 
-        if (clicked && CheckCollisionPointRec(GetMousePosition(), lb->framesRect)) {
+        if (clicked &&
+            CheckCollisionPointRec(GetMousePosition(), lb->framesRect)) {
             lb->curFrame = i;
+            lb->selectedLayer = layer;
         }
 
         cellRect.x += cellRect.width;
@@ -226,7 +228,8 @@ bool LayerItemDraw(
 
     Vector2 mpos = GetMousePosition();
 
-    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked && CheckCollisionPointRec(mpos, lb->layersRect);
+    bool hover = CheckCollisionPointRec(mpos, bounds) && !locked &&
+                 CheckCollisionPointRec(mpos, lb->layersRect);
     bool clicked = hover && (IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
     float halfHeight = bounds.height / 2.0f;
 
@@ -268,12 +271,14 @@ bool LayerItemDraw(
         }
     }
 
-    if (hover && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && CheckCollisionPointRec(mpos, lb->layersRect)) {
+    if (hover && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
+        CheckCollisionPointRec(mpos, lb->layersRect)) {
         lb->menuSelLayer = layer;
     }
 
     if (CheckCollisionPointRec(mpos, nameRect) &&
-        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked && CheckCollisionPointRec(mpos, lb->layersRect)) {
+        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !locked &&
+        CheckCollisionPointRec(mpos, lb->layersRect)) {
         lb->draggingLayer = true;
         lb->dragLayer = layer;
     }
@@ -281,6 +286,33 @@ bool LayerItemDraw(
     OptThemeSet(T_PANEL_BORDER, ogBorder);
 
     return clicked;
+}
+static void frwdFrame(LayerBarState *lb) {
+    if (lb->curFrame < (lb->curLayer->flist->count - 1)) {
+        lb->curFrame++;
+    }
+}
+
+static void bkwdFrame(LayerBarState *lb) {
+    if (lb->curFrame > 0) {
+        lb->curFrame--;
+    }
+}
+
+static void upLayer(LayerBarState *lb) {
+
+    if (lb->curLayer->index > 0) {
+        int targetIndex = lb->curLayer->index - 1;
+        LayerObj *obj = lb->list->layers[targetIndex];
+        lb->selectedLayer = obj;
+    }
+}
+
+static void dwnLayer(LayerBarState *lb) {
+    if (lb->curLayer->index < (lb->list->count - 1)) {
+        LayerObj *obj = lb->list->layers[lb->curLayer->index + 1];
+        lb->selectedLayer = obj;
+    }
 }
 
 int LayerBarLogic(LayerBarState *lb, double dt) {
@@ -295,6 +327,24 @@ int LayerBarLogic(LayerBarState *lb, double dt) {
         };
 
         Vector2 mpos = GetMousePosition();
+
+        if (CheckCollisionPointRec(mpos, bounds)) {
+            if (IsKeyPressed(KEY_LEFT) || IsKeyPressedRepeat(KEY_LEFT)) {
+                bkwdFrame(lb);
+            }
+
+            if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
+                frwdFrame(lb);
+            }
+
+            if (IsKeyPressed(KEY_UP)) {
+                upLayer(lb);
+            }
+
+            if (IsKeyPressed(KEY_DOWN)) {
+                dwnLayer(lb);
+            }
+        }
 
         bool atHandle = CheckCollisionPointRec(mpos, handleRect);
 
@@ -317,104 +367,6 @@ int LayerBarLogic(LayerBarState *lb, double dt) {
     }
 
     return -1;
-}
-
-#define MIN_SLIDER 10.0f
-
-void DrawScrollBars(LayerBarState *lb, Rectangle content) {
-
-    Vector2 mpos = GetMousePosition();
-
-    Rectangle viewArea = lb->framesRect;
-
-    bool hasHorizontalScroll = content.width > viewArea.width;
-    bool hasVerticalScroll = content.height > viewArea.height;
-
-    DrawRectangleRounded(lb->hScrollRect, 0.9, 0, Fade(ColorBlack, 0.5));
-    DrawRectangleRounded(lb->vScrollRect, 0.9, 0, Fade(ColorBlack, 0.5));
-
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-        lb->hScrollDragging = false;
-        lb->hScrollDragging = false;
-    }
-
-    float maxScrollX = content.width - viewArea.width;
-    float maxScrollY = content.height - viewArea.height;
-
-    float ratioH = viewArea.width / content.width;
-    float ratioV = viewArea.height / content.height;
-
-    if (maxScrollX <= 0.0f) {
-        maxScrollX = 0.0f;
-    }
-    if (maxScrollY < 0.0f) {
-        maxScrollY = 0.0f;
-    }
-
-    float hSliderWidth = viewArea.width * ratioH;
-    float vSliderHeight = viewArea.height * ratioV;
-
-    if (hSliderWidth < MIN_SLIDER) {
-        hSliderWidth = MIN_SLIDER;
-    }
-    if (vSliderHeight < MIN_SLIDER) {
-        vSliderHeight = MIN_SLIDER;
-    }
-
-    float hSliderTravel = viewArea.width - hSliderWidth;
-    float vSliderTravel = viewArea.height - vSliderHeight;
-
-    float hScrollNorm = (maxScrollX > 0.0f) ? lb->scroll.x / maxScrollX : 0.0f;
-    float vScrollNorm = (maxScrollY > 0.0f) ? lb->scroll.y / maxScrollY : 0.0f;
-
-    float hSliderX = lb->hScrollRect.x + hScrollNorm * hSliderTravel;
-    float vSliderY = lb->vScrollRect.y + vScrollNorm * vSliderTravel;
-
-    Rectangle vThumb = {lb->vScrollRect.x, vSliderY, SCROLLT, vSliderHeight};
-    Rectangle hThumb = {hSliderX, lb->hScrollRect.y, hSliderWidth, SCROLLT};
-
-    if (CheckCollisionPointRec(mpos, viewArea)) {
-        Vector2 wheelMove = GetMouseWheelMoveV();
-
-        float wheelDeltaX = wheelMove.x * 20.0f;
-        lb->scroll.x -= wheelDeltaX;
-        lb->scroll.x = Clamp(lb->scroll.x, 0.0f, maxScrollX);
-
-        float wheelDeltaY = wheelMove.y * 20.0f;
-        lb->scroll.y -= wheelDeltaY;
-        lb->scroll.y = Clamp(lb->scroll.y, 0.0f, maxScrollY);
-    }
-
-    if (CheckCollisionPointRec(mpos, vThumb) &&
-        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !lb->vScrollDragging) {
-        lb->vScrollDragging = true;
-    }
-
-    if (CheckCollisionPointRec(mpos, hThumb) &&
-        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !lb->hScrollDragging) {
-        lb->hScrollDragging = true;
-    }
-
-    if (lb->vScrollDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        float delta = GetMouseDelta().y;
-        lb->scroll.y += delta;
-    }
-
-    if (lb->hScrollDragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        float delta = GetMouseDelta().x;
-        lb->scroll.x += delta;
-    }
-
-    lb->scroll.x = Clamp(lb->scroll.x, 0.0f, maxScrollX);
-    lb->scroll.y = Clamp(lb->scroll.y, 0.0f, maxScrollY);
-
-    if (hasVerticalScroll) {
-        DrawRectangleRounded(vThumb, 0.9, 0, ColorVGreen);
-    }
-
-    if (hasHorizontalScroll) {
-        DrawRectangleRounded(hThumb, 0.9, 0, ColorVGreen);
-    }
 }
 
 #define MENU_HEIGHT_LAYER  120
@@ -532,7 +484,7 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
         toolBtnRect.x += toolBtnRect.width;
         if (BpTextButton(toolBtnRect, GuiIconText(ICON_PLAYER_JUMP, NULL))) {
             createDupFrame(lb);
-            lb->curFrame++;
+            // lb->curFrame++;
         }
 
         toolBtnRect.x += toolBtnRect.width + LAYER_ITEM_MARGIN;
@@ -557,6 +509,7 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
         toolBtnRect.x += toolBtnRect.width;
         if (BpTextButton(toolBtnRect, GuiIconText(ICON_PLAYER_STOP, NULL))) {
             lb->timelineState = TIMELINE_STOP;
+            lb->curFrame = 0;
         }
         toolBtnRect.x += toolBtnRect.width;
         if (BpTextButton(toolBtnRect, GuiIconText(ICON_PLAYER_NEXT, NULL))) {
@@ -577,9 +530,11 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
         float posY = layersBounds.y + LAYER_ITEM_MARGIN;
         float pyinc = LAYER_ITEM_HEIGHT + 1;
         Rectangle activeRect = {0};
-		Rectangle layerNamesRect = {layersBounds.x, layersBounds.y, lb->layerNameWidth + 8,
-            layersBounds.height};
-		BeginScissorModeRec(layerNamesRect);
+        Rectangle layerNamesRect = {
+            layersBounds.x, layersBounds.y, lb->layerNameWidth + 8,
+            layersBounds.height
+        };
+        BeginScissorModeRec(layerNamesRect);
 
         for (int i = 0; i < layerCount; i++) {
             LayerObj *layer = lb->list->layers[i];
@@ -590,7 +545,8 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
                 LAYER_ITEM_HEIGHT,
             };
             bool isCur = (i == lb->curLayer->index);
-            if (LayerItemDraw(lb, layerNameBtn, layer, isCur) && CheckCollisionPointRec(mpos, layerNamesRect)) {
+            if (LayerItemDraw(lb, layerNameBtn, layer, isCur) &&
+                CheckCollisionPointRec(mpos, layerNamesRect)) {
                 lb->selectedLayer = layer;
             }
             if (isCur) {
@@ -637,12 +593,23 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
             };
 
             bool isCur = (lb->curLayer->index == i);
-            if (LayerItemFrameDraw(lb, layerFrameRect, layer, isCur) && CheckCollisionPointRec(mpos, lb->framesRect)) {
-                lb->selectedLayer = layer;
+            if (LayerItemFrameDraw(lb, layerFrameRect, layer, isCur) &&
+                CheckCollisionPointRec(mpos, lb->framesRect)) {
+                // lb->selectedLayer = layer;
             }
 
             fposY += pyinc;
         }
+
+        Rectangle activeFramesRect = {
+            (framesBounds.x + 1) + lb->curFrame * LAYER_ITEM_HEIGHT -
+                lb->scroll.x,
+            layersBounds.y + LAYER_ITEM_MARGIN - lb->scroll.y,
+            LAYER_ITEM_HEIGHT,
+            (layerCount * (LAYER_ITEM_HEIGHT + 1)),
+        };
+
+        BpPanelOnlyClrBorder(activeFramesRect, 2, ColorVWhite);
 
         OptThemeSet(T_PANEL_BORDER, ogBorder);
         EndScissorMode();
@@ -698,12 +665,14 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
             (LAYER_ITEM_HEIGHT + 1) * frameCount,
             ((LAYER_ITEM_HEIGHT + 1) * layerCount) + LAYER_ITEM_MARGIN * 2
         };
-		Rectangle scrollRect = lb->framesRect;
-		scrollRect.width += 5;
-		scrollRect.height += 5;
-		BpScrollPanel(scrollRect, usedRect, &lb->scroll, lb->framesRect , &lb->hScrollDragging, &lb->vScrollDragging);
+        Rectangle scrollRect = lb->framesRect;
+        scrollRect.width += 5;
+        scrollRect.height += 5;
+        BpScrollPanel(
+            scrollRect, usedRect, &lb->scroll, lb->framesRect,
+            &lb->hScrollDragging, &lb->vScrollDragging, &lb->layersRect
+        );
 
-		DrawRectangleLinesEx(lb->framesRect, 2, RED);
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
             CheckCollisionPointRec(mpos, bounds) && !locked) {
             lb->menuOpen = !lb->menuOpen;
