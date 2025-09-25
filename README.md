@@ -5,10 +5,10 @@
 
 ### Features
 * Pixel perfect drawing tools
-* Layers `[TODO]`
-* Animation `[TODO]`
+* Layers
+* Animation
 * Export and Import to/from PNG, JPEG, GIF, Sprite sheets `[TODO]`
+* Scripting `[TODO]`
 *  More coming soon...
 
-### Screenshots
-![](assets/extras/screenshot_1.png)
+![](assets/extras/banner.png)
