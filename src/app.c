@@ -130,7 +130,7 @@ void LayoutLogic(Gui *gui, double dt) {
     bool menuBarOpen = gui->state->menubar.menuOpen;
     bool sliderHover = gui->curTab->state->dtb.sliderHover;
     bool layerpopup = gui->curTab->state->lb.anypopup;
-    bool guipopup = gui->state->newsprite.p.active;
+    bool guipopup = gui->state->newsprite.p.active || gui->state->about.p.active;
 
     bool tabpopup = gui->curTab->state->eximg.p.active;
     if (menuBarOpen || sliderHover || layerpopup || guipopup || tabpopup) {
@@ -197,7 +197,7 @@ void LayoutDraw(Gui *gui, double dt) {
     bool menuOpen = gui->state->menubar.menuOpen;
     bool sizeSliderHover = gui->curTab->state->dtb.sliderHover;
     bool layerpopup = gui->curTab->state->lb.anypopup;
-    bool guipopup = gui->state->newsprite.p.active;
+    bool guipopup = gui->state->newsprite.p.active || gui->state->about.p.active;
     bool tabpopup = gui->curTab->state->eximg.p.active;
 
     // SyncTabData(gui->curTab, &gui->state->menubar, &gui->state->statusbar);
@@ -260,6 +260,14 @@ void LayoutDraw(Gui *gui, double dt) {
         }
     }
 
+    if (gui->state->about.p.active) {
+        WinStatus result = WAbout(&gui->state->about, dt);
+        if (result == WIN_CLOSE || result == WIN_CANCEL || result == WIN_OK) {
+            gui->state->about.p.active = false;
+            FreeWAbout(&gui->state->about);
+        }
+    }
+
     if (guipopup) {
         GuiLock();
     }
@@ -282,13 +290,7 @@ void LayoutDraw(Gui *gui, double dt) {
         }
     }
 
-    if (gui->state->about.p.active) {
-        WinStatus result = WAbout(&gui->state->about, dt);
-        if (result == WIN_CLOSE || result == WIN_CANCEL || result == WIN_OK) {
-            gui->state->about.p.active = false;
-            FreeWAbout(&gui->state->about);
-        }
-    }
+
 
     if (tabpopup) {
         GuiLock();
