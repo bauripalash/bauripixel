@@ -17,7 +17,7 @@
 static TopMenuEntry TopMenus[TMENU_COUNT] = {
     {"File", TMENU_FILE, 8, 150, false},
     {"Edit", TMENU_EDIT, 10, 150, false},
-    {"Help", TMENU_HELP, 1, 100, false},
+    {"Help", TMENU_HELP, 2, 100, false},
 };
 
 MenuBarState NewMenuBar() {
@@ -156,12 +156,9 @@ MenuAction drawHelpMenu(MenuBarState *state, Rectangle bounds) {
 
     BpPanelBorder(bounds, 2);
     Rectangle rect = MakeMenuRect();
-
-    if (BpLabelButton(rect, "About")) {
-        resetMenu(state);
-        return MACTION_SHOW_ABOUT;
-    }
-
+    SimpleLabelBtnMenu(rect, "About", MACTION_SHOW_ABOUT);
+    IncreaseItemY();
+    SimpleLabelBtnMenu(rect, "Help", MACTION_SHOW_HELP);
     IncreaseItemY();
 
     return MACTION_COUNT;

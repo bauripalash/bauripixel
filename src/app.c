@@ -8,6 +8,7 @@
 #include "include/widgets/canvas.h"
 #include "include/widgets/drawtoolbar.h"
 #include "include/widgets/layerbar.h"
+#include "include/windows/about.h"
 #include "include/windows/exportimg.h"
 #include "include/windows/newsprite.h"
 #include "include/windows/window.h"
@@ -103,6 +104,7 @@ void handleMenubar(Gui *gui) {
         }
         if (maction == MACTION_SHOW_ABOUT) {
             TraceLog(LOG_WARNING, "Show About");
+            gui->state->about.p.active = true;
         }
 
         if (maction == MACTION_NEW_FILE) {
@@ -277,6 +279,14 @@ void LayoutDraw(Gui *gui, double dt) {
         if (result == WIN_OK) {
             TabExportImage(gui->curTab);
             FreeWExportImg(expoImg);
+        }
+    }
+
+    if (gui->state->about.p.active) {
+        WinStatus result = WAbout(&gui->state->about, dt);
+        if (result == WIN_CLOSE || result == WIN_CANCEL || result == WIN_OK) {
+            gui->state->about.p.active = false;
+            FreeWAbout(&gui->state->about);
         }
     }
 

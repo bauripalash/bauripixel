@@ -23,6 +23,7 @@ typedef enum {
     MACTION_FLIP_V,
 
     MACTION_SHOW_ABOUT,
+    MACTION_SHOW_HELP,
 
     //
     MACTION_COUNT

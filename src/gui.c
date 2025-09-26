@@ -2,6 +2,7 @@
 #include "include/tabs.h"
 #include "include/widgets/menubar.h"
 #include "include/widgets/statusbar.h"
+#include "include/windows/about.h"
 #include "include/windows/newsprite.h"
 #include <stdbool.h>
 #include <stdlib.h>
@@ -11,6 +12,7 @@ GuiGlobalState *NewGuiState() {
     gs->menubar = NewMenuBar();
     gs->statusbar = NewStatusBar();
     gs->newsprite = NewWNewSprite();
+    gs->about = NewWAbout();
 
     return gs;
 }

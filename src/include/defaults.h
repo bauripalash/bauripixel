@@ -1,7 +1,7 @@
 #ifndef DEFAULTS_H
 #define DEFAULTS_H
 
-#define DEF_WIN_HEIGHT       728
+#define DEF_WIN_HEIGHT       768
 #define DEF_WIN_WIDTH        1028
 
 #define DEF_MIN_WIN_HEIGHT   700

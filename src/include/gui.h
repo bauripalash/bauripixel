@@ -4,6 +4,7 @@
 #include "tabs.h"
 #include "widgets/menubar.h"
 #include "widgets/statusbar.h"
+#include "windows/about.h"
 #include "windows/newsprite.h"
 #include <stdbool.h>
 
@@ -11,6 +12,7 @@ typedef struct GuiGlobalState {
     MenuBarState menubar;
     StatusBarState statusbar;
     WNewSpriteState newsprite;
+    WAboutState about;
 
 } GuiGlobalState;
 

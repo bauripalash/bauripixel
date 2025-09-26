@@ -55,6 +55,7 @@ pub fn build(b: *std.Build) void {
             "src/widgets/widget.c",
             "src/widgets/drawtoolbar.c",
             "src/widgets/layerbar.c",
+            "src/windows/about.c",
             "src/windows/layeropts.c",
             "src/windows/newsprite.c",
             "src/windows/exportimg.c",
