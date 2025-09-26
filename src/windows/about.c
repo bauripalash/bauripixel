@@ -1,10 +1,12 @@
 #include "../include/windows/about.h"
 #include "../include/components.h"
 #include <stdbool.h>
-#include <string.h>
 
 #define ABT_DEF_WIDTH  500
 #define ABT_DEF_HEIGHT 300
+
+#define ABT_MARGIN_TB  30
+#define ABT_LBL_H      30
 
 WAboutState NewWAbout() {
     WAboutState abt = {0};
@@ -21,6 +23,13 @@ static void updateBounds(WAboutState *state) {
         state->p.b.x = (GetScreenWidth() - state->p.b.width) / 2.0f;
         state->p.b.y = (GetScreenHeight() - state->p.b.height) / 2.0f;
     }
+}
+
+float labelCntrX(float x, float w, const char *str) {
+    Font f = GuiGetFont();
+    int fs = f.baseSize;
+    int sw = GuiGetTextWidth(str) / 2.0f;
+    return (x + w);
 }
 
 WinStatus WAbout(WAboutState *state, double dt) {
@@ -43,6 +52,37 @@ WinStatus WAbout(WAboutState *state, double dt) {
         if (winRes) {
             result = WIN_CLOSE;
         }
+
+        int ogAlign = GuiGetStyle(LABEL, TEXT_ALIGNMENT);
+        int ogFs = GuiGetStyle(DEFAULT, TEXT_SIZE);
+        GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+
+        Rectangle lRect = {
+            bounds.x, bounds.y + WINDOW_TOP_HEIGHT + ABT_MARGIN_TB,
+            bounds.width, ABT_LBL_H
+        };
+
+        const char titleStr[] = "BauriPixel";
+
+        GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
+        GuiLabel(lRect, titleStr);
+        lRect.y += lRect.height + 5;
+        GuiSetStyle(DEFAULT, TEXT_SIZE, ogFs);
+        GuiLabel(lRect, "v0.1.0");
+        lRect.y += lRect.height + 5;
+        GuiLabel(lRect, "Simple & Lightweight Pixel Art Editor");
+        lRect.y += lRect.height + 5;
+        GuiLabel(lRect, "Developed by, Palash Bauri");
+        lRect.y += lRect.height + 5;
+        GuiLabel(
+            lRect,
+            GuiIconText(
+                ICON_HEART, "In loving memory of my mother, Mukti Rani Sinha"
+            )
+        );
+
+        GuiSetStyle(LABEL, TEXT_ALIGNMENT, ogAlign);
+        GuiSetStyle(DEFAULT, TEXT_SIZE, ogFs);
     }
 
     return result;
