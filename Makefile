@@ -4,6 +4,8 @@ ZIG_OUTPUT:=zig-out/bin/$(BIN)
 HEADERS:= $(shell find src/include -path 'src/external' -prune -o -path 'src/include/exported' -prune -o -name '*.h' -print)
 SOURCES:= $(shell find src/ -path 'src/external' -prune -o -name '*.c' -print)
 PACKER:=./packer.py
+ASSETS_DIR:=assets/media
+
 
 all: run
 
@@ -77,6 +79,11 @@ clean: cmake_clean
 .PHONE: rdtools
 rdtools:
 	$(PACKER) assets/media/drawtools/drawtools_icon_minimal.png -o src/include/exported/drawtoolicons.h
+
+.PHONY: convlogo
+convlogo:
+	aseprite -b $(ASSETS_DIR)/logos/duck_logo.aseprite --ignore-layer "BG" --scale 10 --save-as $(ASSETS_DIR)/logos/logo.png
+	aseprite -b $(ASSETS_DIR)/logos/duck_logo.aseprite --ignore-layer "BG" --scale 2 --save-as $(ASSETS_DIR)/logos/logo32px.png
 
 .PHONE: rappicon
 rappicon:
