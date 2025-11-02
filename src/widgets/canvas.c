@@ -26,12 +26,12 @@ CanvasState NewCanvas(int w, int h) {
 
     c.scroll = (Vector2){0, 0};
     c.zoomMin = 0.2f;
-    c.zoomMax = INIT_CELL_SIZE;
+    c.zoomMax = w / 2.0f;
 
     c.scrollThickness = 10.0f;
 
+	// TODO: Should be the first color in the palette
     c.current = ColorBlack;
-    c.pxSize = INIT_CELL_SIZE;
     c.camera = (Camera2D){0};
     c.drawArea = (Rectangle){0};
     c.hScrollRect = (Rectangle){0};
@@ -44,7 +44,8 @@ CanvasState NewCanvas(int w, int h) {
     c.camera.target = (Vector2){0, 0};
 
     c.camera.zoom = 1.0f;
-
+	// TODO: Should come from New Sprite Widget
+	// Blank checkered for transparent otherwise flat colored
     c.bgColor = BLANK;
     c.bgImg = GenImageChecked(
         c.gridSize.x, c.gridSize.y, 8, 8, ColorCheckerLight, ColorCheckerDark
@@ -57,7 +58,6 @@ CanvasState NewCanvas(int w, int h) {
     c.camera.offset = Vector2Zero();
     c.point = Vector2Zero();
 
-    // --
     c.brushSize = 1;
     c.brushShape = BSP_SQAURE;
     c.brushDragging = false;
@@ -77,7 +77,6 @@ CanvasState NewCanvas(int w, int h) {
 
     // --
     //
-    c.drawArea4 = (Vector4){0};
     c.canvasArea4 = (Vector4){0};
 
     c.sbHThumbRect = (Rectangle){0};
@@ -132,10 +131,10 @@ static void updateBounds(CanvasState *c) {
 
     Rectangle bounds = c->prop.bounds;
     c->drawArea = (Rectangle){
-        bounds.x + CANVAS_DRAW_MARGIN + c->scrollThickness,
-        bounds.y + CANVAS_DRAW_MARGIN + c->scrollThickness,
-        bounds.width - (CANVAS_DRAW_MARGIN * 2) - c->scrollThickness * 3,
-        bounds.height - (CANVAS_DRAW_MARGIN * 2) - c->scrollThickness * 3
+        bounds.x +  c->scrollThickness,
+        bounds.y +  c->scrollThickness,
+        bounds.width - c->scrollThickness * 3,
+        bounds.height - c->scrollThickness * 3
     };
 
     c->vScrollRect =
@@ -305,10 +304,10 @@ bool CanvasScrollBarsLogic(CanvasState *state) {
     float yScale = scrollHeight / vBounds.height;
 
     /* Limits of travel for canvas
-float minPosX = -canvasWidth;
-float maxPosX = viewWidth;
-float minPosY = -canvasHeight;
-float maxPosY = viewHeight;
+	float minPosX = -canvasWidth;
+	float maxPosX = viewWidth;
+	float minPosY = -canvasHeight;
+	float maxPosY = viewHeight;
     */
 
     // distance from bottom edge of draw area to

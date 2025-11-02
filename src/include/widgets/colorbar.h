@@ -22,7 +22,9 @@
 
 #define ColorsCount(c)        (sizeof(c) / sizeof(Color))
 
+// Colorbar/ Color panel widget state
 typedef struct {
+	// Widget prop base
     WidgetProp prop;
     int prevIndex;
     int currentIndex;

@@ -2,7 +2,6 @@
 #define DRAWTOOLBAR_H
 
 #include "../../external/raylib.h"
-#include "../components.h"
 #include "../drawtools.h"
 #include "widget.h"
 #include <stdbool.h>
