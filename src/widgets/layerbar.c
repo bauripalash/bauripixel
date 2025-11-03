@@ -8,16 +8,26 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+// Layerbar widget initial height
 #define LB_INIT_HEIGHT       120
+// Layerbar widget minimum height
 #define LB_MIN_HEIGHT        50
+// Layer Left, right margin 
 #define LB_MARGIN_LR         10
+// Layerbar Top, bottom margin
 #define LB_MARGIN_TB         10
+// Layerbar Left, right padding
 #define LB_PADDING_LR        10
+// Layerbar Top, bottom padding
 #define LB_PADDING_TB        10
 
+// Layerbar resize handle thickness
 #define HANDLE_THICKNESS     20
+// Height of each layer item
 #define LAYER_ITEM_HEIGHT    35
+// Default name label width 
 #define DEF_LAYER_NAME_WIDTH 200
+// Margin for each layer item
 #define LAYER_ITEM_MARGIN    5
 
 LayerBarState NewLayerBar() {
@@ -60,7 +70,6 @@ LayerBarState NewLayerBar() {
     lb.dragLayer = NULL;
 
     lb.curFrame = 0;
-    lb.selAllFrames = false;
     lb.timelineState = TIMELINE_STOP;
 
     return lb;
@@ -668,6 +677,7 @@ int LayerBarDraw(LayerBarState *lb, double dt) {
         Rectangle scrollRect = lb->framesRect;
         scrollRect.width += 5;
         scrollRect.height += 5;
+        
         BpScrollPanel(
             scrollRect, usedRect, &lb->scroll, lb->framesRect,
             &lb->hScrollDragging, &lb->vScrollDragging, &lb->layersRect

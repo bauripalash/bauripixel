@@ -1,6 +1,7 @@
 #ifndef EXPORT_H
 #define EXPORT_H
 
+// Image Export Format
 typedef enum BpImgFmt {
     BP_IMG_PNG,
     BP_IMG_JPEG,

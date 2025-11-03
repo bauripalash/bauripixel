@@ -227,6 +227,7 @@ bool BpFramePrevBox(Rectangle bounds, FrameObj *frame, bool preview) {
     GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
     GuiLabel(rect, TextFormat("%d", frame->index));
     GuiSetStyle(LABEL, TEXT_ALIGNMENT, ogAlign);
+    
     return CheckCollisionPointRec(GetMousePosition(), rect) &&
            IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !GuiIsLocked();
 }
@@ -239,10 +240,12 @@ bool BpFramePrevActive(Rectangle bounds, FrameObj *frame, bool preview) {
         bounds.height - ACTIVE_FRAME_PADDING * 2
     };
 
+    
     bool result = BpFramePrevBox(bounds, frame, preview);
     int ogBorder = OptThemeGetSet(T_PANEL_BORDER, OptThemeGet(T_FRAME_ACTIVE));
 
     BpPanelOnlyBorder(newBounds, 2);
+    
 
     OptThemeSet(T_PANEL_BORDER, ogBorder);
     return result;
