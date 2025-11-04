@@ -3,6 +3,7 @@
 
 #define T_INVALID_RETURN -9998
 
+// Theme Option Keys
 typedef enum OptThemeKey {
     T_SCROLLBAR_BG = 0,
     T_SCROLLBAR_FG,
@@ -56,8 +57,11 @@ typedef struct OptThemeProp {
 } OptThemeProp;
 
 #define ValidOptTheme(v) (v == T_INVALID_RETURN)
+// Set Theme Option
 void OptThemeSet(OptThemeKey key, int value);
+// Set Theme Option and Return Previous Value of Theme Key
 int OptThemeGetSet(OptThemeKey key, int value);
+// Get Theme Option Value for the `key`
 int OptThemeGet(OptThemeKey key);
 
 #endif

@@ -22,25 +22,35 @@ typedef struct Side {
 #define Vector4ToSide(vec)                                                     \
     (Side) { .t = vec.x, .b = vec.w, .l = vec.y, .r = vec.z }
 
+// Side to all Sides active
 #define SideAll()         (Side){0}
+// Side with no Sides active
 #define SideNone()        (Side){-1, -1, -1, -1}
 
+// Check if Side has all Sides activated
 #define IsAllSide(s)      (s.t != -1 && s.b != -1 && s.l != -1 && s.r != -1)
 
+// Return Count of Array
 #define ArrCount(arr)     (sizeof(arr) / sizeof(arr[0]))
+// Is the coordinates of vector are negetive
 #define IsVecNeg(vec)     (vec.x < 0 && vec.y < 0)
+// Create a `(-1,-1)` Vector
 #define Vector2Negetive() ((Vector2){-1, -1})
 
+// Print Vector with Message
 #define TraceVector(vec, msg)                                                  \
     TraceLog(LOG_WARNING, "%s [%f, %f]", msg, vec.x, vec.y)
 
+// Print Rectangle with Message
 #define TraceRect(r, msg)                                                      \
     TraceLog(                                                                  \
         LOG_WARNING, "%s [[%f, %f] [%f, %f]]", msg, r.x, r.y, r.width,         \
         r.height                                                               \
     )
 
+// Convert `d` Degrees to Radians
 #define DegToRad(d) ((float)(d * DEG2RAD))
+// Convert `r` Radians to Degrees
 #define RadToDeg(r) ((float)(r * RAD2DEG))
 
 // If left/right shift key is being pressed down
@@ -96,8 +106,12 @@ bool RectAllDiff(Rectangle a, Rectangle b);
 // If Shift, Ctrl or Meta/Windows key is being pressed down
 bool IsModifierDown();
 
+// Is the app running on Browser
 bool IsOsWeb();
+// Is the app running on Linux based OS
 bool IsOsLinux();
+// Is the app running on Apple Mac
 bool IsOsMac();
+// Is the app running on Windows PC
 bool IsOsWin();
 #endif

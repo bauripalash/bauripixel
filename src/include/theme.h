@@ -89,6 +89,7 @@ static const GuiStyleProp RgDarkThemeProps[] = {
 
 // ============== RAGUI THEME END ==============
 
+// Load App Icon from Embedded Image in a header
 void LoadAppIcon() {
 
     Image icon = LoadImageFromMemory(".png", LOGO_PNG_DATA, LOGO_PNG_SIZE);
@@ -96,8 +97,10 @@ void LoadAppIcon() {
     UnloadImage(icon);
 }
 
+// Load GUI font
 void LoadAppFont() { GuiLoadStyleBIOSfontII(); }
 
+// Load Default Dark App Theme
 void LoadAppDarkTheme() {
 
     for (int i = 0; i < ArrCount(darkThemeOpts); i++) {
