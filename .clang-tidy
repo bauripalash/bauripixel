@@ -1,0 +1,20 @@
+---
+Checks:          'clang-diagnostic-*,clang-analyzer-*'
+WarningsAsErrors: ''
+HeaderFileExtensions:
+  - ''
+  - h
+  - hh
+  - hpp
+  - hxx
+ImplementationFileExtensions:
+  - c
+  - cc
+  - cpp
+  - cxx
+HeaderFilterRegex: '^(?!.*/src/external/).*'
+ExcludeHeaderFilterRegex: '.*/src/external/.*'
+FormatStyle:     none
+SystemHeaders:   false
+UseColor: true
+...

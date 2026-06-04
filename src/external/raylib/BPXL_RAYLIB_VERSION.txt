@@ -1,0 +1,2 @@
+Raylib:9ace1489175a375529a6e8510b75f0c8a7b34cc0:https://github.com/raysan5/raylib/commit/9ace1489175a375529a6e8510b75f0c8a7b34cc0
+Raygui:b08d04942acbac94edb47d089ceb0e6c5320d935:https://github.com/raysan5/raygui/commit/b08d04942acbac94edb47d089ceb0e6c5320d935

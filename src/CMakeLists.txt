@@ -1,0 +1,10 @@
+include("${CMAKE_CURRENT_LIST_DIR}/sources.cmake")
+
+target_sources(${PROJECT_NAME}
+	PRIVATE 
+	${BAURIPIXEL_SRC_FILES} 
+	${BAURIPIXEL_MAIN_FILE} 
+	${BAURIPIXEL_HEADER_FILES}
+)
+
+
