@@ -1,4 +1,0 @@
-If:
-  PathMatch: src/include/exported/*.h
-Index:
-  Background: Skip
