@@ -1,0 +1,8 @@
+#ifndef BAURIPIXEL_DEFAULTS_H
+#define BAURIPIXEL_DEFAULTS_H
+
+#define APP_DEFAULT_WIDTH  1000
+#define APP_DEFAULT_HEIGHT 700
+#define APP_DEFAULT_TITLE  "BauriPixel"
+
+#endif
