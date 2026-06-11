@@ -1,9 +1,10 @@
 #include "../include/colors.h"
 #include "../include/wpanel.h"
+#include "raylib.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
-int PanelDraw(BpWidget *base, void *ctx) {
+int PanelDraw(BpWidget *base, double dt, void *ctx) {
     (void)ctx;
     if (base == NULL) return -1;
 
@@ -18,7 +19,7 @@ int PanelDraw(BpWidget *base, void *ctx) {
     return 0;
 }
 
-int PanelUpdate(BpWidget *base, void *ctx) {
+int PanelUpdate(BpWidget *base, double dt, void *ctx) {
     (void)base;
     (void)ctx;
     return 0;
@@ -50,4 +51,10 @@ void PanelSetColor(WPanel *panel, Color bg, Color border) {
     if (panel == NULL) return;
     panel->background = bg;
     panel->border = border;
+}
+
+void PanelSetAnchor(WPanel *panel, Vector2 anchor, Vector2 stopper) {
+    if (panel == NULL) return;
+    panel->w.bounds.anchor = anchor;
+    panel->w.bounds.stopper = stopper;
 }

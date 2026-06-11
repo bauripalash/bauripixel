@@ -30,9 +30,9 @@ typedef struct BpWidget {
     bool enabled;
 
     // Update function (self, ctx) -> int
-    int (*Update)(struct BpWidget *w, void *ctx);
+    int (*Update)(struct BpWidget *w, double dt, void *ctx);
     // Draw function (self, ctx) -> int
-    int (*Draw)(struct BpWidget *w, void *ctx);
+    int (*Draw)(struct BpWidget *w, double dt, void *ctx);
 } BpWidget;
 
 #define Widget(w) ((BpWidget *)(w))
