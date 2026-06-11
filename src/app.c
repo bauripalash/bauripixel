@@ -2,26 +2,20 @@
 #include "external/raylib/raylib.h"
 #include "external/raylib/src/raylib.h"
 #include "include/colors.h"
+#include "include/components.h"
 #include "include/defaults.h"
-#include "include/widget.h"
-#include "include/wpanel.h"
-#include "raymath.h"
-#include <stdlib.h>
+#include "include/theme.h"
 
 int LayoutUpdate(double dt);
 int LayoutDraw(double dt);
-
-WPanel panel = {0};
 
 int RunApp(void) {
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(APP_DEFAULT_WIDTH, APP_DEFAULT_HEIGHT, APP_DEFAULT_TITLE);
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
-
-    panel = NewWPanel(100, 100);
-    PanelSetColor(&panel, BpColorCBlack, BpColorCOrange);
-    PanelSetAnchor(&panel, (Vector2){50, 50}, Vector2Zero());
+    LoadDefaultTheme();
+    LoadDefaultAppFont();
 
     double dt = GetFrameTime();
     while (!WindowShouldClose()) {
@@ -47,11 +41,8 @@ int RunApp(void) {
     return 0;
 }
 
-int LayoutUpdate(double dt) {
-    panel.w.Update(Widget(&panel), dt, NULL);
-    return 0;
-}
+int LayoutUpdate(double dt) { return 0; }
 int LayoutDraw(double dt) {
-    panel.w.Draw(Widget(&panel), dt, NULL);
+    BpPanelBorder((Rectangle){0, 0, 50, 50}, 2);
     return 0;
 }
