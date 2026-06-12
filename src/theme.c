@@ -13,7 +13,7 @@
 
 static const BpOptThemeProp defaultThemeOpts[] = {
     {T_PANEL_BG, BpHexColorCBlack},
-    {T_PANEL_BORDER, BpHexColorCOrange},
+    {T_PANEL_BORDER, BpHexColorCGray},
     {T_PANEL_BORDER_THICK, 2},
 
 };

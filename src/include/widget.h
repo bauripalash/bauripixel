@@ -8,20 +8,14 @@ extern "C" {
 #include "../external/raylib/raylib.h"
 #include <stdbool.h>
 
-// Bounds, Size for widgets
-typedef struct BpwBounds {
-    // Top-Left Anchor
-    Vector2 anchor;
-    // Bottom-Right Anchor
-    Vector2 stopper;
-    // Size
-    Vector2 size;
-} BpwBounds;
-
 // Base Widget
 typedef struct BpWidget {
-    // widget size
-    BpwBounds bounds;
+    // widget bound
+    Rectangle bounds;
+    // widget top-left anchor
+    Vector2 anchor;
+    // widget bottom-right stopper
+    Vector2 stopper;
     // parent widget link
     struct BpWidget *parent;
     // should the widget be drawn?
@@ -36,6 +30,16 @@ typedef struct BpWidget {
 } BpWidget;
 
 #define Widget(w) ((BpWidget *)(w))
+
+typedef struct BpColorPanel {
+    BpWidget w;
+    int colorIndex;
+    int boxSize;
+    Color *colors;
+    int colorCount;
+} BpColorPanel;
+
+BpColorPanel NewColorPanel(void);
 
 #ifdef __cplusplus
 }

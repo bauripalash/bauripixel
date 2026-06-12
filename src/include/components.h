@@ -32,7 +32,7 @@ typedef struct BpSide {
 #define IsAllSide(s)                                                           \
     (s.top != -1 && s.bottom != -1 && s.left != -1 && s.right != -1)
 
-void BpSimpleBorder(Rectangle bounds, int thickness, BpSide sides);
+void BpSimplePanel(Rectangle bounds, int thickness, BpSide sides);
 void BpPanelBorder(Rectangle bounds, int thickness);
 void BpPanelOnlyBorder(Rectangle bounds, int thickness);
 void BpPanelNoBorder(Rectangle bounds);

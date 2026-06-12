@@ -5,9 +5,13 @@
 #include "include/components.h"
 #include "include/defaults.h"
 #include "include/theme.h"
+#include "include/widget.h"
+#include <stdlib.h>
 
 int LayoutUpdate(double dt);
 int LayoutDraw(double dt);
+
+BpColorPanel cp = {0};
 
 int RunApp(void) {
     SetTraceLogLevel(LOG_WARNING);
@@ -16,6 +20,8 @@ int RunApp(void) {
     SetTargetFPS(60);
     LoadDefaultTheme();
     LoadDefaultAppFont();
+
+    cp = NewColorPanel();
 
     double dt = GetFrameTime();
     while (!WindowShouldClose()) {
@@ -41,10 +47,11 @@ int RunApp(void) {
     return 0;
 }
 
-int LayoutUpdate(double dt) { return 0; }
+int LayoutUpdate(double dt) {
+    cp.w.Update(Widget(&cp), dt, NULL);
+    return 0;
+}
 int LayoutDraw(double dt) {
-    BpSimpleBorder(
-        (Rectangle){5, 5, GetScreenWidth() - 10, 20}, 2, MakeSide(0, 0, 0, 0)
-    );
+    cp.w.Draw(Widget(&cp), dt, NULL);
     return 0;
 }

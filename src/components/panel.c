@@ -20,7 +20,7 @@
         bounds.y + bounds.height - thickness, thickness, thickness, brdr       \
     ))
 
-void BpSimpleBorder(Rectangle bounds, int thickness, BpSide sides) {
+void BpSimplePanel(Rectangle bounds, int thickness, BpSide sides) {
     Color bg = GetColor(OptThemeGet(T_PANEL_BG));
     Color brdr = GetColor(OptThemeGet(T_PANEL_BORDER));
     DrawRectangleRec(
@@ -83,6 +83,8 @@ void BpSimpleBorder(Rectangle bounds, int thickness, BpSide sides) {
     }
 }
 
-void BpPanelBorder(Rectangle bounds, int thickness) {}
+void BpPanelBorder(Rectangle bounds, int thickness) {
+    BpSimplePanel(bounds, thickness, MakeAllSide());
+}
 void BpPanelOnlyBorder(Rectangle bounds, int thickness) {}
 void BpPanelNoBorder(Rectangle bounds) {}
