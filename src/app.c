@@ -43,6 +43,8 @@ int RunApp(void) {
 
 int LayoutUpdate(double dt) { return 0; }
 int LayoutDraw(double dt) {
-    BpPanelBorder((Rectangle){0, 0, 50, 50}, 2);
+    BpSimpleBorder(
+        (Rectangle){5, 5, GetScreenWidth() - 10, 20}, 2, MakeSide(0, 0, 0, 0)
+    );
     return 0;
 }
