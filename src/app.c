@@ -37,7 +37,7 @@ int RunApp(void) {
         LayoutUpdate(dt);
         BeginDrawing();
         {
-            ClearBackground(BpColorCBlack);
+            ClearBackground(BpColorAppBG);
             LayoutDraw(dt);
         }
         EndDrawing();

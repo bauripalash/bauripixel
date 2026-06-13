@@ -33,10 +33,26 @@ typedef struct BpWidget {
 
 typedef struct BpColorPanel {
     BpWidget w;
-    int colorIndex;
-    int boxSize;
+    // Color Palette array
     Color *colors;
+    // Color Palette count
     int colorCount;
+    // From Color Palette (starts with 0)
+    int colorIndex;
+
+    // How much size each colored boxes take
+    int boxSize;
+    // How much space we can use from drawing colored boxes
+    Rectangle usableRect;
+    // How much space we actually used based on color count
+    Rectangle usedRect;
+    // How many numbers of columns of colored boxes can be shown
+    int maxColumns;
+    // How many numbers of rows will actually be used.
+    int usedRow;
+    // How many numbers of column will actually be used.
+    int usedColumn;
+
 } BpColorPanel;
 
 BpColorPanel NewColorPanel(void);

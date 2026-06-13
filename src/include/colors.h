@@ -56,29 +56,46 @@
 #define BpColorCWhite     BpSolidColor(0xf8, 0xea, 0xcf)
 
 /*
+ * Twilight 5 Palette by Star
+ * https://lospec.com/palette-list/twilight-5
+ */
+
+#define BpHexColorTPinkLight    BpHexColor(fbbbad)
+#define BpHexColorTPink         BpHexColor(ee8695)
+#define BpHexColorTGrayLightest BpHexColor(4a7a96)
+#define BpHexColorTGrayLighter  BpHexColor(333f58)
+#define BpHexColorTGrayDarker   BpHexColor(292831)
+
+#define BpColorTPinkLight       BpSolidColor(0xfb, 0xbb, 0xad)
+#define BpColorTPink            BpSolidColor(0xee, 0x86, 0x95)
+#define BpColorTGrayLightest    BpSolidColor(0x4a, 0x7a, 0x96)
+#define BpColorTGrayLighter     BpSolidColor(0x33, 0x3f, 0x58)
+#define BpColorTGrayDarker      BpSolidColor(0x29, 0x28, 0x31)
+
+/*
  * Custom Color
  */
 
 // Based on Twilight 5 Darkest Grey
-#define HexColorAppBG BpHexColor(17171c)
-#define ColorAppBG    BpSolidColor(0x17, 0x17, 0x1c)
+#define BpHexColorAppBG BpHexColor(17171c)
+#define BpColorAppBG    BpSolidColor(0x17, 0x17, 0x1c)
 
 // Based on Twilight 5 Darkest Grey
-#define HexColorStatus      BpHexColor(1d1c23)
-#define ColorStatus         BpSolidColor(0x1d, 0x1c, 0x23)
+#define BpHexColorStatus      BpHexColor(1d1c23)
+#define BpColorStatus         BpSolidColor(0x1d, 0x1c, 0x23)
 
-#define HexColorPanelBorder HexColorTGrayLighter
+#define BpHexColorPanelBorder BpHexColorTGrayLighter
 
-#define HexColorTransparent 0
-#define ColorTransparent    (Color){0, 0, 0, 0}
+#define BpHexColorTransparent 0
+#define BpColorTransparent    (Color){0, 0, 0, 0}
 
-#define ColorCheckerDark    BpSolidColor(0xA8, 0xA8, 0xA8)
-#define ColorCheckerLight   BpSolidColor(0xD8, 0xD8, 0xD8)
+#define BpColorCheckerDark    BpSolidColor(0xA8, 0xA8, 0xA8)
+#define BpColorCheckerLight   BpSolidColor(0xD8, 0xD8, 0xD8)
 
-#define HexColorWhite       BpHexColor(ffffff)
-#define ColorWhite          BpSolidColor(0xff, 0xff, 0xff)
+#define BpHexColorWhite       BpHexColor(ffffff)
+#define BpColorWhite          BpSolidColor(0xff, 0xff, 0xff)
 
-#define HexColorBlack       BpHexColor(000000)
-#define ColorBlack          BpSolidColor(0x00, 0x00, 0x00)
+#define BpHexColorBlack       BpHexColor(000000)
+#define BpColorBlack          BpSolidColor(0x00, 0x00, 0x00)
 
 #endif
