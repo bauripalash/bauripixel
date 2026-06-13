@@ -7,8 +7,8 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define CP_MARGIN_TB 5
-#define CP_PADDING   5
+#define CP_MARGIN  5
+#define CP_PADDING 5
 
 static void updateBounds(BpColorPanel *panel) {}
 
@@ -118,8 +118,8 @@ BpColorPanel NewColorPanel(void) {
         .Draw = colorPanelDraw,
     };
 
-    cp.w.bounds.x = cp.w.bounds.x + CP_MARGIN_TB + cp.w.anchor.x;
-    cp.w.bounds.y = cp.w.bounds.y + CP_MARGIN_TB + cp.w.anchor.y;
+    cp.w.bounds.x = cp.w.bounds.x + CP_MARGIN + cp.w.anchor.x;
+    cp.w.bounds.y = cp.w.bounds.y + CP_MARGIN + cp.w.anchor.y;
 
     cp.colorIndex = 0;
     cp.boxSize = 30;
