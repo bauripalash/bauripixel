@@ -37,8 +37,14 @@ typedef struct BpColorPanel {
     Color *colors;
     // Color Palette count
     int colorCount;
-    // From Color Palette (starts with 0)
-    int colorIndex;
+    // Current selected color index from Color Palette (starts with 0)
+    int curColorIndex;
+    // Current selected color
+    Color curColor;
+    // Hovering color index from Color Palette
+    int hoverColorIndex;
+    // Hovering color
+    Color hoverColor;
 
     // How much size each colored boxes take
     int boxSize;
@@ -52,6 +58,11 @@ typedef struct BpColorPanel {
     int usedRow;
     // How many numbers of column will actually be used.
     int usedColumn;
+
+    // Scroll Vector for Raygui Scroll panel
+    Vector2 scroll;
+    // View Rectangle for Raygui Scroll panel
+    Rectangle view;
 
 } BpColorPanel;
 
