@@ -11,6 +11,8 @@ typedef enum BpOptThemeKey {
     T_PANEL_BG,
     T_PANEL_BORDER,
     T_PANEL_BORDER_THICK,
+    T_SCROLLBAR_BG,
+    T_SCROLLBAR_FG,
     T_MAX_THEME_KEYS
 } BpOptThemeKey;
 

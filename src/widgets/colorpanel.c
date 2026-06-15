@@ -20,7 +20,6 @@ int colorPanelDraw(BpWidget *base, double dt, void *ctx) {
     BpColorPanel *cp = (BpColorPanel *)base;
 
     Rectangle usableRect = cp->usableRect;
-    Rectangle usedRect = cp->usedRect;
     int maxColumns = cp->maxColumns;
     int colorCount = cp->colorCount;
     int boxSize = cp->boxSize;
@@ -43,15 +42,19 @@ int colorPanelDraw(BpWidget *base, double dt, void *ctx) {
         DrawRectangleLinesEx(colorRect, 2, cboxBorderColor);
     }
     EndScissorMode();
+
     int ogDefBg = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
     int ogLvBorderW = GuiGetStyle(LISTVIEW, BORDER_WIDTH);
+    int ogBtnBase = GuiGetStyle(BUTTON, BASE_COLOR_NORMAL);
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, BpHexColorTransparent);
     GuiSetStyle(LISTVIEW, BORDER_WIDTH, 0);
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, BpHexColorVGray);
 
     GuiScrollPanel(cp->usableRect, NULL, cp->usedRect, &cp->scroll, &cp->view);
 
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ogDefBg);
     GuiSetStyle(LISTVIEW, BORDER_WIDTH, ogLvBorderW);
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ogBtnBase);
     // DrawRectangleLinesEx(usableRect, 2, RED);
     // DrawRectangleLinesEx(usedRect, 2, GREEN);
 
