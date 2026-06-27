@@ -1,6 +1,6 @@
-#include "include/theme.h"
-#include "include/colors.h"
-#include "include/utils.h"
+#include "theme.h"
+#include "colors.h"
+#include "utils.h"
 
 // clang-format off
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 
 #include "external/raylib/raygui.h"
 #include "gen/biosfontii.h"
-#include "include/options.h"
+#include "options.h"
 // clang-format on
 
 static const BpOptThemeProp defaultThemeOpts[] = {

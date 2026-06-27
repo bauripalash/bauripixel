@@ -1,4 +1,4 @@
-#include "include/app.h"
+#include "app.h"
 int main(void) {
     int result = RunApp();
     return result;

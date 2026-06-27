@@ -1,7 +1,7 @@
+#include "../colors.h"
+#include "../components.h"
 #include "../external/raylib/raylib.h"
-#include "../include/colors.h"
-#include "../include/components.h"
-#include "../include/widget.h"
+#include "../widget.h"
 #include "raylib.h"
 
 int drawAreaDraw(BpWidget *base, double dt, void *ctx) {

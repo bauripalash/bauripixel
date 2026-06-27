@@ -1,11 +1,10 @@
-#include "include/app.h"
+#include "app.h"
+#include "colors.h"
+#include "defaults.h"
 #include "external/raylib/raylib.h"
 #include "external/raylib/src/raylib.h"
-#include "include/colors.h"
-#include "include/components.h"
-#include "include/defaults.h"
-#include "include/theme.h"
-#include "include/widget.h"
+#include "theme.h"
+#include "widget.h"
 #include <stdbool.h>
 #include <stdlib.h>
 

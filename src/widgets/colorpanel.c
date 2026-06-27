@@ -1,10 +1,10 @@
+#include "../colors.h"
+#include "../components.h"
 #include "../external/raylib/raygui.h"
 #include "../external/raylib/raylib.h"
 #include "../external/stb/stb_ds.h"
-#include "../include/colors.h"
-#include "../include/components.h"
-#include "../include/utils.h"
-#include "../include/widget.h"
+#include "../utils.h"
+#include "../widget.h"
 #include "raylib.h"
 #include <math.h>
 #include <stdbool.h>

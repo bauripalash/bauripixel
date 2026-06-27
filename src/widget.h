@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../external/raylib/raylib.h"
+#include "external/raylib/raylib.h"
 #include <stdbool.h>
 
 /*

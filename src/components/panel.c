@@ -1,6 +1,6 @@
+#include "../components.h"
 #include "../external/raylib/raylib.h"
-#include "../include/components.h"
-#include "../include/options.h"
+#include "../options.h"
 #include "raylib.h"
 
 #define TLDot() (DrawRectangle(bounds.x, bounds.y, thickness, thickness, brdr))
