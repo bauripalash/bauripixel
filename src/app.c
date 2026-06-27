@@ -6,12 +6,14 @@
 #include "include/defaults.h"
 #include "include/theme.h"
 #include "include/widget.h"
+#include <stdbool.h>
 #include <stdlib.h>
 
 int LayoutUpdate(double dt);
 int LayoutDraw(double dt);
 
 BpColorPanel cp = {0};
+BpDrawArea da = {0};
 
 int RunApp(void) {
     SetTraceLogLevel(LOG_WARNING);
@@ -22,6 +24,8 @@ int RunApp(void) {
     LoadDefaultAppFont();
 
     cp = NewColorPanel();
+    cp.w.enabled = false;
+    da = NewDrawArea();
 
     double dt = GetFrameTime();
     while (!WindowShouldClose()) {
@@ -49,9 +53,11 @@ int RunApp(void) {
 
 int LayoutUpdate(double dt) {
     cp.w.Update(Widget(&cp), dt, NULL);
+    da.w.Update(Widget(&da), dt, NULL);
     return 0;
 }
 int LayoutDraw(double dt) {
     cp.w.Draw(Widget(&cp), dt, NULL);
+    da.w.Draw(Widget(&da), dt, NULL);
     return 0;
 }

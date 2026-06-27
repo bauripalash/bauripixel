@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-int RunApp();
+int RunApp(void);
 
 #ifdef __cplusplus
 }

@@ -8,6 +8,21 @@ extern "C" {
 #include "../external/raylib/raylib.h"
 #include <stdbool.h>
 
+/*
+ * Margin And Padding Infos
+ *
+ */
+
+// Color Panel Margin
+#define CLRPANEL_MARGIN 5
+// Color Panel Padding
+#define CLRPANEL_PADDING 5
+
+// Draw Area Margin
+#define DRWAREA_MARGIN 10
+// Draw Area Padding
+#define DRWAREA_PADDING 10
+
 // Base Widget
 typedef struct BpWidget {
     // widget bound
@@ -67,6 +82,20 @@ typedef struct BpColorPanel {
 } BpColorPanel;
 
 BpColorPanel NewColorPanel(void);
+
+typedef struct BpDrawArea {
+    BpWidget w;
+    Color color;
+
+    Color bgColor;
+    Image bgImg;
+    Texture2D bgTxt;
+
+    Rectangle usableRect;
+
+} BpDrawArea;
+
+BpDrawArea NewDrawArea(void);
 
 #ifdef __cplusplus
 }

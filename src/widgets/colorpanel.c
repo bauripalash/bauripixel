@@ -10,12 +10,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#define CP_MARGIN  5
-#define CP_PADDING 5
-
 static void updateBounds(BpColorPanel *panel) {}
 
 int colorPanelDraw(BpWidget *base, double dt, void *ctx) {
+    if (!base->enabled || !base->visible) {
+        return 1;
+    }
     BpPanelBorder(base->bounds, 5);
     BpColorPanel *cp = (BpColorPanel *)base;
 
@@ -62,15 +62,18 @@ int colorPanelDraw(BpWidget *base, double dt, void *ctx) {
 }
 
 int colorPanelUpdate(BpWidget *base, double dt, void *ctx) {
+    if (!base->enabled) {
+        return 1;
+    }
     updateBounds((BpColorPanel *)base);
     BpColorPanel *cp = (BpColorPanel *)base;
     bool locked = GuiIsLocked();
 
     Rectangle usableRect = (Rectangle){
-        base->bounds.x + CP_PADDING,
-        base->bounds.y + CP_PADDING,
-        base->bounds.width - CP_PADDING * 2,
-        base->bounds.height - CP_PADDING * 2,
+        base->bounds.x + CLRPANEL_PADDING,
+        base->bounds.y + CLRPANEL_PADDING,
+        base->bounds.width - CLRPANEL_PADDING * 2,
+        base->bounds.height - CLRPANEL_PADDING * 2,
     };
     int colorCount = cp->colorCount;
     int boxSize = cp->boxSize;
@@ -162,8 +165,8 @@ BpColorPanel NewColorPanel(void) {
         .Draw = colorPanelDraw,
     };
 
-    cp.w.bounds.x = cp.w.bounds.x + CP_MARGIN + cp.w.anchor.x;
-    cp.w.bounds.y = cp.w.bounds.y + CP_MARGIN + cp.w.anchor.y;
+    cp.w.bounds.x = cp.w.bounds.x + CLRPANEL_MARGIN + cp.w.anchor.x;
+    cp.w.bounds.y = cp.w.bounds.y + CLRPANEL_MARGIN + cp.w.anchor.y;
 
     cp.curColorIndex = 0;
     cp.hoverColorIndex = 0;
