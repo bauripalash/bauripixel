@@ -113,6 +113,7 @@ typedef struct BpDrawArea {
 
 	Camera2D camera;
 
+	bool hovering;
     Rectangle usableRect;
 
 } BpDrawArea;

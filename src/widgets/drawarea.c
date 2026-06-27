@@ -20,9 +20,11 @@
 #include "../components.h"
 #include "../external/raylib/raygui.h"
 #include "../external/raylib/raylib.h"
+#include "../external/raylib/raymath.h"
 #include "../utils.h"
 #include "../widget.h"
 #include "raylib.h"
+#include <stdbool.h>
 #include <stdlib.h>
 
 int drawAreaDraw(BpWidget *base, double dt, void *ctx) {
@@ -50,6 +52,7 @@ int drawAreaUpdate(BpWidget *base, double dt, void *ctx) {
     if (!base->enabled) {
         return 1;
     }
+    bool isLocked = GuiIsLocked();
     Vector2 mouse = GetMousePosition();
     BpDrawArea *da = (BpDrawArea *)base;
     Rectangle bounds = base->bounds;
@@ -59,16 +62,21 @@ int drawAreaUpdate(BpWidget *base, double dt, void *ctx) {
     };
 
     da->usableRect = usableRect;
+    bool isHovering = CheckCollisionPointRec(mouse, usableRect) && !isLocked;
+    da->hovering = isHovering;
 
-    if (CheckCollisionPointRec(mouse, usableRect)) {
-        if (IsKeyPressed(KEY_A)) {
-            da->camera.zoom += 0.5;
-        }
+    if (isHovering) {
+        float mWheel = GetMouseWheelMove();
+        if (mWheel != 0) {
+            Vector2 mWorldPos = GetScreenToWorld2D(mouse, da->camera);
+            da->camera.offset = mouse;
+            da->camera.target = mWorldPos;
 
-        if (IsKeyPressed(KEY_D)) {
-            da->camera.zoom -= 0.5;
-        }
-    }
+            float scale = 0.2f * mWheel;
+            da->camera.zoom =
+                Clamp(expf(logf(da->camera.zoom) + scale), 0.125f, 64.0f);
+        } // mWheel != 0
+    } // isHovering
 
     return 0;
 }
