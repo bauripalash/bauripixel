@@ -42,7 +42,7 @@ int RunApp(void) {
 
     cp = NewColorPanel();
     cp.w.enabled = false;
-    da = NewDrawArea();
+    da = NewDrawArea(32, 32);
 
     double dt = GetFrameTime();
     while (!WindowShouldClose()) {

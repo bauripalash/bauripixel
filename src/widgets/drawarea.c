@@ -18,9 +18,12 @@
 
 #include "../colors.h"
 #include "../components.h"
+#include "../external/raylib/raygui.h"
 #include "../external/raylib/raylib.h"
+#include "../utils.h"
 #include "../widget.h"
 #include "raylib.h"
+#include <stdlib.h>
 
 int drawAreaDraw(BpWidget *base, double dt, void *ctx) {
     if (!base->enabled || !base->visible) {
@@ -28,8 +31,17 @@ int drawAreaDraw(BpWidget *base, double dt, void *ctx) {
     }
 
     BpDrawArea *da = (BpDrawArea *)base;
+    Rectangle usableRect = da->usableRect;
     BpPanelBorder(base->bounds, 2);
     DrawRectangleLinesEx(da->usableRect, 2, BpColorBlack);
+    BeginScissorModeRec(usableRect);
+    GuiGrid(usableRect, NULL, da->canvasWidth * 2.0f, 1, NULL);
+    BeginMode2D(da->camera);
+    {
+        DrawTexture(da->bgTxt, usableRect.x, usableRect.y, BpColorWhite);
+    }
+    EndMode2D();
+    EndScissorMode();
 
     return 0;
 }
@@ -38,6 +50,7 @@ int drawAreaUpdate(BpWidget *base, double dt, void *ctx) {
     if (!base->enabled) {
         return 1;
     }
+    Vector2 mouse = GetMousePosition();
     BpDrawArea *da = (BpDrawArea *)base;
     Rectangle bounds = base->bounds;
     Rectangle usableRect = {
@@ -47,10 +60,20 @@ int drawAreaUpdate(BpWidget *base, double dt, void *ctx) {
 
     da->usableRect = usableRect;
 
+    if (CheckCollisionPointRec(mouse, usableRect)) {
+        if (IsKeyPressed(KEY_A)) {
+            da->camera.zoom += 0.5;
+        }
+
+        if (IsKeyPressed(KEY_D)) {
+            da->camera.zoom -= 0.5;
+        }
+    }
+
     return 0;
 }
 
-BpDrawArea NewDrawArea(void) {
+BpDrawArea NewDrawArea(int canvasW, int canvasH) {
     BpDrawArea da = {0};
     da.w = (BpWidget){
         .enabled = true,
@@ -62,7 +85,19 @@ BpDrawArea NewDrawArea(void) {
         .Draw = drawAreaDraw
     };
     da.color = BpColorBlack;
-    // da.bgImg = GenImageChecked(, int height, int checksX, int checksY, Color
-    // col1, Color col2)
+    da.canvasWidth = canvasW;
+    da.canvasHeight = canvasH;
+
+    da.camera = (Camera2D){
+        .zoom = 1.0f,
+        .offset = (Vector2){0},
+        .target = (Vector2){0},
+        .rotation = 0
+    };
+
+    da.bgImg = GenImageChecked(
+        canvasW, canvasH, 8, 8, BpColorCheckerLight, BpColorCheckerDark
+    );
+    da.bgTxt = LoadTextureFromImage(da.bgImg);
     return da;
 }

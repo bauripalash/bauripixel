@@ -104,16 +104,20 @@ BpColorPanel NewColorPanel(void);
 typedef struct BpDrawArea {
     BpWidget w;
     Color color;
+	int canvasWidth;
+	int canvasHeight;
 
     Color bgColor;
     Image bgImg;
     Texture2D bgTxt;
 
+	Camera2D camera;
+
     Rectangle usableRect;
 
 } BpDrawArea;
 
-BpDrawArea NewDrawArea(void);
+BpDrawArea NewDrawArea(int canvasW, int canvasH);
 
 #ifdef __cplusplus
 }
