@@ -1,7 +1,7 @@
 /*
  * utils.h - Utilities Definitions
  * Copyright (C) <year>  <name of author>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -29,7 +29,13 @@ extern "C" {
     (BeginScissorMode(rect.x, rect.y, rect.width, rect.height))
 
 #define ArrCount(arr) (sizeof(arr) / sizeof(arr[0]))
-#define TraceVector2(msg, vec) (TraceLog(LOG_WARNING, "%s [%f, %f]", msg, vec.x, vec.y))
+#define TraceVector2(msg, vec)                                                 \
+    (TraceLog(LOG_WARNING, "%s [%f, %f]", msg, vec.x, vec.y))
+#define TraceRect(msg, rect)                                                   \
+    (TraceLog(                                                                 \
+        LOG_WARNING, "%s [%f, %f, %f, %f]", msg, rect.x, rect.y, rect.width,   \
+        rect.height                                                            \
+    ))
 
 #ifdef __cplusplus
 }

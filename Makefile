@@ -24,7 +24,7 @@ RELEASE_CC=clang
 CPPCHECK_BUILD_DIR=$(CMAKE_BUILD_DIR)/cppcheck
 
 
-HEADERS:= $(shell find src/include -path 'src/gen' -prune -o -path 'src/external' -prune -o -path 'src/tmpl' -prune -o -name '*.h' -print)
+HEADERS:= $(shell find src/ -path 'src/gen' -prune -o -path 'src/external' -prune -o -path 'src/tmpl' -prune -o -name '*.h' -print)
 SOURCES:= $(shell find src/ -path 'src/gen' -prune -o -path 'src/external' -prune -o -path 'src/tmpl' -prune -o -name '*.c' -print)
 
 

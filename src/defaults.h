@@ -1,7 +1,7 @@
 /*
  * defaults.h - Default Values Definitions Used Throughtout The Application
  * Copyright (C) <year>  <name of author>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or

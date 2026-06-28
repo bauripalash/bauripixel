@@ -1,7 +1,7 @@
 /*
  * widget.c - Widget Definitions
  * Copyright (C) <year>  <name of author>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -107,32 +107,32 @@ BpColorPanel NewColorPanel(void);
 // DrawArea Widget
 typedef struct BpDrawArea {
     BpWidget w;
-	// Current selected color
+    // Current selected color
     Color color;
-	// The actual canvas width in pixels
-	int canvasWidth;
-	// The actual canvas height in pixels
-	int canvasHeight;
+    // The actual canvas width in pixels
+    int canvasWidth;
+    // The actual canvas height in pixels
+    int canvasHeight;
 
-	// Selected background color
+    // Selected background color
     Color bgColor;
 
-	// The checkerd or solid background image as the base for drawing
+    // The checkerd or solid background image as the base for drawing
     Image bgImg;
-	// Texture for background image
+    // Texture for background image
     Texture2D bgTxt;
 
-	// Zoom and Panning controller camera
-	Camera2D camera;
+    // Zoom and Panning controller camera
+    Camera2D camera;
 
-	// The virtual `Player` for controlling the drawing canvas
-	Vector2 point;
+    // The virtual `Player` for controlling the drawing canvas
+    Vector2 point;
 
-	// Is the mouse inside the usable rectangle
-	bool hovering;
-	// Is the canvas being panned/moved
-	bool panning;
-	// Usable Rectangle where the canvas can move within
+    // Is the mouse inside the usable rectangle
+    bool hovering;
+    // Is the canvas being panned/moved
+    bool panning;
+    // Usable Rectangle where the canvas can move within
     Rectangle usableRect;
 
 } BpDrawArea;
