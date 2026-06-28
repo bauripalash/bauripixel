@@ -132,8 +132,9 @@ typedef struct BpDrawArea {
     bool hovering;
     // Is the canvas being panned/moved
     bool panning;
-    // Usable Rectangle where the canvas can move within
-    Rectangle usableRect;
+    // Usable Rectangle where the canvas can move within, the viewable area
+    Rectangle viewport;
+    Rectangle canvasRect;
 
 } BpDrawArea;
 
