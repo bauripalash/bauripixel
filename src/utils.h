@@ -29,6 +29,7 @@ extern "C" {
     (BeginScissorMode(rect.x, rect.y, rect.width, rect.height))
 
 #define ArrCount(arr) (sizeof(arr) / sizeof(arr[0]))
+#define TraceVector2(msg, vec) (TraceLog(LOG_WARNING, "%s [%f, %f]", msg, vec.x, vec.y))
 
 #ifdef __cplusplus
 }

@@ -62,8 +62,10 @@ typedef struct BpWidget {
     int (*Draw)(struct BpWidget *w, double dt, void *ctx);
 } BpWidget;
 
+// Caste any widget to base Widget
 #define Widget(w) ((BpWidget *)(w))
 
+// Color Selector Panel
 typedef struct BpColorPanel {
     BpWidget w;
     // Color Palette array
@@ -99,25 +101,46 @@ typedef struct BpColorPanel {
 
 } BpColorPanel;
 
+// Create New Color Panel Widget
 BpColorPanel NewColorPanel(void);
 
+// DrawArea Widget
 typedef struct BpDrawArea {
     BpWidget w;
+	// Current selected color
     Color color;
+	// The actual canvas width in pixels
 	int canvasWidth;
+	// The actual canvas height in pixels
 	int canvasHeight;
 
+	// Selected background color
     Color bgColor;
+
+	// The checkerd or solid background image as the base for drawing
     Image bgImg;
+	// Texture for background image
     Texture2D bgTxt;
 
+	// Zoom and Panning controller camera
 	Camera2D camera;
 
+	// The virtual `Player` for controlling the drawing canvas
+	Vector2 point;
+
+	// Is the mouse inside the usable rectangle
 	bool hovering;
+	// Is the canvas being panned/moved
+	bool panning;
+	// Usable Rectangle where the canvas can move within
     Rectangle usableRect;
 
 } BpDrawArea;
 
+// Create new DrawArea
+// Parameters:
+// canvasW => Width of the actual drawing in pixels
+// canvasH => Height of the actual drawing in pixels
 BpDrawArea NewDrawArea(int canvasW, int canvasH);
 
 #ifdef __cplusplus
