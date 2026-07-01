@@ -30,9 +30,13 @@
 // clang-format on
 
 static const BpOptThemeProp defaultThemeOpts[] = {
-    {T_PANEL_BG, BpHexColorStatus},     {T_PANEL_BORDER, BpHexColorBlack},
-    {T_PANEL_BORDER_THICK, 2},          {T_SCROLLBAR_BG, BpHexColorVGray},
+    {T_PANEL_BG, BpHexColorStatus},
+    {T_PANEL_BORDER, BpHexColorBlack},
+    {T_PANEL_BORDER_THICK, 2},
+    {T_SCROLLBAR_BG, BpHexColorBlack},
     {T_SCROLLBAR_FG, BpHexColorVGreen},
+    {T_SCROLLBAR_HVR_FG, BpHexColorVGrayLight},
+    {T_SCROLLBAR_CLK_FG, BpHexColorVGreen},
 };
 
 static const GuiStyleProp defaultThemeRGuiOpts[] = {

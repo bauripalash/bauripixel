@@ -134,7 +134,18 @@ typedef struct BpDrawArea {
     bool panning;
     // Usable Rectangle where the canvas can move within, the viewable area
     Rectangle viewport;
+
+    // The drawable canvas rect, width, height being canvasWidth, canvasHeight
     Rectangle canvasRect;
+
+    // Vertical Scrollbar rectangle bounds
+    Rectangle vScrollRect;
+    // Horizontal Scrollbar rectangle bounds
+    Rectangle hScrollRect;
+    // Vertical Scroll Thumb rectangle bounds
+    Rectangle vThumbRect;
+    // Horizontal Scroll Thumb rectangle bounds
+    Rectangle hThumbRect;
 
 } BpDrawArea;
 

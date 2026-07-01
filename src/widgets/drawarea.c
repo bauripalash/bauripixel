@@ -21,9 +21,9 @@
 #include "../external/raylib/raygui.h"
 #include "../external/raylib/raylib.h"
 #include "../external/raylib/raymath.h"
+#include "../options.h"
 #include "../utils.h"
 #include "../widget.h"
-#include "raylib.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -31,7 +31,31 @@
 
 bool drawAreaScrollbarDraw(BpWidget *base) {
     BpDrawArea *da = (BpDrawArea *)base;
+
+    Color scrollBgH = GetColor(OptThemeGet(T_SCROLLBAR_BG));
+    Color scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_BG));
+    Color scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_FG));
+    Color scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_FG));
+
     Rectangle viewport = da->viewport;
+
+    Rectangle vScrollRect = da->vScrollRect;
+    Rectangle hScrollRect = da->hScrollRect;
+    Rectangle vThumbRect = da->vThumbRect;
+    Rectangle hThumbRect = da->hThumbRect;
+
+    DrawRectangleRec(vScrollRect, scrollBgV);
+    DrawRectangleRec(hScrollRect, scrollBgH);
+    DrawRectangleRec(vThumbRect, scrollFgV);
+    DrawRectangleRec(hThumbRect, scrollFgH);
+
+    return false;
+}
+
+bool drawAreaScrollbarUpdate(BpWidget *base) {
+    BpDrawArea *da = (BpDrawArea *)base;
+    Rectangle viewport = da->viewport;
+
     Rectangle vScrollRect = {
         viewport.x + viewport.width,
         viewport.y,
@@ -46,12 +70,20 @@ bool drawAreaScrollbarDraw(BpWidget *base) {
         DA_SCROLL_THICKNESS,
     };
 
-    DrawRectangleRec(vScrollRect, BpColorBlack);
-    DrawRectangleRec(hScrollRect, BpColorBlack);
+    Rectangle vThumbRect = {
+        vScrollRect.x, vScrollRect.y, 10, DA_SCROLL_THICKNESS
+    };
+
+    Rectangle hThumbRect = {
+        hScrollRect.x, hScrollRect.y, DA_SCROLL_THICKNESS, 10
+    };
+
+    da->hScrollRect = hScrollRect;
+    da->vScrollRect = vScrollRect;
+    da->vThumbRect = vThumbRect;
+    da->hThumbRect = hThumbRect;
     return false;
 }
-
-bool drawAreaScrollbarUpdate(BpWidget *base) { return false; }
 
 void DrawAreaCenterCanvas(BpWidget *base) {
     BpDrawArea *da = (BpDrawArea *)base;
@@ -90,7 +122,6 @@ int drawAreaDraw(BpWidget *base, double dt, void *ctx) {
     BeginScissorModeRec(viewport);
     BeginMode2D(da->camera);
     {
-        DrawRectangleLinesEx(viewport, 2, BLUE);
         DrawTexture(da->bgTxt, canvasArea.x, canvasArea.y, BpColorWhite);
     }
     EndMode2D();
@@ -180,9 +211,18 @@ int drawAreaUpdate(BpWidget *base, double dt, void *ctx) {
             float viewTop = worldViewPortTopLeft.y;
             float viewBottom = worldViewPortBottomRight.y;
 
-            // Limiting?
+            // Panning Limit
+            // the canvas left edge cannot go right to viewport's right edge
+            if (canvasLeft > viewRight) da->point.x += canvasLeft - viewRight;
+            // the canvas right edge cannot go left to viewport's left edge
+            if (canvasRight < viewLeft) da->point.x += canvasRight - viewLeft;
+            // the canvas top edge cannot go below the viewport's bottom edge
+            if (canvasTop > viewBottom) da->point.y += canvasTop - viewBottom;
+            // the canvas bottom edge cannot go above the viewport's top edge
+            if (canvasBottom < viewTop) da->point.y += canvasBottom - viewTop;
         }
 
+        // Syncs the player to camera's view
         da->camera.target.x = da->point.x;
         da->camera.target.y = da->point.y;
 
@@ -232,6 +272,21 @@ BpDrawArea NewDrawArea(int canvasW, int canvasH) {
         bounds.width - DRWAREA_PADDING * 2, bounds.height - DRWAREA_PADDING * 2
     };
     da.canvasRect = (Rectangle){da.viewport.x, da.viewport.y, canvasW, canvasH};
+    da.vScrollRect = (Rectangle){
+        da.viewport.x + da.viewport.width,
+        da.viewport.y,
+        DA_SCROLL_THICKNESS,
+        da.viewport.height,
+    };
+
+    da.hScrollRect = (Rectangle){
+        da.viewport.x,
+        da.viewport.y + da.viewport.height,
+        da.viewport.width,
+        DA_SCROLL_THICKNESS,
+    };
+    da.vThumbRect = (Rectangle){0};
+    da.hThumbRect = (Rectangle){0};
     DrawAreaCenterCanvas(&da.w);
     return da;
 }
