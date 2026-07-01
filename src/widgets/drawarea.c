@@ -24,10 +24,12 @@
 #include "../options.h"
 #include "../utils.h"
 #include "../widget.h"
+#include "raylib.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
 #define DA_SCROLL_THICKNESS 10
+#define DA_SCROLL_ROUNDNESS 0.9
 
 bool drawAreaScrollbarDraw(BpWidget *base) {
     BpDrawArea *da = (BpDrawArea *)base;
@@ -36,6 +38,14 @@ bool drawAreaScrollbarDraw(BpWidget *base) {
     Color scrollBgV = GetColor(OptThemeGet(T_SCROLLBAR_BG));
     Color scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_FG));
     Color scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_FG));
+
+    if (da->vThumbHover) {
+        scrollFgV = GetColor(OptThemeGet(T_SCROLLBAR_HVR_FG));
+    }
+
+    if (da->hThumbHover) {
+        scrollFgH = GetColor(OptThemeGet(T_SCROLLBAR_HVR_FG));
+    }
 
     Rectangle viewport = da->viewport;
 
@@ -46,8 +56,8 @@ bool drawAreaScrollbarDraw(BpWidget *base) {
 
     DrawRectangleRec(vScrollRect, scrollBgV);
     DrawRectangleRec(hScrollRect, scrollBgH);
-    DrawRectangleRec(vThumbRect, scrollFgV);
-    DrawRectangleRec(hThumbRect, scrollFgH);
+    DrawRectangleRounded(vThumbRect, DA_SCROLL_ROUNDNESS, 0, scrollFgV);
+    DrawRectangleRounded(hThumbRect, DA_SCROLL_ROUNDNESS, 0, scrollFgH);
 
     return false;
 }
@@ -55,6 +65,11 @@ bool drawAreaScrollbarDraw(BpWidget *base) {
 bool drawAreaScrollbarUpdate(BpWidget *base) {
     BpDrawArea *da = (BpDrawArea *)base;
     Rectangle viewport = da->viewport;
+    bool isLocked = GuiIsLocked();
+    Vector2 mouse = GetMousePosition();
+
+    bool hThumbHover = false;
+    bool vThumbHover = false;
 
     Rectangle vScrollRect = {
         viewport.x + viewport.width,
@@ -70,18 +85,31 @@ bool drawAreaScrollbarUpdate(BpWidget *base) {
         DA_SCROLL_THICKNESS,
     };
 
+    float vThumbHeight = 20;
+    float hThumbHeight = 20;
+
     Rectangle vThumbRect = {
-        vScrollRect.x, vScrollRect.y, 10, DA_SCROLL_THICKNESS
+        vScrollRect.x, vScrollRect.y, DA_SCROLL_THICKNESS, vThumbHeight
     };
 
     Rectangle hThumbRect = {
-        hScrollRect.x, hScrollRect.y, DA_SCROLL_THICKNESS, 10
+        hScrollRect.x, hScrollRect.y, hThumbHeight, DA_SCROLL_THICKNESS
     };
+
+    if (!isLocked && CheckCollisionPointRec(mouse, vThumbRect)) {
+        vThumbHover = true;
+    }
+
+    if (!isLocked && CheckCollisionPointRec(mouse, hThumbRect)) {
+        hThumbHover = true;
+    }
 
     da->hScrollRect = hScrollRect;
     da->vScrollRect = vScrollRect;
     da->vThumbRect = vThumbRect;
     da->hThumbRect = hThumbRect;
+    da->vThumbHover = vThumbHover;
+    da->hThumbHover = hThumbHover;
     return false;
 }
 
@@ -287,6 +315,8 @@ BpDrawArea NewDrawArea(int canvasW, int canvasH) {
     };
     da.vThumbRect = (Rectangle){0};
     da.hThumbRect = (Rectangle){0};
+    da.vThumbHover = false;
+    da.hThumbHover = false;
     DrawAreaCenterCanvas(&da.w);
     return da;
 }

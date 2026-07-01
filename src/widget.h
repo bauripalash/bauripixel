@@ -147,6 +147,11 @@ typedef struct BpDrawArea {
     // Horizontal Scroll Thumb rectangle bounds
     Rectangle hThumbRect;
 
+    // Is mouse hovering within vertical scroll thumb bounds
+    bool vThumbHover;
+    // Is mouse hovering within horizontal scroll thumb bounds
+    bool hThumbHover;
+
 } BpDrawArea;
 
 // Create new DrawArea
