@@ -31,6 +31,60 @@
 #define DA_SCROLL_THICKNESS 10
 #define DA_SCROLL_ROUNDNESS 0.9
 
+// Clamp the fake player point for panning limit of canvas
+static Vector2 drawAreaClampPoint(BpDrawArea *da, Vector2 targetPoint);
+
+static Vector2 drawAreaClampPoint(BpDrawArea *da, Vector2 targetPoint) {
+    // Create a copy of DrawArea's camera so we dont't have to mutate the
+    // real camera
+    Camera2D tempCamera = da->camera;
+    tempCamera.target = targetPoint;
+
+    // Viewport (Usable Rect) corners in WorldSpace
+    // It is tell if the the camera looked at `target`, what would be visible
+    Vector2 viewportTopLeftWord = GetScreenToWorld2D(
+        (Vector2){da->viewport.x, da->viewport.y}, tempCamera
+    );
+
+    Vector2 viewportBottomRightWorld = GetScreenToWorld2D(
+        (Vector2){
+            da->viewport.x + da->viewport.width,
+            da->viewport.y + da->viewport.height
+        },
+        tempCamera
+    );
+
+    // Canvas's edges, the canvas is a static object inside the WorldSpace
+    // where we look through the lense of the camera, at the viewport is limit
+    // of the area we can see inside the world
+    // The Canvas never moves, only the camera's viewport changes, so it might
+    // confuse us as if the canvas is moving.
+    //
+    // So canvas edges in WorldSpace are fixed in a sense
+    float canvasLeft = da->canvasRect.x;
+    float canvasRight = da->canvasRect.x + da->canvasRect.width;
+    float canvasTop = da->canvasRect.y;
+    float canvasBottom = da->canvasRect.y + da->canvasRect.height;
+
+    // The viewport edges in WorldSpace
+    float viewportLeft = viewportTopLeftWord.x;
+    float viewportRight = viewportBottomRightWorld.x;
+    float viewportTop = viewportTopLeftWord.y;
+    float viewportBottom = viewportBottomRightWorld.y;
+
+    // Panning Limit
+    // the canvas left edge cannot go right to viewport's right edge
+    if (canvasLeft > viewportRight) targetPoint.x += canvasLeft - viewportRight;
+    // the canvas right edge cannot go left to viewport's left edge
+    if (canvasRight < viewportLeft) targetPoint.x += canvasRight - viewportLeft;
+    // the canvas top edge cannot go below the viewport's bottom edge
+    if (canvasTop > viewportBottom) targetPoint.y += canvasTop - viewportBottom;
+    // the canvas bottom edge cannot go above the viewport's top edge
+    if (canvasBottom < viewportTop) targetPoint.y += canvasBottom - viewportTop;
+
+    return targetPoint;
+}
+
 bool drawAreaScrollbarDraw(BpWidget *base) {
     BpDrawArea *da = (BpDrawArea *)base;
 
@@ -208,54 +262,13 @@ int drawAreaUpdate(BpWidget *base, double dt, void *ctx) {
 
             da->panning = false;
         }
-        // Convert viewport from screen space to inside the world of camera
-        // space. The viewport is basically what the camera sees inside the
-        // world in the plane
-        Vector2 worldViewPortTopLeft =
-            GetScreenToWorld2D((Vector2){viewport.x, viewport.y}, da->camera);
-        Vector2 worldViewPortBottomRight = GetScreenToWorld2D(
-            (Vector2){
-                viewport.x + viewport.width, viewport.y + viewport.height
-            },
-            da->camera
-        );
-
-        // The canvas is fixed in the world space
-        // we just move the viewport via the camera
-        Vector2 canvasTopLeft = {canvasArea.x, canvasArea.y};
-        Vector2 canvasBottomRight = {
-            canvasArea.x + canvasArea.width, canvasArea.y + canvasArea.height
-        };
-        if (da->panning & !isLocked) {
-            // Canvas edges in world space
-            float canvasLeft = canvasTopLeft.x;
-            float canvasRight = canvasBottomRight.x;
-            float canvasTop = canvasTopLeft.y;
-            float canvasBottom = canvasBottomRight.y;
-
-            // Viewport edges in world space
-            float viewLeft = worldViewPortTopLeft.x;
-            float viewRight = worldViewPortBottomRight.x;
-            float viewTop = worldViewPortTopLeft.y;
-            float viewBottom = worldViewPortBottomRight.y;
-
-            // Panning Limit
-            // the canvas left edge cannot go right to viewport's right edge
-            if (canvasLeft > viewRight) da->point.x += canvasLeft - viewRight;
-            // the canvas right edge cannot go left to viewport's left edge
-            if (canvasRight < viewLeft) da->point.x += canvasRight - viewLeft;
-            // the canvas top edge cannot go below the viewport's bottom edge
-            if (canvasTop > viewBottom) da->point.y += canvasTop - viewBottom;
-            // the canvas bottom edge cannot go above the viewport's top edge
-            if (canvasBottom < viewTop) da->point.y += canvasBottom - viewTop;
-        }
-
-        // Syncs the player to camera's view
-        da->camera.target.x = da->point.x;
-        da->camera.target.y = da->point.y;
 
     } // isHovering
 
+    da->point = drawAreaClampPoint(da, da->point);
+    // Syncs the player to camera's view
+    da->camera.target.x = da->point.x;
+    da->camera.target.y = da->point.y;
     drawAreaScrollbarUpdate(base);
     da->canvasRect = (Rectangle){
         da->viewport.x, da->viewport.y, da->canvasWidth, da->canvasHeight
