@@ -121,6 +121,7 @@ bool drawAreaScrollbarUpdate(BpWidget *base) {
     Rectangle viewport = da->viewport;
     bool isLocked = GuiIsLocked();
     Vector2 mouse = GetMousePosition();
+    float zoom = da->camera.zoom;
 
     bool hThumbHover = false;
     bool vThumbHover = false;
@@ -157,6 +158,16 @@ bool drawAreaScrollbarUpdate(BpWidget *base) {
     if (!isLocked && CheckCollisionPointRec(mouse, hThumbRect)) {
         hThumbHover = true;
     }
+
+    // Size of the viewport in WorldSpace
+    // dividing by camera zoom will undo the applied zoom
+    float viewportWorldWidth = viewport.width / zoom;
+    float viewportWorldHeight = viewport.height / zoom;
+
+    float canvasLeft = da->canvasRect.x;
+    float canvasTop = da->canvasRect.y;
+    float canvasWidth = da->canvasRect.width;
+    float canvasHeight = da->canvasRect.height;
 
     da->hScrollRect = hScrollRect;
     da->vScrollRect = vScrollRect;
@@ -224,7 +235,6 @@ int drawAreaUpdate(BpWidget *base, double dt, void *ctx) {
         bounds.x + DRWAREA_PADDING, bounds.y + DRWAREA_PADDING,
         bounds.width - DRWAREA_PADDING * 2, bounds.height - DRWAREA_PADDING * 2
     };
-    Rectangle canvasArea = da->canvasRect;
 
     da->viewport = viewport;
 
