@@ -25,6 +25,7 @@
 #include "../utils.h"
 #include "../widget.h"
 #include "raylib.h"
+#include <math.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -159,15 +160,20 @@ bool drawAreaScrollbarUpdate(BpWidget *base) {
         hThumbHover = true;
     }
 
-    // Size of the viewport in WorldSpace
-    // dividing by camera zoom will undo the applied zoom
-    float viewportWorldWidth = viewport.width / zoom;
-    float viewportWorldHeight = viewport.height / zoom;
-
     float canvasLeft = da->canvasRect.x;
     float canvasTop = da->canvasRect.y;
     float canvasWidth = da->canvasRect.width;
     float canvasHeight = da->canvasRect.height;
+
+    Vector2 viewTopLeft =
+        GetScreenToWorld2D((Vector2){viewport.x, viewport.y}, da->camera);
+    Vector2 viewBottomRight = GetScreenToWorld2D(
+        (Vector2){viewport.x + viewport.width, viewport.y + viewport.height},
+        da->camera
+    );
+
+    TraceVector2("View TL", viewTopLeft);
+    TraceVector2("View BR", viewBottomRight);
 
     da->hScrollRect = hScrollRect;
     da->vScrollRect = vScrollRect;
@@ -215,7 +221,20 @@ int drawAreaDraw(BpWidget *base, double dt, void *ctx) {
     BeginScissorModeRec(viewport);
     BeginMode2D(da->camera);
     {
+        Vector2 viewTopLeft =
+            GetScreenToWorld2D((Vector2){viewport.x, viewport.y}, da->camera);
+        Vector2 viewBottomRight = GetScreenToWorld2D(
+            (Vector2){
+                viewport.x + viewport.width, viewport.y + viewport.height
+            },
+            da->camera
+        );
         DrawTexture(da->bgTxt, canvasArea.x, canvasArea.y, BpColorWhite);
+        DrawCircleLinesV(da->camera.target, 5, RED);
+        DrawCircleLinesV(da->camera.offset, 5, BLUE);
+        DrawRectangleLinesEx(viewport, 2, GREEN);
+        DrawCircleLinesV(viewTopLeft, 10, PINK);
+        DrawCircleLinesV(viewBottomRight, 10, MAGENTA);
     }
     EndMode2D();
     EndScissorMode();
@@ -249,7 +268,6 @@ int drawAreaUpdate(BpWidget *base, double dt, void *ctx) {
             Vector2 mWorldPos = GetScreenToWorld2D(mouse, da->camera);
 
             da->camera.offset = mouse;
-            da->camera.target = mWorldPos;
             da->point = mWorldPos;
 
             float scale = 0.2f * mWheel;
